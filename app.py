@@ -21,6 +21,8 @@ CORS(app, resources={
     }
 })
 
+START_TIME = time.time()
+
 # Cargar o crear el modelo
 MODEL_PATH = 'endometriosis_model_v2.pkl'
 
@@ -323,15 +325,15 @@ if __name__ == "__main__":
 
 def get_status_data():
     """Obtiene los datos de estado con hora de Santiago de Chile"""
-    start_time = time.time()
     santiago_tz = pytz.timezone('America/Santiago')
     current_time = datetime.now(santiago_tz)
-    uptime_seconds = round(time.time() - start_time)
+    uptime_seconds = round(time.time() - START_TIME)
     
     return {
         "service": "S.I.T.M.E.",
+        "description": "Sistema Integrado de Tecnología y Monitoreo Empresarial",
         "status": "active",
-        "timestamp": current_time.strftime("%Y-%m-%d %H:%M:%S %Z"),  # Ej: "2024-02-19 13:30:00 CLST"
+        "timestamp": current_time.strftime("%Y-%m-%d %H:%M:%S %Z"),  # Ej: "2024-02-19 13:30:00 CLST",
         "config_file": "/etc/systemd/system/sitme.service",
         "enabled": "enabled",
         "version": "1.0.0",
@@ -355,31 +357,38 @@ def get_status_data():
 @app.route('/status')
 def status_cmd():
     """Endpoint de estado con hora de Santiago"""
-    status = get_status_data()
+    try:
+        status = get_status_data()
+        
+        output = []
+        
+        # Encabezado
+        status_symbol = "●" if status['status'] == 'active' else "○"
+        output.append(f"{status_symbol} {status['service']}.service - {status['description']}")
+        
+        # Líneas de estado
+        output.append(f"     Loaded: loaded ({status['config_file']}; {status['enabled']}; vendor preset: enabled)")
+        output.append(f"     Active: {status['status']} (running) since {status['timestamp']}; {status['uptime']} ago")
+        output.append(f"   Main PID: {status['pid']} ({status['process_name']})")
+        output.append(f"      Tasks: {status['threads']} (limit: {status['thread_limit']})")
+        output.append(f"     Memory: {status['memory_usage']}")
+        output.append(f"      Components:")
+        
+        for component, state in status['components'].items():
+            output.append(f"             ├─ {component} ({state})")
+        
+        # Formato de log (ej: "Feb 19 13:30:00")
+        try:
+            log_timestamp = datetime.strptime(
+                status['timestamp'].split(' ')[0] + ' ' + status['timestamp'].split(' ')[1], 
+                "%Y-%m-%d %H:%M:%S"
+            ).strftime("%b %d %H:%M:%S")
+        except (ValueError, IndexError):
+            log_timestamp = datetime.now().strftime("%b %d %H:%M:%S")
+        
+        output.append(f"\n{log_timestamp} {status['hostname']} systemd[1]: {status['last_event']}")
+        
+        return "<pre>" + "\n".join(output) + "</pre>"
     
-    output = []
-    
-    # Encabezado
-    status_symbol = "●" if status['status'] == 'active' else "○"
-    output.append(f"{status_symbol} {status['service']}.service - {status['description']}")
-    
-    # Líneas de estado
-    output.append(f"     Loaded: loaded ({status['config_file']}; {status['enabled']}; vendor preset: enabled)")
-    output.append(f"     Active: {status['status']} (running) since {status['timestamp']}; {status['uptime']} ago")
-    output.append(f"   Main PID: {status['pid']} ({status['process_name']})")
-    output.append(f"      Tasks: {status['threads']} (limit: {status['thread_limit']})")
-    output.append(f"     Memory: {status['memory_usage']}")
-    output.append(f"      Components:")
-    
-    for component, state in status['components'].items():
-        output.append(f"             ├─ {component} ({state})")
-    
-    # Formato de log (ej: "Feb 19 13:30:00")
-    log_timestamp = datetime.strptime(
-        status['timestamp'].split(' ')[0] + ' ' + status['timestamp'].split(' ')[1], 
-        "%Y-%m-%d %H:%M:%S"
-    ).strftime("%b %d %H:%M:%S")
-    
-    output.append(f"\n{log_timestamp} {status['hostname']} systemd[1]: {status['last_event']}")
-    
-    return "<pre>" + "\n".join(output) + "</pre>"
+    except Exception as e:
+        return f"<pre>Error generating status: {str(e)}</pre>", 500
