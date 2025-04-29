@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITME</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #1a1a1a;
+            color: #00ff00;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--info);
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .card {
+            background-color: #222;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .card-header {
+            font-size: 18px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #333;
+            color: var(--info);
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+        }
+        
+        .component {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        
+        .component-online {
+            background-color: rgba(39, 174, 96, 0.2);
+            border-left: 3px solid var(--success);
+        }
+        
+        .component-offline {
+            background-color: rgba(231, 76, 60, 0.2);
+            border-left: 3px solid var(--danger);
+        }
+        
+        .component-degraded {
+            background-color: rgba(243, 156, 18, 0.2);
+            border-left: 3px solid var(--warning);
+        }
+        
+        .log-console {
+            grid-column: span 3;
+            height: 200px;
+            overflow-y: auto;
+            background-color: #111;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            color: #00ff00;
+        }
+        
+        .log-time {
+            color: #ff9900;
+        }
+        
+        .chart-container {
+            height: 200px;
+            position: relative;
+        }
+        
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+        
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">SITME v1.0.0</div>
+            <div>
+                <span class="status-badge status-active">ACTIVE</span>
+                <span id="uptime">UPTIME: 0h 0m 0s</span>
+            </div>
+        </header>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">RESUMEN DEL SISTEMA</div>
+                <div class="metric">
+                    <span>Estado:</span>
+                    <span class="metric-value" id="status">ACTIVE</span>
+                </div>
+                <div class="metric">
+                    <span>Uptime:</span>
+                    <span class="metric-value" id="uptime-detail">0h 0m 0s</span>
+                </div>
+                <div class="metric">
+                    <span>Última actualización:</span>
+                    <span class="metric-value" id="last-updated">00:00:00</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">RENDIMIENTO</div>
+                <div class="metric">
+                    <span>CPU:</span>
+                    <span class="metric-value" id="cpu-usage">0%</span>
+                </div>
+                <div class="metric">
+                    <span>Memoria:</span>
+                    <span class="metric-value" id="memory-usage">0MB</span>
+                </div>
+                <div class="metric">
+                    <span>Tiempo respuesta:</span>
+                    <span class="metric-value" id="response-time">0ms</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">COMPONENTES</div>
+                <div id="components-container">
+                    <!-- Componentes se cargarán aquí -->
+                </div>
+            </div>
+            
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-header">ACTIVIDAD</div>
+                <div class="chart-container">
+                    <canvas id="requests-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">ESTADO SERVIDOR</div>
+                <div class="server-status">
+                    <div class="metric">
+                        <span>Solicitudes:</span>
+                        <span class="metric-value" id="total-requests">0</span>
+                    </div>
+                    <div class="server-indicator">
+                        <span>Servidor:</span>
+                        <span class="metric-value" id="server-status">ONLINE</span>
+                        <span class="blink">●</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="log-console" id="log-console">
+                <!-- Logs se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Configuración inicial del gráfico
+        const ctx = document.getElementById('requests-chart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Solicitudes por minuto',
+                    data: [],
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#00ff00'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#00ff00'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#00ff00'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Función para actualizar el dashboard
+        async function updateDashboard() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                // Actualizar métricas
+                document.getElementById('uptime').textContent = `UPTIME: ${data.uptime}`;
+                document.getElementById('uptime-detail').textContent = data.uptime;
+                document.getElementById('last-updated').textContent = data.last_updated;
+                document.getElementById('cpu-usage').textContent = `${data.cpu_usage}%`;
+                document.getElementById('memory-usage').textContent = `${data.memory_usage}MB`;
+                document.getElementById('response-time').textContent = `${data.response_time}ms`;
+                document.getElementById('total-requests').textContent = data.requests;
+                
+                // Actualizar componentes
+                const componentsContainer = document.getElementById('components-container');
+                componentsContainer.innerHTML = '';
+                for (const [name, status] of Object.entries(data.components)) {
+                    const componentDiv = document.createElement('div');
+                    componentDiv.className = `component component-${status.toLowerCase()}`;
+                    componentDiv.innerHTML = `
+                        <span>${name}:</span>
+                        <span class="metric-value">${status.toUpperCase()}</span>
+                    `;
+                    componentsContainer.appendChild(componentDiv);
+                }
+                
+                // Actualizar logs
+                const logConsole = document.getElementById('log-console');
+                logConsole.innerHTML = '';
+                data.logs.forEach(log => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'log-entry';
+                    logEntry.innerHTML = `<span class="log-time">${log.split(' - ')[0]}</span> - ${log.split(' - ')[1]}`;
+                    logConsole.appendChild(logEntry);
+                });
+                logConsole.scrollTop = logConsole.scrollHeight;
+                
+                // Actualizar gráfico
+                const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                chart.data.labels.push(now);
+                chart.data.datasets[0].data.push(data.requests);
+                
+                // Mantener solo los últimos 10 puntos
+                if (chart.data.labels.length > 10) {
+                    chart.data.labels.shift();
+                    chart.data.datasets[0].data.shift();
+                }
+                
+                chart.update();
+                
+            } catch (error) {
+                console.error('Error al actualizar el dashboard:', error);
+            }
+        }
+        
+        // Actualizar cada 3 segundos
+        updateDashboard();
+        setInterval(updateDashboard, 3000);
+    </script>
+</body>
+</html>
