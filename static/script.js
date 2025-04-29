@@ -91,7 +91,7 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
     };
     
     // Hacer la petición al backend
-    fetch('http://localhost:5000/predict', {
+    fetch('https://sitme.onrender.com/predict', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
