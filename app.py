@@ -10,7 +10,7 @@ import os
 from scipy.stats import skewnorm
 from datetime import datetime
 import time
-import pytz
+import random
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app, resources={
@@ -319,76 +319,40 @@ def get_feature_importance():
         ))
     return {}
 
+SERVICE_START_TIME = time.time()
+
+def get_service_data():
+    """Genera datos simulados del servicio"""
+    uptime = time.time() - SERVICE_START_TIME
+    hours, rem = divmod(uptime, 3600)
+    minutes, seconds = divmod(rem, 60)
+    
+    return {
+        "status": "active",
+        "uptime": f"{int(hours)}h {int(minutes)}m {int(seconds)}s",
+        "cpu_usage": random.randint(5, 30),
+        "memory_usage": random.randint(200, 500),
+        "response_time": random.randint(10, 50),
+        "requests": random.randint(1000, 5000),
+        "last_updated": datetime.now().strftime("%H:%M:%S"),
+        "components": {
+            "API": random.choice(["online", "online", "online", "degraded"]),
+            "Database": "online",
+            "Cache": random.choice(["online", "online", "offline"]),
+            "Auth": "online"
+        },
+        "logs": [
+            f"{datetime.now().strftime('%H:%M:%S')} - Sistema iniciado",
+            f"{datetime.now().strftime('%H:%M:%S')} - Conexión establecida con DB",
+            f"{datetime.now().strftime('%H:%M:%S')} - Caché inicializada",
+            f"{datetime.now().strftime('%H:%M:%S')} - Escuchando en puerto 5000"
+        ]
+    }
+
+@app.route('/api/status')
+def api_status():
+    return get_service_data()
+
 # Configuración para producción
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)))
-
-def get_status_data():
-    """Obtiene los datos de estado con hora de Santiago de Chile"""
-    santiago_tz = pytz.timezone('America/Santiago')
-    current_time = datetime.now(santiago_tz)
-    uptime_seconds = round(time.time() - START_TIME)
-    
-    return {
-        "service": "S.I.T.M.E.",
-        "description": "Sistema Integrado de Tecnología y Monitoreo Empresarial",
-        "status": "active",
-        "timestamp": current_time.strftime("%Y-%m-%d %H:%M:%S %Z"),  # Ej: "2024-02-19 13:30:00 CLST",
-        "config_file": "/etc/systemd/system/sitme.service",
-        "enabled": "enabled",
-        "version": "1.0.0",
-        "components": {
-            "database": "online",
-            "ml_model": "loaded",
-            "api": "operational"
-        },
-        "uptime": f"{uptime_seconds} seconds",
-        "response_time": "50ms",
-        "environment": "production",
-        "pid": 12345,
-        "process_name": "sitmet",
-        "threads": 4,
-        "thread_limit": 100,
-        "memory_usage": "45.2MB",
-        "hostname": "sitme-server",
-        "last_event": "Service initialized successfully"
-    }
-
-@app.route('/status')
-def status_cmd():
-    """Endpoint de estado con hora de Santiago"""
-    try:
-        status = get_status_data()
-        
-        output = []
-        
-        # Encabezado
-        status_symbol = "●" if status['status'] == 'active' else "○"
-        output.append(f"{status_symbol} {status['service']}.service - {status['description']}")
-        
-        # Líneas de estado
-        output.append(f"     Loaded: loaded ({status['config_file']}; {status['enabled']}; vendor preset: enabled)")
-        output.append(f"     Active: {status['status']} (running) since {status['timestamp']}; {status['uptime']} ago")
-        output.append(f"   Main PID: {status['pid']} ({status['process_name']})")
-        output.append(f"      Tasks: {status['threads']} (limit: {status['thread_limit']})")
-        output.append(f"     Memory: {status['memory_usage']}")
-        output.append(f"      Components:")
-        
-        for component, state in status['components'].items():
-            output.append(f"             ├─ {component} ({state})")
-        
-        # Formato de log (ej: "Feb 19 13:30:00")
-        try:
-            log_timestamp = datetime.strptime(
-                status['timestamp'].split(' ')[0] + ' ' + status['timestamp'].split(' ')[1], 
-                "%Y-%m-%d %H:%M:%S"
-            ).strftime("%b %d %H:%M:%S")
-        except (ValueError, IndexError):
-            log_timestamp = datetime.now().strftime("%b %d %H:%M:%S")
-        
-        output.append(f"\n{log_timestamp} {status['hostname']} systemd[1]: {status['last_event']}")
-        
-        return "<pre>" + "\n".join(output) + "</pre>"
-    
-    except Exception as e:
-        return f"<pre>Error generating status: {str(e)}</pre>", 500
