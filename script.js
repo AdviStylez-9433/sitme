@@ -1,0 +1,418 @@
+// Generar ID clínico aleatorio
+document.getElementById('clinicId').textContent = Math.floor(1000 + Math.random() * 9000);
+        
+// Calcular edad automáticamente desde fecha de nacimiento
+document.getElementById('birth_date').addEventListener('change', function() {
+    const birthDate = new Date(this.value);
+    const ageDifMs = Date.now() - birthDate.getTime();
+    const ageDate = new Date(ageDifMs);
+    const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+    document.getElementById('age').value = age;
+});
+
+// Manejar envío del formulario
+document.getElementById('endometriosisForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const button = this.querySelector('button');
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    
+    // Validar campos requeridos
+    const requiredFields = ['full_name', 'birth_date', 'menarche_age', 'cycle_length', 'period_duration', 'last_period'];
+    for (const field of requiredFields) {
+        if (!document.getElementById(field).value) {
+            alert(`Por favor complete el campo requerido: "${document.querySelector(`label[for="${field}"]`).textContent.replace(' *', '')}"`);
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-heartbeat"></i> Evaluar Riesgo de Endometriosis';
+            return;
+        }
+    }
+
+    // Recoger todos los datos del formulario
+    const formData = {
+        personal: {
+            full_name: document.getElementById('full_name').value,
+            id_number: document.getElementById('id_number').value,
+            birth_date: document.getElementById('birth_date').value,
+            age: document.getElementById('age').value,
+            blood_type: document.getElementById('blood_type').value,
+            insurance: document.getElementById('insurance').value
+        },
+        history: {
+            gynecological_surgery: document.getElementById('gynecological_surgery').checked,
+            pelvic_inflammatory: document.getElementById('pelvic_inflammatory').checked,
+            ovarian_cysts: document.getElementById('ovarian_cysts').checked,
+            family_endometriosis: document.getElementById('family_endometriosis').checked,
+            family_autoimmune: document.getElementById('family_autoimmune').checked,
+            family_cancer: document.getElementById('family_cancer').checked,
+            comorbidity_autoimmune: document.getElementById('comorbidity_autoimmune').checked,
+            comorbidity_thyroid: document.getElementById('comorbidity_thyroid').checked,
+            comorbidity_ibs: document.getElementById('comorbidity_ibs').checked,
+            medications: document.getElementById('medications').value
+        },
+        menstrual: {
+            menarche_age: document.getElementById('menarche_age').value,
+            cycle_length: document.getElementById('cycle_length').value,
+            period_duration: document.getElementById('period_duration').value,
+            last_period: document.getElementById('last_period').value,
+            pain_level: document.getElementById('pain_level'
+                
+            ).value,
+            pain_premenstrual: document.getElementById('pain_premenstrual').checked,
+            pain_menstrual: document.getElementById('pain_menstrual').checked,
+            pain_ovulation: document.getElementById('pain_ovulation').checked,
+            pain_chronic: document.getElementById('pain_chronic').checked
+        },
+        symptoms: {
+            pain_during_sex: document.querySelector('input[name="pain_during_sex"]:checked')?.value === '1',
+            bowel_symptoms: document.querySelector('input[name="bowel_symptoms"]:checked')?.value === '1',
+            urinary_symptoms: document.querySelector('input[name="urinary_symptoms"]:checked')?.value === '1',
+            fatigue: document.querySelector('input[name="fatigue"]:checked')?.value === '1',
+            infertility: document.querySelector('input[name="infertility"]:checked')?.value === '1',
+            other_symptoms: document.getElementById('other_symptoms').value
+        },
+        biomarkers: {
+            ca125: document.getElementById('ca125').value ? parseFloat(document.getElementById('ca125').value) : null,
+            il6: document.getElementById('il6').value ? parseFloat(document.getElementById('il6').value) : null,
+            tnf_alpha: document.getElementById('tnf_alpha').value ? parseFloat(document.getElementById('tnf_alpha').value) : null,
+            vegf: document.getElementById('vegf').value ? parseFloat(document.getElementById('vegf').value) : null,
+            amh: document.getElementById('amh').value ? parseFloat(document.getElementById('amh').value) : null,
+            crp: document.getElementById('crp').value ? parseFloat(document.getElementById('crp').value) : null,
+            imaging: document.getElementById('imaging').value,
+            imaging_details: document.getElementById('imaging_details').value
+        },
+        examination: {
+            bmi: document.getElementById('bmi').value ? parseFloat(document.getElementById('bmi').value) : null,
+            pelvic_exam: document.getElementById('pelvic_exam').value,
+            vaginal_exam: document.getElementById('vaginal_exam').value,
+            clinical_notes: document.getElementById('clinical_notes').value
+        }
+    };
+    
+    // Hacer la petición al backend
+    fetch('http://localhost:5000/predict', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            // Datos para el modelo predictivo
+            age: formData.personal.age,
+            menarche_age: formData.menstrual.menarche_age,
+            cycle_length: formData.menstrual.cycle_length,
+            period_duration: formData.menstrual.period_duration,
+            pain_level: formData.menstrual.pain_level,
+            pain_during_sex: formData.symptoms.pain_during_sex ? 1 : 0,
+            family_history: formData.history.family_endometriosis ? 1 : 0,
+            bowel_symptoms: formData.symptoms.bowel_symptoms ? 1 : 0,
+            urinary_symptoms: formData.symptoms.urinary_symptoms ? 1 : 0,
+            fatigue: formData.symptoms.fatigue ? 1 : 0,
+            infertility: formData.symptoms.infertility ? 1 : 0,
+            ca125: formData.biomarkers.ca125,
+            il6: formData.biomarkers.il6,
+            tnf_alpha: formData.biomarkers.tnf_alpha,
+            vegf: formData.biomarkers.vegf,
+            amh: formData.biomarkers.amh,
+            crp: formData.biomarkers.crp,
+            // Datos adicionales para el reporte
+            full_form_data: formData
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error del servidor: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // Mostrar resultados
+        displayResults({
+            probability: data.probability,
+            riskLevel: data.risk_level,
+            riskTitle: getRiskTitle(data.risk_level),
+            riskDescription: getRiskDescription(data.risk_level),
+            riskIcon: getRiskIcon(data.risk_level),
+            recommendation: data.recommendation,
+            riskFactors: mapRiskFactors(data.risk_factors || [], formData),
+            formData: formData,
+            guidelines: getClinicalGuidelines(data.risk_level)
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showError(error.message);
+        
+        // Opción de simulación solo en desarrollo
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            if (confirm('Error al conectar con el servidor. ¿Desea ver una simulación local?')) {
+                showSimulation(formData);
+            }
+        }
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-heartbeat"></i> Evaluar Riesgo de Endometriosis';
+    });
+});
+
+// Función para mostrar resultados
+function displayResults(data) {
+    const resultContainer = document.getElementById('resultContainer');
+    const probabilityPercent = (data.probability * 100).toFixed(1);
+    
+    // Configurar el resultado principal
+    document.getElementById('riskTitle').textContent = data.riskTitle;
+    document.getElementById('riskDescription').textContent = data.riskDescription;
+    document.getElementById('riskIcon').className = data.riskIcon;
+    
+    // Configurar el círculo de probabilidad
+    const probabilityCircle = document.getElementById('probabilityCircle');
+    probabilityCircle.textContent = `${probabilityPercent}%`;
+    
+    // Configurar el texto de probabilidad
+    document.getElementById('probabilityText').textContent = 
+        `El sistema ha calculado un ${probabilityPercent}% de probabilidad de endometriosis basado en los síntomas y marcadores proporcionados.`;
+    
+    // Configurar factores de riesgo
+    const riskFactorsList = document.getElementById('riskFactorsList');
+    riskFactorsList.innerHTML = '';
+    
+    data.riskFactors.forEach(factor => {
+        const factorElement = document.createElement('div');
+        factorElement.className = 'risk-factor';
+        factorElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${factor}`;
+        riskFactorsList.appendChild(factorElement);
+    });
+    
+    // Configurar recomendaciones
+    const recommendationsList = document.getElementById('recommendationsList');
+    recommendationsList.innerHTML = '';
+    
+    const recommendations = data.recommendation.split('\n').filter(r => r.trim() !== '');
+    
+    recommendations.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        recommendationsList.appendChild(li);
+    });
+    
+    // Configurar resumen del paciente
+    const patientSummary = document.getElementById('patientSummary');
+    patientSummary.innerHTML = '';
+    
+    const summaryData = [
+        { label: 'Nombre', value: data.formData.personal.full_name },
+        { label: 'Edad', value: `${data.formData.personal.age} años` },
+        { label: 'Menarquia', value: `${data.formData.menstrual.menarche_age} años` },
+        { label: 'Ciclo menstrual', value: `${data.formData.menstrual.cycle_length} días` },
+        { label: 'Duración período', value: `${data.formData.menstrual.period_duration} días` },
+        { label: 'Dolor menstrual', value: `${data.formData.menstrual.pain_level}/10` },
+        { label: 'Dispareunia', value: data.formData.symptoms.pain_during_sex ? 'Sí' : 'No' },
+        { label: 'Antecedentes familiares', value: data.formData.history.family_endometriosis ? 'Sí' : 'No' },
+        { label: 'CA-125', value: data.formData.biomarkers.ca125 !== null ? `${data.formData.biomarkers.ca125} U/mL` : 'No medido' },
+        { label: 'PCR', value: data.formData.biomarkers.crp !== null ? `${data.formData.biomarkers.crp} mg/L` : 'No medido' },
+        { label: 'IMC', value: data.formData.examination.bmi !== null ? data.formData.examination.bmi : 'No calculado' },
+        { label: 'Examen pélvico', value: data.formData.examination.pelvic_exam || 'No registrado' }
+    ];
+    
+    summaryData.forEach(item => {
+        const summaryItem = document.createElement('div');
+        summaryItem.className = 'summary-item';
+        summaryItem.innerHTML = `
+            <div class="summary-label">${item.label}</div>
+            <div class="summary-value">${item.value}</div>
+        `;
+        patientSummary.appendChild(summaryItem);
+    });
+    
+    // Configurar guías clínicas
+    if (data.guidelines) {
+        document.getElementById('asrmGuideline').textContent = data.guidelines.asrm;
+        document.getElementById('eshreGuideline').textContent = data.guidelines.eshre;
+        document.getElementById('niceGuideline').textContent = data.guidelines.nice;
+    }
+    
+    // Mostrar el contenedor de resultados con la clase de riesgo adecuada
+    resultContainer.className = `result-container ${data.riskLevel}-risk`;
+    resultContainer.style.display = 'block';
+    
+    // Desplazarse a los resultados
+    resultContainer.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Funciones auxiliares
+function getRiskTitle(riskLevel) {
+    const titles = {
+        'high': 'Riesgo Alto de Endometriosis',
+        'moderate': 'Riesgo Moderado de Endometriosis',
+        'low': 'Riesgo Bajo de Endometriosis'
+    };
+    return titles[riskLevel] || 'Resultado de la Evaluación';
+}
+
+function getRiskDescription(riskLevel) {
+    const descriptions = {
+        'high': 'Los síntomas, marcadores y hallazgos clínicos sugieren una alta probabilidad de endometriosis. Se recomienda evaluación especializada urgente.',
+        'moderate': 'Presenta varios indicadores de endometriosis que justifican mayor investigación y seguimiento cercano.',
+        'low': 'Los síntomas actuales no sugieren endometriosis como diagnóstico principal, pero se recomienda monitorear cualquier cambio.'
+    };
+    return descriptions[riskLevel] || 'Por favor consulte los resultados detallados.';
+}
+
+function getRiskIcon(riskLevel) {
+    const icons = {
+        'high': 'fas fa-exclamation-triangle',
+        'moderate': 'fas fa-exclamation-circle',
+        'low': 'fas fa-check-circle'
+    };
+    return icons[riskLevel] || 'fas fa-info-circle';
+}
+
+function mapRiskFactors(riskFactors, formData) {
+    const factorMap = {
+        'dolor_severo': `Dolor menstrual severo (nivel ${formData.menstrual.pain_level}/10)`,
+        'dispareunia': 'Dolor durante relaciones sexuales',
+        'ca125_elevado': formData.biomarkers.ca125 ? `CA-125 elevado (${formData.biomarkers.ca125} U/mL)` : 'Marcadores inflamatorios elevados',
+        'historia_familiar': 'Antecedentes familiares de endometriosis',
+        'sintomas_intestinales': 'Síntomas intestinales cíclicos',
+        'sintomas_urinarios': 'Síntomas urinarios cíclicos',
+        'fatiga_cronica': 'Fatiga crónica',
+        'problemas_fertilidad': 'Dificultades para concebir',
+        'menarquia_temprana': `Menarquia temprana (${formData.menstrual.menarche_age} años)`,
+        'ciclos_cortos': `Ciclos menstruales cortos (${formData.menstrual.cycle_length} días)`,
+        'sangrado_prolongado': `Sangrado menstrual prolongado (${formData.menstrual.period_duration} días)`
+    };
+    
+    // Añadir factores basados en los datos del formulario
+    if (formData.history.gynecological_surgery) {
+        riskFactors.push('cirugias_ginecologicas');
+        factorMap['cirugias_ginecologicas'] = 'Historial de cirugías ginecológicas';
+    }
+    
+    if (formData.biomarkers.crp > 10) {
+        riskFactors.push('pcr_elevada');
+        factorMap['pcr_elevada'] = `PCR elevada (${formData.biomarkers.crp} mg/L)`;
+    }
+    
+    if (formData.examination.pelvic_exam === 'tenderness' || formData.examination.pelvic_exam === 'nodules') {
+        riskFactors.push('hallazgos_pelvicos');
+        factorMap['hallazgos_pelvicos'] = 'Hallazgos anormales en examen pélvico';
+    }
+    
+    return riskFactors.map(factor => factorMap[factor] || factor);
+}
+
+function getClinicalGuidelines(riskLevel) {
+    const guidelines = {
+        high: {
+            asrm: "Paciente cumple criterios para evaluación laparoscópica diagnóstica según ASRM. Considerar estadificación quirúrgica.",
+            eshre: "Recomendación ESHRE: Derivación a unidad especializada en endometriosis. Considerar tratamiento médico agresivo y evaluación quirúrgica.",
+            nice: "Guía NICE: Paciente de alto riesgo requiere evaluación multidisciplinaria (ginecólogo, especialista en dolor, fertilidad)."
+        },
+        moderate: {
+            asrm: "Paciente puede beneficiarse de tratamiento médico empírico según ASRM. Considerar imagenología avanzada antes de cirugía.",
+            eshre: "Recomendación ESHRE: Prueba de tratamiento médico de 3-6 meses. Si no mejora, considerar evaluación quirúrgica.",
+            nice: "Guía NICE: Manejo inicial con AINEs y terapia hormonal. Evaluar respuesta en 3 meses."
+        },
+        low: {
+            asrm: "ASRM sugiere manejo conservador con seguimiento. Educación sobre síntomas de alerta.",
+            eshre: "Recomendación ESHRE: Manejo sintomático. Reevaluar si síntomas progresan o cambian.",
+            nice: "Guía NICE: Educación y analgesia según necesidad. Seguimiento anual o ante nuevos síntomas."
+        }
+    };
+    
+    return guidelines[riskLevel] || {
+        asrm: "Consulte las guías ASRM más recientes para recomendaciones específicas.",
+        eshre: "Ver directrices ESHRE actualizadas para el manejo de casos individuales.",
+        nice: "Referir a las guías NICE completas para protocolos de tratamiento."
+    };
+}
+
+function showError(message) {
+    const errorContainer = document.createElement('div');
+    errorContainer.className = 'error-message';
+    errorContainer.innerHTML = `
+        <i class="fas fa-exclamation-circle"></i>
+        <span>${message}</span>
+    `;
+    errorContainer.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #ffebee;
+        color: #c62828;
+        padding: 15px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        z-index: 1000;
+    `;
+    
+    document.body.appendChild(errorContainer);
+    
+    setTimeout(() => {
+        errorContainer.style.transition = 'opacity 1s';
+        errorContainer.style.opacity = '0';
+        setTimeout(() => errorContainer.remove(), 1000);
+    }, 5000);
+}
+
+// Función de simulación solo para desarrollo
+function showSimulation(formData) {
+    let probability = 0.2;
+    
+    // Factores de riesgo simulados
+    if (formData.menstrual.pain_level >= 7) probability += 0.25;
+    if (formData.symptoms.pain_during_sex) probability += 0.15;
+    if (formData.history.family_endometriosis) probability += 0.1;
+    if (formData.symptoms.bowel_symptoms) probability += 0.1;
+    if (formData.symptoms.urinary_symptoms) probability += 0.1;
+    if (formData.symptoms.fatigue) probability += 0.05;
+    if (formData.symptoms.infertility) probability += 0.05;
+    
+    // Ajustar según biomarcadores
+    if (formData.biomarkers.ca125 > 35) probability += 0.1;
+    if (formData.biomarkers.il6 > 5) probability += 0.05;
+    if (formData.biomarkers.crp > 10) probability += 0.05;
+    
+    probability = Math.min(probability, 0.95);
+    
+    const riskLevel = probability > 0.7 ? 'high' : probability > 0.4 ? 'moderate' : 'low';
+    
+    displayResults({
+        probability: probability,
+        riskLevel: riskLevel,
+        riskTitle: getRiskTitle(riskLevel),
+        riskDescription: getRiskDescription(riskLevel),
+        riskIcon: getRiskIcon(riskLevel),
+        recommendation: 'Esta es una simulación local basada en patrones típicos.\nLos resultados reales requieren conexión con el servidor y evaluación médica profesional.\n\nRecomendaciones:\n1. Consulta con ginecólogo\n2. Pruebas complementarias\n3. Seguimiento estrecho',
+        riskFactors: mapRiskFactors([
+            ...(formData.menstrual.pain_level >= 7 ? ['dolor_severo'] : []),
+            ...(formData.symptoms.pain_during_sex ? ['dispareunia'] : []),
+            ...(formData.history.family_endometriosis ? ['historia_familiar'] : []),
+            ...(formData.biomarkers.ca125 > 35 ? ['ca125_elevado'] : []),
+            ...(formData.biomarkers.crp > 10 ? ['pcr_elevada'] : []),
+            ...(formData.symptoms.bowel_symptoms ? ['sintomas_intestinales'] : [])
+        ], formData),
+        formData: formData,
+        guidelines: getClinicalGuidelines(riskLevel)
+    });
+}
+
+// Actualizar visualización del nivel de dolor
+document.getElementById('pain_level').addEventListener('input', function() {
+    const value = this.value;
+    const min = this.min || 1;
+    const max = this.max || 10;
+    const percentage = ((value - min) / (max - min)) * 100;
+    this.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${percentage}%, #e0e0e0 ${percentage}%, #e0e0e0 100%)`;
+});
+
+// Inicializar el control deslizante
+document.getElementById('pain_level').dispatchEvent(new Event('input'));
