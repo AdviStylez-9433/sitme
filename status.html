@@ -6,20 +6,20 @@
     <title>SITME</title>
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #34495e;
-            --success: #27ae60;
-            --danger: #e74c3c;
-            --warning: #f39c12;
-            --info: #3498db;
-            --light: #ecf0f1;
-            --dark: #2c3e50;
+            --primary: #1a237e;
+            --secondary: #283593;
+            --success: #00c853;
+            --danger: #ff1744;
+            --warning: #ffab00;
+            --info: #2962ff;
+            --light: #e8eaf6;
+            --dark: #0d47a1;
         }
         
         body {
             font-family: 'Courier New', monospace;
-            background-color: #1a1a1a;
-            color: #00ff00;
+            background-color: #121212;
+            color: #bbdefb;
             margin: 0;
             padding: 0;
             line-height: 1.6;
@@ -36,25 +36,28 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #303f9f;
             margin-bottom: 20px;
         }
         
         .logo {
             font-size: 24px;
             font-weight: bold;
-            color: var(--info);
+            color: #82b1ff;
+            text-shadow: 0 0 5px rgba(130, 177, 255, 0.5);
         }
         
         .status-badge {
             padding: 5px 10px;
             border-radius: 3px;
             font-weight: bold;
+            background-color: var(--dark);
+            color: white;
         }
         
         .status-active {
             background-color: var(--success);
-            color: white;
+            color: #000;
         }
         
         .dashboard-grid {
@@ -64,19 +67,19 @@
         }
         
         .card {
-            background-color: #222;
-            border: 1px solid #333;
+            background-color: #1e1e2d;
+            border: 1px solid #303f9f;
             border-radius: 5px;
             padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
         
         .card-header {
             font-size: 18px;
             margin-bottom: 10px;
             padding-bottom: 5px;
-            border-bottom: 1px solid #333;
-            color: var(--info);
+            border-bottom: 1px solid #303f9f;
+            color: #82b1ff;
         }
         
         .metric {
@@ -87,6 +90,7 @@
         
         .metric-value {
             font-weight: bold;
+            color: #64ffda;
         }
         
         .component {
@@ -98,17 +102,17 @@
         }
         
         .component-online {
-            background-color: rgba(39, 174, 96, 0.2);
+            background-color: rgba(0, 200, 83, 0.1);
             border-left: 3px solid var(--success);
         }
         
         .component-offline {
-            background-color: rgba(231, 76, 60, 0.2);
+            background-color: rgba(255, 23, 68, 0.1);
             border-left: 3px solid var(--danger);
         }
         
         .component-degraded {
-            background-color: rgba(243, 156, 18, 0.2);
+            background-color: rgba(255, 171, 0, 0.1);
             border-left: 3px solid var(--warning);
         }
         
@@ -116,19 +120,20 @@
             grid-column: span 3;
             height: 200px;
             overflow-y: auto;
-            background-color: #111;
+            background-color: #0a0a1a;
             padding: 10px;
             border-radius: 5px;
             font-family: monospace;
+            border: 1px solid #1a237e;
         }
         
         .log-entry {
             margin-bottom: 5px;
-            color: #00ff00;
+            color: #64ffda;
         }
         
         .log-time {
-            color: #ff9900;
+            color: #ff9e80;
         }
         
         .chart-container {
@@ -138,10 +143,36 @@
         
         .blink {
             animation: blink 1s step-end infinite;
+            color: #00c853;
         }
         
         @keyframes blink {
             50% { opacity: 0; }
+        }
+
+        /* Efectos especiales */
+        .card:hover {
+            box-shadow: 0 0 15px rgba(41, 98, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        ::selection {
+            background: #2962ff;
+            color: white;
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a237e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2962ff;
+            border-radius: 4px;
         }
     </style>
 </head>
