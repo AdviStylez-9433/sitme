@@ -338,33 +338,27 @@ def determine_risk_level_v2(probability, patient_data):
     if probability >= base_thresholds['high']:
         risk_level = 'high'
         recommendation = (
-            "Alta probabilidad de endometriosis (≥{:.0f}%).\n"
-            "Recomendaciones:\n"
-            "- Consulta urgente con especialista en endometriosis\n"
-            "- Ecografía transvaginal especializada\n"
-            "- Resonancia magnética pélvica\n"
-            "- Evaluación de marcadores inflamatorios\n"
-            "- Considerar laparoscopia diagnóstica".format(base_thresholds['high']*100))
+            "Consulta urgente con especialista en endometriosis\n"
+            "Ecografía transvaginal especializada\n"
+            "Resonancia magnética pélvica\n"
+            "Evaluación de marcadores inflamatorios\n"
+            "Considerar laparoscopia diagnóstica".format(base_thresholds['high']*100))
     elif probability >= base_thresholds['moderate']:
         risk_level = 'moderate'
         recommendation = (
-            "Probabilidad moderada de endometriosis (≥{:.0f}%).\n"
-            "Recomendaciones:\n"
-            "- Consulta ginecológica en 1-2 meses\n"
-            "- Ecografía pélvica\n"
-            "- Prueba terapéutica con AINEs\n"
-            "- Considerar tratamiento hormonal\n"
-            "- Seguimiento estrecho".format(base_thresholds['moderate']*100))
+            "Consulta ginecológica en 1-2 meses\n"
+            "Ecografía pélvica\n"
+            "Prueba terapéutica con AINEs\n"
+            "Considerar tratamiento hormonal\n"
+            "Seguimiento estrecho".format(base_thresholds['moderate']*100))
     else:
         risk_level = 'low'
         recommendation = (
-            "Baja probabilidad de endometriosis (<{:.0f}%).\n"
-            "Recomendaciones:\n"
-            "- Analgesia según necesidad\n"
-            "- Monitoreo de síntomas\n"
-            "- Reevaluar si síntomas persisten\n"
-            "- Educación sobre endometriosis\n"
-            "- Seguimiento en 6 meses".format(base_thresholds['moderate']*100))
+            "Analgesia según necesidad\n"
+            "Monitoreo de síntomas\n"
+            "Reevaluar si síntomas persisten\n"
+            "Educación sobre endometriosis\n"
+            "Seguimiento en 6 meses".format(base_thresholds['moderate']*100))
     
     return risk_level, recommendation
 
