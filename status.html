@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SITME - Monitor en Tiempo Real</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SITME - Status</title>
+    <link rel="icon" href="../static/favicon.png" type="image/png">
     <style>
         :root {
             --primary: #1a237e;
@@ -15,7 +17,7 @@
             --light: #e8eaf6;
             --dark: #0d47a1;
         }
-        
+
         body {
             font-family: 'Courier New', monospace;
             background-color: #121212;
@@ -24,13 +26,13 @@
             padding: 0;
             line-height: 1.6;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         header {
             display: flex;
             justify-content: space-between;
@@ -39,14 +41,14 @@
             border-bottom: 1px solid #303f9f;
             margin-bottom: 20px;
         }
-        
+
         .logo {
             font-size: 24px;
             font-weight: bold;
             color: #82b1ff;
             text-shadow: 0 0 5px rgba(130, 177, 255, 0.5);
         }
-        
+
         .status-badge {
             padding: 5px 10px;
             border-radius: 3px;
@@ -54,18 +56,18 @@
             background-color: var(--dark);
             color: white;
         }
-        
+
         .status-active {
             background-color: var(--success);
             color: #000;
         }
-        
+
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
-        
+
         .card {
             background-color: #1e1e2d;
             border: 1px solid #303f9f;
@@ -73,7 +75,7 @@
             padding: 15px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
-        
+
         .card-header {
             font-size: 18px;
             margin-bottom: 10px;
@@ -81,18 +83,18 @@
             border-bottom: 1px solid #303f9f;
             color: #82b1ff;
         }
-        
+
         .metric {
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
         }
-        
+
         .metric-value {
             font-weight: bold;
             color: #64ffda;
         }
-        
+
         .component {
             display: flex;
             justify-content: space-between;
@@ -100,22 +102,22 @@
             padding: 5px;
             border-radius: 3px;
         }
-        
+
         .component-online {
             background-color: rgba(0, 200, 83, 0.1);
             border-left: 3px solid var(--success);
         }
-        
+
         .component-offline {
             background-color: rgba(255, 23, 68, 0.1);
             border-left: 3px solid var(--danger);
         }
-        
+
         .component-degraded {
             background-color: rgba(255, 171, 0, 0.1);
             border-left: 3px solid var(--warning);
         }
-        
+
         .log-console {
             grid-column: span 3;
             height: 200px;
@@ -126,28 +128,30 @@
             font-family: monospace;
             border: 1px solid #1a237e;
         }
-        
+
         .log-entry {
             margin-bottom: 5px;
             color: #64ffda;
         }
-        
+
         .log-time {
             color: #ff9e80;
         }
-        
+
         .chart-container {
             height: 200px;
             position: relative;
         }
-        
+
         .blink {
             animation: blink 1s step-end infinite;
             color: #00c853;
         }
-        
+
         @keyframes blink {
-            50% { opacity: 0; }
+            50% {
+                opacity: 0;
+            }
         }
 
         .card:hover {
@@ -172,8 +176,87 @@
             background: #2962ff;
             border-radius: 4px;
         }
+
+        /* Responsividad - Tabletas (768px a 1024px) */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .card[style*="grid-column: span 2"] {
+                grid-column: span 2;
+            }
+
+            .log-console {
+                grid-column: span 2;
+            }
+        }
+
+        /* Responsividad - Móviles (hasta 767px) */
+        @media (max-width: 767px) {
+            .container {
+                padding: 10px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .card,
+            .card[style*="grid-column: span 2"],
+            .log-console {
+                grid-column: span 1;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            .card-header {
+                font-size: 16px;
+            }
+
+            .metric {
+                font-size: 14px;
+            }
+
+            .log-console {
+                height: 150px;
+                font-size: 13px;
+            }
+
+            .chart-container {
+                height: 250px;
+                /* Más alto en móviles para mejor visibilidad */
+            }
+        }
+
+        /* Ajustes para pantallas muy pequeñas */
+        @media (max-width: 480px) {
+            .radio-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .status-badge,
+            #uptime {
+                font-size: 12px;
+            }
+
+            .card {
+                padding: 10px;
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -183,7 +266,7 @@
                 <span id="uptime">UPTIME: 0h 0m 0s</span>
             </div>
         </header>
-        
+
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-header">RESUMEN DEL SISTEMA</div>
@@ -200,7 +283,7 @@
                     <span class="metric-value" id="last-updated">00:00:00</span>
                 </div>
             </div>
-            
+
             <div class="card">
                 <div class="card-header">RENDIMIENTO</div>
                 <div class="metric">
@@ -216,21 +299,21 @@
                     <span class="metric-value" id="response-time">0ms</span>
                 </div>
             </div>
-            
+
             <div class="card">
                 <div class="card-header">COMPONENTES</div>
                 <div id="components-container">
                     <!-- Componentes se cargarán aquí -->
                 </div>
             </div>
-            
+
             <div class="card" style="grid-column: span 2;">
                 <div class="card-header">ACTIVIDAD EN TIEMPO REAL</div>
                 <div class="chart-container">
                     <canvas id="requests-chart"></canvas>
                 </div>
             </div>
-            
+
             <div class="card">
                 <div class="card-header">ESTADO SERVIDOR</div>
                 <div class="server-status">
@@ -245,9 +328,10 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="log-console" id="log-console">
-                <div class="log-entry"><span class="log-time">[SISTEMA]</span> Inicializando monitor en tiempo real...</div>
+                <div class="log-entry"><span class="log-time">[SISTEMA]</span> Inicializando monitor en tiempo real...
+                </div>
             </div>
         </div>
     </div>
@@ -258,7 +342,7 @@
         let requestDataHistory = [];
         const MAX_HISTORY = 30;
         let isFirstLoad = true;
-    
+
         // Configuración del gráfico mejorado
         const chartConfig = {
             type: 'line',
@@ -364,7 +448,7 @@
                         mode: 'index',
                         intersect: false,
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 let label = context.dataset.label || '';
                                 if (label) {
                                     label += ': ';
@@ -390,51 +474,51 @@
                 }
             }
         };
-    
+
         // Inicializar gráfico
         const chart = new Chart(
             document.getElementById('requests-chart').getContext('2d'),
             chartConfig
         );
-    
+
         // Función para formatear el tiempo de actividad
         function formatUptime(uptimeString) {
             // Asumiendo el formato "Xh Ym Zs" de tu backend
             return uptimeString || '0h 0m 0s';
         }
-    
+
         // Función para agregar entradas de log
         function addLogEntry(message) {
             const logConsole = document.getElementById('log-console');
             const logEntry = document.createElement('div');
             logEntry.className = 'log-entry';
-            
+
             const now = new Date();
             const timestamp = now.toLocaleTimeString();
             logEntry.innerHTML = `<span class="log-time">[${timestamp}]</span> ${message}`;
-            
+
             logConsole.appendChild(logEntry);
             logConsole.scrollTop = logConsole.scrollHeight;
-            
+
             // Mantener un máximo de 100 entradas
             if (logConsole.children.length > 100) {
                 logConsole.removeChild(logConsole.firstChild);
             }
         }
-    
+
         // Función para actualizar el dashboard con datos reales del backend
         async function updateDashboard() {
             try {
                 const startTime = performance.now();
                 const response = await fetch('/api/status');
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 const loadTime = (performance.now() - startTime).toFixed(2);
-                
+
                 // Datos de rendimiento para el gráfico
                 const chartData = {
                     time: data.last_updated.split(':').slice(1, 3).join(':'),
@@ -443,7 +527,7 @@
                     memory: parseInt(data.memory_usage) || 0,
                     response: parseInt(data.response_time) || 0
                 };
-                
+
                 // Actualizar métricas principales
                 document.getElementById('uptime').textContent = `UPTIME: ${formatUptime(data.uptime)}`;
                 document.getElementById('uptime-detail').textContent = formatUptime(data.uptime);
@@ -452,16 +536,16 @@
                 document.getElementById('memory-usage').textContent = `${data.memory_usage}MB`;
                 document.getElementById('response-time').textContent = `${data.response_time}ms`;
                 document.getElementById('total-requests').textContent = data.requests;
-                
+
                 // Actualizar estado del servidor
                 const serverStatus = document.getElementById('server-status');
                 serverStatus.textContent = data.status.toUpperCase();
                 serverStatus.style.color = data.status === 'active' ? '#00c853' : '#ff1744';
-                
+
                 // Actualizar componentes
                 const componentsContainer = document.getElementById('components-container');
                 componentsContainer.innerHTML = '';
-                
+
                 for (const [name, status] of Object.entries(data.components)) {
                     const componentDiv = document.createElement('div');
                     componentDiv.className = `component component-${status.toLowerCase()}`;
@@ -471,58 +555,58 @@
                     `;
                     componentsContainer.appendChild(componentDiv);
                 }
-                
+
                 // Actualizar logs (solo si es la primera carga o hay logs nuevos)
                 if (isFirstLoad || data.logs?.length > 0) {
                     const logConsole = document.getElementById('log-console');
-                    
+
                     if (isFirstLoad) {
                         logConsole.innerHTML = ''; // Limpiar logs iniciales
                         data.logs?.forEach(log => {
                             addLogEntry(log.split(' - ')[1] || log);
                         });
-                        
+
                         // Agregar log de conexión exitosa
                         addLogEntry(`Conexión establecida con el backend (${loadTime}ms)`);
                         isFirstLoad = false;
                     }
-                    
+
                     // Agregar métricas actuales como log
                     addLogEntry(`CPU: ${data.cpu_usage}% | Mem: ${data.memory_usage}MB | Req/s: ${chartData.rps.toFixed(2)}`);
                 }
-                
+
                 // Actualizar gráfico
                 requestDataHistory.push(chartData);
-                
+
                 if (requestDataHistory.length > MAX_HISTORY) {
                     requestDataHistory.shift();
                 }
-                
+
                 chart.data.labels = requestDataHistory.map(d => d.time);
                 chart.data.datasets[0].data = requestDataHistory.map(d => d.rps);
                 chart.data.datasets[1].data = requestDataHistory.map(d => d.cpu);
                 chart.data.datasets[2].data = requestDataHistory.map(d => d.memory);
-                
+
                 // Actualización optimizada del gráfico
                 if (requestDataHistory.length > 1) {
                     chart.update('none'); // Actualizar sin animación
                 } else {
                     chart.update();
                 }
-                
+
             } catch (error) {
                 console.error('Error al actualizar el dashboard:', error);
                 addLogEntry(`Error de conexión: ${error.message}`);
-                
+
                 // Reintentar después de 5 segundos si hay error
                 setTimeout(updateDashboard, 5000);
             }
         }
-        
+
         // Iniciar monitoreo en tiempo real
         updateDashboard();
         const monitoringInterval = setInterval(updateDashboard, 1000);
-        
+
         // Manejar recarga suave cuando la pestaña gana foco
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
@@ -531,4 +615,5 @@
         });
     </script>
 </body>
+
 </html>
