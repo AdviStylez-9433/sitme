@@ -452,148 +452,80 @@
                 <button type="submit"><i class="fas fa-heartbeat"></i> Evaluar Riesgo de Endometriosis</button>
             </form>
             
-            <!-- Resultados Mejorados -->
+            <!-- Resultados -->
             <div id="resultContainer" class="result-container">
-                <!-- Encabezado del resultado -->
                 <div class="result-header">
                     <div class="result-icon">
                         <i class="fas fa-exclamation-triangle" id="riskIcon"></i>
                     </div>
-                    <div class="result-header-content">
+                    <div>
                         <h2 class="result-title" id="riskTitle">Resultado de la Evaluación</h2>
-                        <div class="result-meta">
-                            <span class="result-date"><i class="far fa-calendar-alt"></i> <span id="resultDate"></span></span>
-                            <span class="result-id"><i class="fas fa-id-card"></i> ID: ENDO-<span id="resultClinicId"></span></span>
-                        </div>
                         <p class="result-description" id="riskDescription"></p>
                     </div>
                 </div>
                 
-                <!-- Resumen visual del riesgo -->
-                <div class="risk-summary">
-                    <div class="probability-container">
-                        <div class="probability-circle" id="probabilityCircle">
-                            <div class="probability-value">0%</div>
-                            <div class="probability-label">Probabilidad</div>
-                        </div>
-                        <div class="risk-level-container">
-                            <div class="risk-level" id="riskLevel">
-                                <span class="risk-level-badge">Nivel de Riesgo</span>
-                                <span class="risk-level-text">Bajo</span>
+                <div class="probability-container">
+                    <div class="probability-circle" id="probabilityCircle">
+                        0%
+                    </div>
+                    <div class="result-details">
+                        <h3>Probabilidad de Endometriosis</h3>
+                        <p id="probabilityText"></p>
+                        
+                        <div class="risk-factors">
+                            <div class="risk-factors-title">
+                                <i class="fas fa-exclamation-circle"></i> Factores de Riesgo Identificados
                             </div>
-                            <div class="risk-meter">
-                                <div class="risk-meter-track">
-                                    <div class="risk-meter-fill" id="riskMeterFill"></div>
-                                </div>
-                                <div class="risk-meter-labels">
-                                    <span>Bajo</span>
-                                    <span>Moderado</span>
-                                    <span>Alto</span>
-                                </div>
+                            <div class="risk-factors-list" id="riskFactorsList">
+                                <!-- Factores de riesgo se agregarán aquí -->
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Detalles del resultado -->
-                <div class="result-details-grid">
-                    <!-- Factores de riesgo -->
-                    <div class="result-card risk-factors-card">
-                        <div class="card-header">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>Factores de Riesgo Clave</h3>
-                        </div>
-                        <div class="risk-factors-list" id="riskFactorsList">
-                            <!-- Factores de riesgo se agregarán aquí -->
-                        </div>
-                        <div class="card-footer">
-                            <i class="fas fa-info-circle"></i> Estos factores aumentan la probabilidad de endometriosis
-                        </div>
-                    </div>
-                    
-                    <!-- Hallazgos clínicos -->
-                    <div class="result-card clinical-findings-card">
-                        <div class="card-header">
-                            <i class="fas fa-clipboard-check"></i>
-                            <h3>Hallazgos Clínicos Relevantes</h3>
-                        </div>
-                        <div class="findings-list" id="clinicalFindingsList">
-                            <!-- Hallazgos clínicos se agregarán aquí -->
-                        </div>
-                    </div>
-                    
-                    <!-- Recomendaciones -->
-                    <div class="result-card recommendations-card">
-                        <div class="card-header">
-                            <i class="fas fa-clipboard-list"></i>
-                            <h3>Plan de Acción Recomendado</h3>
-                        </div>
-                        <div class="recommendations-priority">
-                            <div class="priority-item urgent">
-                                <h4><i class="fas fa-arrow-up"></i> Prioridad Alta</h4>
-                                <ul id="urgentRecommendations"></ul>
-                            </div>
-                            <div class="priority-item medium">
-                                <h4><i class="fas fa-arrow-right"></i> Prioridad Media</h4>
-                                <ul id="mediumRecommendations"></ul>
-                            </div>
-                            <div class="priority-item low">
-                                <h4><i class="fas fa-arrow-down"></i> Prioridad Baja</h4>
-                                <ul id="lowRecommendations"></ul>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Resumen del paciente -->
-                    <div class="result-card patient-summary-card">
-                        <div class="card-header">
-                            <i class="fas fa-user-circle"></i>
-                            <h3>Resumen del Paciente</h3>
-                        </div>
-                        <div class="summary-grid" id="patientSummary">
-                            <!-- Los datos del paciente se llenarán aquí -->
-                        </div>
+                <div class="recommendations">
+                    <h3><i class="fas fa-clipboard-list"></i> Recomendaciones Clínicas</h3>
+                    <ul id="recommendationsList">
+                        <!-- Las recomendaciones se llenarán con JavaScript -->
+                    </ul>
+                </div>
+                
+                <div class="patient-summary">
+                    <h3><i class="fas fa-file-medical"></i> Resumen Clínico del Paciente</h3>
+                    <div class="summary-grid" id="patientSummary">
+                        <!-- Los datos del paciente se llenarán aquí -->
                     </div>
                 </div>
                 
-                <!-- Guías clínicas -->
                 <div class="clinical-guidelines">
-                    <div class="guidelines-header">
-                        <i class="fas fa-book-medical"></i>
-                        <h3>Guías Clínicas de Referencia</h3>
-                    </div>
-                    <div class="guidelines-tabs">
-                        <button class="guideline-tab active" data-tab="asrm">ASRM</button>
-                        <button class="guideline-tab" data-tab="eshre">ESHRE</button>
-                        <button class="guideline-tab" data-tab="nice">NICE</button>
-                    </div>
-                    <div class="guidelines-content">
-                        <div class="guideline-pane active" id="asrm-guideline">
-                            <h4>American Society for Reproductive Medicine</h4>
-                            <div class="guideline-text" id="asrmGuideline">
-                                Criterios de clasificación de endometriosis basados en hallazgos quirúrgicos.
-                            </div>
+                    <h3><i class="fas fa-book-medical"></i> Guías Clínicas Aplicables</h3>
+                    
+                    <div class="guideline">
+                        <div class="guideline-title">
+                            <i class="fas fa-check-circle"></i> ASRM (American Society for Reproductive Medicine)
                         </div>
-                        <div class="guideline-pane" id="eshre-guideline">
-                            <h4>European Society of Human Reproduction and Embryology</h4>
-                            <div class="guideline-text" id="eshreGuideline">
-                                Guías para el manejo de mujeres con endometriosis.
-                            </div>
-                        </div>
-                        <div class="guideline-pane" id="nice-guideline">
-                            <h4>National Institute for Health and Care Excellence</h4>
-                            <div class="guideline-text" id="niceGuideline">
-                                Recomendaciones para el diagnóstico y tratamiento de endometriosis.
-                            </div>
+                        <div class="guideline-content" id="asrmGuideline">
+                            Criterios de clasificación de endometriosis basados en hallazgos quirúrgicos.
                         </div>
                     </div>
-                </div>
-                
-                <!-- Acciones -->
-                <div class="result-actions">
-                    <button class="action-btn print-btn"><i class="fas fa-print"></i> Imprimir Resultados</button>
-                    <button class="action-btn pdf-btn"><i class="fas fa-file-pdf"></i> Exportar a PDF</button>
-                    <button class="action-btn share-btn"><i class="fas fa-share-alt"></i> Compartir</button>
+                    
+                    <div class="guideline">
+                        <div class="guideline-title">
+                            <i class="fas fa-check-circle"></i> ESHRE (European Society of Human Reproduction and Embryology)
+                        </div>
+                        <div class="guideline-content" id="eshreGuideline">
+                            Guías para el manejo de mujeres con endometriosis.
+                        </div>
+                    </div>
+                    
+                    <div class="guideline">
+                        <div class="guideline-title">
+                            <i class="fas fa-check-circle"></i> NICE (National Institute for Health and Care Excellence)
+                        </div>
+                        <div class="guideline-content" id="niceGuideline">
+                            Recomendaciones para el diagnóstico y tratamiento de endometriosis.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
