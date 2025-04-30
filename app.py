@@ -237,8 +237,8 @@ def predict():
         risk_score = calculate_risk_score(input_data.iloc[0])
         
         return jsonify({    
-            'probability': int(round(adjusted_prob * 100)),  # Convertido a porcentaje entero
-            'risk_score': int(round(risk_score)),  # Redondeado a entero
+            'probability': float(adjusted_prob),
+            'risk_score': float(risk_score),
             'risk_level': risk_level,
             'risk_factors': risk_factors,
             'recommendation': recommendation,
