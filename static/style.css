@@ -178,6 +178,11 @@ input:focus, select:focus, textarea:focus {
     cursor: pointer;
 }
 
+/* Color personalizado para el radio seleccionado */
+.radio-option input[type="radio"] {
+    accent-color: var(--primary);
+}
+
 .pain-scale-container {
     margin-top: 15px;
     width: 100%;
@@ -242,8 +247,8 @@ input[type="range"]#pain_level {
 /* Thumb (control deslizante) */
 input[type="range"]#pain_level::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     background: var(--primary);
     border-radius: 50%;
     cursor: pointer;
@@ -788,4 +793,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+.invalid {
+    border-color: #e74c3c !important;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+.form-group input {
+    transition: border-color 0.3s ease;
 }

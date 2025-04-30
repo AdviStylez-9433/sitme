@@ -1,5 +1,63 @@
 // Generar ID clínico aleatorio
 document.getElementById('clinicId').textContent = Math.floor(1000 + Math.random() * 9000);
+
+document.addEventListener('DOMContentLoaded', function() {
+    const rutInput = document.getElementById('rut');
+    const rutError = document.getElementById('rut-error');
+    
+    // Formateo automático mientras escribe
+    rutInput.addEventListener('input', function(e) {
+        // Limpiar error si está visible
+        rutError.style.display = 'none';
+        rutInput.classList.remove('invalid');
+        
+        // Formateo del RUT
+        let value = e.target.value.replace(/[^\dkK-]/gi, '');
+        
+        if(value.length > 1) {
+            value = value.replace(/-/g, '');
+            if(value.length > 7) {
+                value = value.substring(0, value.length - 1) + '-' + value.slice(-1);
+            }
+            if(value.includes('-')) {
+                const parts = value.split('-');
+                value = parts[0] + '-' + parts[1].toUpperCase();
+            }
+        }
+        
+        e.target.value = value;
+    });
+    
+    // Validar al perder foco
+    rutInput.addEventListener('blur', function(e) {
+        if(e.target.value && !validarRUT(e.target.value)) {
+            rutInput.classList.add('invalid');
+            rutError.textContent = 'RUT inválido. Verifique el dígito verificador.';
+            rutError.style.display = 'block';
+        }
+    });
+    
+    function validarRUT(rut) {
+        rut = rut.replace(/[^\dkK-]/gi, '');
+        if(!/^\d{7,8}-[\dkK]$/i.test(rut)) return false;
+        
+        const [numero, dv] = rut.split('-');
+        return calcularDV(numero) === dv.toUpperCase();
+    }
+    
+    function calcularDV(numero) {
+        let suma = 0;
+        let multiplo = 2;
+        
+        for(let i = numero.length - 1; i >= 0; i--) {
+            suma += parseInt(numero.charAt(i)) * multiplo;
+            multiplo = multiplo === 7 ? 2 : multiplo + 1;
+        }
+        
+        const resto = suma % 11;
+        return resto === 0 ? '0' : resto === 1 ? 'K' : (11 - resto).toString();
+    }
+});
         
 // Calcular edad automáticamente desde fecha de nacimiento
 document.getElementById('birth_date').addEventListener('change', function() {
@@ -8,6 +66,27 @@ document.getElementById('birth_date').addEventListener('change', function() {
     const ageDate = new Date(ageDifMs);
     const age = Math.abs(ageDate.getUTCFullYear() - 1970);
     document.getElementById('age').value = age;
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const heightInput = document.getElementById('height');
+    const weightInput = document.getElementById('weight');
+    const bmiInput = document.getElementById('bmi');
+    
+    function calculateBMI() {
+        const height = parseFloat(heightInput.value) / 100; // Convertir cm a m
+        const weight = parseFloat(weightInput.value);
+        
+        if (height && weight) {
+            const bmi = weight / (height * height);
+            bmiInput.value = bmi.toFixed(1);
+        } else {
+            bmiInput.value = '';
+        }
+    }
+    
+    heightInput.addEventListener('input', calculateBMI);
+    weightInput.addEventListener('input', calculateBMI);
 });
 
 // Manejar envío del formulario
