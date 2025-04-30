@@ -489,7 +489,7 @@ document.getElementById('pain_level').addEventListener('input', function() {
     const value = this.value;
     const min = this.min || 1;
     const max = this.max || 10;
-    const percentage = ((value - min) / (max - min)) * 100;
+    const percentage = Math.round(((value - min) / (max - min)) * 100);
     this.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${percentage}%, #e0e0e0 ${percentage}%, #e0e0e0 100%)`;
 });
 
