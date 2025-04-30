@@ -236,7 +236,7 @@ def predict():
         # Calcular score de riesgo compuesto
         risk_score = calculate_risk_score(input_data.iloc[0])
         
-        return jsonify({
+        return jsonify({    
             'probability': float(adjusted_prob),
             'risk_score': float(risk_score),
             'risk_level': risk_level,
@@ -371,32 +371,27 @@ def determine_risk_level_v2(probability, patient_data):
 def identify_weighted_risk_factors(patient_data):
     """
     Identifica factores de riesgo clave con ponderación de importancia
+    Devuelve una lista de strings formateados para mostrar directamente
     """
     risk_factors = []
     
-    # Factores con umbrales y pesos
+    # Factores con umbrales y descripciones
     factors = [
-        ('dolor_severo', patient_data['pain_level'] >= 7, 1.5),
-        ('dolor_crónico', patient_data['chronic_pain'] == 1, 2.0),
-        ('dispareunia', patient_data['pain_during_sex'] == 1, 1.5),
-        ('ca125_elevado', patient_data['ca125'] > 35, 1.0 + min(2.0, patient_data['ca125']/50)),
-        ('historia_familiar', patient_data['family_history'] == 1, 1.3),
-        ('sintomas_intestinales', patient_data['bowel_symptoms'] == 1, 1.2),
-        ('infertilidad', patient_data['infertility'] == 1, 1.7),
-        ('dyschezia', patient_data['dyschezia'] == 1, 1.2),
-        ('inflamacion_elevada', patient_data['crp'] > 10, 1.0 + min(1.5, patient_data['crp']/20)),
-        ('menarquia_temprana', patient_data['menarche_age'] < 11, 1.1)
+        ('Dolor severo (≥7/10)', patient_data['pain_level'] >= 7),
+        ('Dolor crónico', patient_data['chronic_pain'] == 1),
+        ('Dolor durante relaciones', patient_data['pain_during_sex'] == 1),
+        (f'CA-125 elevado ({patient_data["ca125"]:.1f} U/mL)', patient_data['ca125'] > 35),
+        ('Historia familiar', patient_data['family_history'] == 1),
+        ('Síntomas intestinales', patient_data['bowel_symptoms'] == 1),
+        ('Infertilidad', patient_data['infertility'] == 1),
+        ('Dolor al defecar', patient_data['dyschezia'] == 1),
+        (f'Inflamación elevada (CRP: {patient_data["crp"]:.1f} mg/L)', patient_data['crp'] > 10),
+        (f'Menarquia temprana (edad {patient_data["menarche_age"]})', patient_data['menarche_age'] < 11)
     ]
     
-    for name, condition, weight in factors:
+    for name, condition in factors:
         if condition:
-            risk_factors.append({
-                'factor': name,
-                'weight': round(float(weight), 2)
-            })
-    
-    # Ordenar por peso descendente
-    risk_factors.sort(key=lambda x: x['weight'], reverse=True)
+            risk_factors.append(name)
     
     return risk_factors
 
