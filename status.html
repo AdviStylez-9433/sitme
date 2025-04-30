@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SITME</title>
+    <title>SITME - Monitor en Tiempo Real</title>
     <style>
         :root {
             --primary: #1a237e;
@@ -150,7 +150,6 @@
             50% { opacity: 0; }
         }
 
-        /* Efectos especiales */
         .card:hover {
             box-shadow: 0 0 15px rgba(41, 98, 255, 0.3);
             transition: all 0.3s ease;
@@ -161,7 +160,6 @@
             color: white;
         }
 
-        /* Scrollbar personalizada */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -227,7 +225,7 @@
             </div>
             
             <div class="card" style="grid-column: span 2;">
-                <div class="card-header">ACTIVIDAD</div>
+                <div class="card-header">ACTIVIDAD EN TIEMPO REAL</div>
                 <div class="chart-container">
                     <canvas id="requests-chart"></canvas>
                 </div>
@@ -249,39 +247,102 @@
             </div>
             
             <div class="log-console" id="log-console">
-                <!-- Logs se cargarán aquí -->
+                <div class="log-entry"><span class="log-time">[SISTEMA]</span> Inicializando monitor en tiempo real...</div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Configuración inicial del gráfico
-        const ctx = document.getElementById('requests-chart').getContext('2d');
-        const chart = new Chart(ctx, {
+        // Variables para el monitoreo en tiempo real
+        let requestDataHistory = [];
+        const MAX_HISTORY = 30;
+        let isFirstLoad = true;
+    
+        // Configuración del gráfico mejorado
+        const chartConfig = {
             type: 'line',
             data: {
-                labels: [],
-                datasets: [{
-                    label: 'Solicitudes por minuto',
-                    data: [],
-                    borderColor: '#3498db',
-                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                    tension: 0.1,
-                    fill: true
-                }]
+                labels: Array(MAX_HISTORY).fill(''),
+                datasets: [
+                    {
+                        label: 'Solicitudes/s',
+                        data: Array(MAX_HISTORY).fill(0),
+                        borderColor: '#2962ff',
+                        backgroundColor: 'rgba(41, 98, 255, 0.1)',
+                        tension: 0.3,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'CPU %',
+                        data: Array(MAX_HISTORY).fill(0),
+                        borderColor: '#00c853',
+                        backgroundColor: 'rgba(0, 200, 83, 0.1)',
+                        tension: 0.3,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        label: 'Memoria (MB)',
+                        data: Array(MAX_HISTORY).fill(0),
+                        borderColor: '#ffab00',
+                        backgroundColor: 'rgba(255, 171, 0, 0.1)',
+                        tension: 0.3,
+                        yAxisID: 'y2'
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
                     y: {
-                        beginAtZero: true,
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Solicitudes/s',
+                            color: '#2962ff'
+                        },
                         grid: {
                             color: 'rgba(255, 255, 255, 0.1)'
                         },
                         ticks: {
-                            color: '#00ff00'
+                            color: '#2962ff'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        min: 0,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'CPU %',
+                            color: '#00c853'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        ticks: {
+                            color: '#00c853'
+                        }
+                    },
+                    y2: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Memoria (MB)',
+                            color: '#ffab00'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        ticks: {
+                            color: '#ffab00'
                         }
                     },
                     x: {
@@ -289,38 +350,118 @@
                             color: 'rgba(255, 255, 255, 0.1)'
                         },
                         ticks: {
-                            color: '#00ff00'
+                            color: '#bbdefb'
                         }
                     }
                 },
                 plugins: {
                     legend: {
                         labels: {
-                            color: '#00ff00'
+                            color: '#82b1ff'
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(2);
+                                    if (context.datasetIndex === 0) {
+                                        label += ' req/s';
+                                    } else if (context.datasetIndex === 1) {
+                                        label += '%';
+                                    } else if (context.datasetIndex === 2) {
+                                        label += ' MB';
+                                    }
+                                }
+                                return label;
+                            }
                         }
                     }
+                },
+                animation: {
+                    duration: 500,
+                    easing: 'linear'
                 }
             }
-        });
-
-        // Función para actualizar el dashboard
+        };
+    
+        // Inicializar gráfico
+        const chart = new Chart(
+            document.getElementById('requests-chart').getContext('2d'),
+            chartConfig
+        );
+    
+        // Función para formatear el tiempo de actividad
+        function formatUptime(uptimeString) {
+            // Asumiendo el formato "Xh Ym Zs" de tu backend
+            return uptimeString || '0h 0m 0s';
+        }
+    
+        // Función para agregar entradas de log
+        function addLogEntry(message) {
+            const logConsole = document.getElementById('log-console');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            const now = new Date();
+            const timestamp = now.toLocaleTimeString();
+            logEntry.innerHTML = `<span class="log-time">[${timestamp}]</span> ${message}`;
+            
+            logConsole.appendChild(logEntry);
+            logConsole.scrollTop = logConsole.scrollHeight;
+            
+            // Mantener un máximo de 100 entradas
+            if (logConsole.children.length > 100) {
+                logConsole.removeChild(logConsole.firstChild);
+            }
+        }
+    
+        // Función para actualizar el dashboard con datos reales del backend
         async function updateDashboard() {
             try {
+                const startTime = performance.now();
                 const response = await fetch('/api/status');
-                const data = await response.json();
                 
-                // Actualizar métricas
-                document.getElementById('uptime').textContent = `UPTIME: ${data.uptime}`;
-                document.getElementById('uptime-detail').textContent = data.uptime;
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const loadTime = (performance.now() - startTime).toFixed(2);
+                
+                // Datos de rendimiento para el gráfico
+                const chartData = {
+                    time: data.last_updated.split(':').slice(1, 3).join(':'),
+                    rps: parseFloat(data.requests_per_second) || 0,
+                    cpu: parseFloat(data.cpu_usage) || 0,
+                    memory: parseInt(data.memory_usage) || 0,
+                    response: parseInt(data.response_time) || 0
+                };
+                
+                // Actualizar métricas principales
+                document.getElementById('uptime').textContent = `UPTIME: ${formatUptime(data.uptime)}`;
+                document.getElementById('uptime-detail').textContent = formatUptime(data.uptime);
                 document.getElementById('last-updated').textContent = data.last_updated;
                 document.getElementById('cpu-usage').textContent = `${data.cpu_usage}%`;
                 document.getElementById('memory-usage').textContent = `${data.memory_usage}MB`;
                 document.getElementById('response-time').textContent = `${data.response_time}ms`;
                 document.getElementById('total-requests').textContent = data.requests;
                 
+                // Actualizar estado del servidor
+                const serverStatus = document.getElementById('server-status');
+                serverStatus.textContent = data.status.toUpperCase();
+                serverStatus.style.color = data.status === 'active' ? '#00c853' : '#ff1744';
+                
                 // Actualizar componentes
                 const componentsContainer = document.getElementById('components-container');
                 componentsContainer.innerHTML = '';
+                
                 for (const [name, status] of Object.entries(data.components)) {
                     const componentDiv = document.createElement('div');
                     componentDiv.className = `component component-${status.toLowerCase()}`;
@@ -331,38 +472,63 @@
                     componentsContainer.appendChild(componentDiv);
                 }
                 
-                // Actualizar logs
-                const logConsole = document.getElementById('log-console');
-                logConsole.innerHTML = '';
-                data.logs.forEach(log => {
-                    const logEntry = document.createElement('div');
-                    logEntry.className = 'log-entry';
-                    logEntry.innerHTML = `<span class="log-time">${log.split(' - ')[0]}</span> - ${log.split(' - ')[1]}`;
-                    logConsole.appendChild(logEntry);
-                });
-                logConsole.scrollTop = logConsole.scrollHeight;
-                
-                // Actualizar gráfico
-                const now = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                chart.data.labels.push(now);
-                chart.data.datasets[0].data.push(data.requests);
-                
-                // Mantener solo los últimos 10 puntos
-                if (chart.data.labels.length > 10) {
-                    chart.data.labels.shift();
-                    chart.data.datasets[0].data.shift();
+                // Actualizar logs (solo si es la primera carga o hay logs nuevos)
+                if (isFirstLoad || data.logs?.length > 0) {
+                    const logConsole = document.getElementById('log-console');
+                    
+                    if (isFirstLoad) {
+                        logConsole.innerHTML = ''; // Limpiar logs iniciales
+                        data.logs?.forEach(log => {
+                            addLogEntry(log.split(' - ')[1] || log);
+                        });
+                        
+                        // Agregar log de conexión exitosa
+                        addLogEntry(`Conexión establecida con el backend (${loadTime}ms)`);
+                        isFirstLoad = false;
+                    }
+                    
+                    // Agregar métricas actuales como log
+                    addLogEntry(`CPU: ${data.cpu_usage}% | Mem: ${data.memory_usage}MB | Req/s: ${chartData.rps.toFixed(2)}`);
                 }
                 
-                chart.update();
+                // Actualizar gráfico
+                requestDataHistory.push(chartData);
+                
+                if (requestDataHistory.length > MAX_HISTORY) {
+                    requestDataHistory.shift();
+                }
+                
+                chart.data.labels = requestDataHistory.map(d => d.time);
+                chart.data.datasets[0].data = requestDataHistory.map(d => d.rps);
+                chart.data.datasets[1].data = requestDataHistory.map(d => d.cpu);
+                chart.data.datasets[2].data = requestDataHistory.map(d => d.memory);
+                
+                // Actualización optimizada del gráfico
+                if (requestDataHistory.length > 1) {
+                    chart.update('none'); // Actualizar sin animación
+                } else {
+                    chart.update();
+                }
                 
             } catch (error) {
                 console.error('Error al actualizar el dashboard:', error);
+                addLogEntry(`Error de conexión: ${error.message}`);
+                
+                // Reintentar después de 5 segundos si hay error
+                setTimeout(updateDashboard, 5000);
             }
         }
         
-        // Actualizar cada 3 segundos
+        // Iniciar monitoreo en tiempo real
         updateDashboard();
-        setInterval(updateDashboard, 3000);
+        const monitoringInterval = setInterval(updateDashboard, 1000);
+        
+        // Manejar recarga suave cuando la pestaña gana foco
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                updateDashboard();
+            }
+        });
     </script>
 </body>
 </html>

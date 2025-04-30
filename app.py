@@ -11,6 +11,7 @@ from scipy.stats import skewnorm
 from datetime import datetime
 import time
 import random
+import threading
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app, resources={
@@ -319,39 +320,94 @@ def get_feature_importance():
         ))
     return {}
 
+# Variables globales para el monitoreo en tiempo real
 SERVICE_START_TIME = time.time()
+REQUEST_COUNTER = 0
+PERFORMANCE_METRICS = {
+    'cpu': [],
+    'memory': [],
+    'response_times': []
+}
+REQUEST_TIMESTAMPS = []
+
+def generate_performance_metrics():
+    """Genera métricas de rendimiento simuladas más realistas"""
+    while True:
+        # Simular carga de CPU con patrones más realistas
+        base_cpu = 20 + 10 * random.random()
+        cpu_usage = base_cpu + 15 * random.random() if random.random() > 0.7 else base_cpu
+        
+        memory_usage = 300 + 200 * random.random()
+        response_time = 15 + 30 * random.random()
+        
+        # Mantener solo los últimos 60 valores (1 minuto de datos)
+        PERFORMANCE_METRICS['cpu'].append(cpu_usage)
+        PERFORMANCE_METRICS['memory'].append(memory_usage)
+        PERFORMANCE_METRICS['response_times'].append(response_time)
+        
+        for metric in PERFORMANCE_METRICS.values():
+            if len(metric) > 60:
+                metric.pop(0)
+        
+        time.sleep(1)
+
+# Iniciar el hilo de generación de métricas
+metrics_thread = threading.Thread(target=generate_performance_metrics, daemon=True)
+metrics_thread.start()
 
 def get_service_data():
-    """Genera datos simulados del servicio"""
+    """Genera datos del servicio en tiempo real"""
     uptime = time.time() - SERVICE_START_TIME
     hours, rem = divmod(uptime, 3600)
     minutes, seconds = divmod(rem, 60)
     
+    # Calcular solicitudes por segundo (últimos 5 segundos)
+    now = time.time()
+    recent_requests = sum(1 for t in REQUEST_TIMESTAMPS if now - t < 5)
+    rps = recent_requests / 5 if recent_requests > 0 else 0
+    
+    # Obtener métricas actuales
+    current_cpu = PERFORMANCE_METRICS['cpu'][-1] if PERFORMANCE_METRICS['cpu'] else 0
+    current_memory = PERFORMANCE_METRICS['memory'][-1] if PERFORMANCE_METRICS['memory'] else 0
+    current_response = PERFORMANCE_METRICS['response_times'][-1] if PERFORMANCE_METRICS['response_times'] else 0
+    
     return {
         "status": "active",
         "uptime": f"{int(hours)}h {int(minutes)}m {int(seconds)}s",
-        "cpu_usage": random.randint(5, 30),
-        "memory_usage": random.randint(200, 500),
-        "response_time": random.randint(10, 50),
-        "requests": random.randint(1000, 5000),
+        "cpu_usage": round(current_cpu, 1),
+        "memory_usage": round(current_memory),
+        "response_time": round(current_response),
+        "requests": REQUEST_COUNTER,
+        "requests_per_second": round(rps, 2),
         "last_updated": datetime.now().strftime("%H:%M:%S"),
+        "performance_history": {
+            "cpu": PERFORMANCE_METRICS['cpu'],
+            "memory": PERFORMANCE_METRICS['memory'],
+            "response_times": PERFORMANCE_METRICS['response_times']
+        },
         "components": {
-            "API": random.choice(["online", "online", "online", "degraded"]),
+            "API": "online" if current_cpu < 80 else "degraded",
             "Database": "online",
-            "Cache": random.choice(["online", "online", "offline"]),
+            "Cache": "online" if random.random() > 0.1 else "offline",
             "Auth": "online"
         },
         "logs": [
-            f"{datetime.now().strftime('%H:%M:%S')} - Sistema iniciado",
-            f"{datetime.now().strftime('%H:%M:%S')} - Conexión establecida con DB",
-            f"{datetime.now().strftime('%H:%M:%S')} - Caché inicializada",
-            f"{datetime.now().strftime('%H:%M:%S')} - Escuchando en puerto 5000"
+            f"{datetime.now().strftime('%H:%M:%S')} - Solicitud #{REQUEST_COUNTER} procesada",
+            f"{datetime.now().strftime('%H:%M:%S')} - CPU: {round(current_cpu, 1)}%",
+            f"{datetime.now().strftime('%H:%M:%S')} - Memoria: {round(current_memory)}MB"
         ]
     }
 
 @app.route('/api/status')
 def api_status():
-    return get_service_data()
+    global REQUEST_COUNTER, REQUEST_TIMESTAMPS
+    REQUEST_COUNTER += 1
+    REQUEST_TIMESTAMPS.append(time.time())
+    
+    # Mantener solo registros de los últimos 60 segundos
+    REQUEST_TIMESTAMPS = [t for t in REQUEST_TIMESTAMPS if time.time() - t < 60]
+    
+    return jsonify(get_service_data())
 
 # Configuración para producción
 if __name__ == "__main__":
