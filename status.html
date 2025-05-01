@@ -141,6 +141,38 @@
         .chart-container {
             height: 200px;
             position: relative;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .chart-highlight {
+            animation: pulse 0.5s ease;
+        }
+
+        /* Efecto de onda para puntos de datos (opcional) */
+        @keyframes wave {
+            0% {
+                r: 3;
+                opacity: 0.8;
+            }
+
+            100% {
+                r: 8;
+                opacity: 0;
+            }
         }
 
         .blink {
@@ -354,7 +386,9 @@
                         data: Array(MAX_HISTORY).fill(0),
                         borderColor: '#2962ff',
                         backgroundColor: 'rgba(41, 98, 255, 0.1)',
-                        tension: 0.3,
+                        tension: 0.4, // Aumentamos la tensión para curvas más suaves
+                        borderWidth: 2,
+                        pointRadius: 0, // Eliminamos puntos para mejor rendimiento
                         yAxisID: 'y'
                     },
                     {
@@ -362,7 +396,9 @@
                         data: Array(MAX_HISTORY).fill(0),
                         borderColor: '#00c853',
                         backgroundColor: 'rgba(0, 200, 83, 0.1)',
-                        tension: 0.3,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 0,
                         yAxisID: 'y1'
                     },
                     {
@@ -370,7 +406,9 @@
                         data: Array(MAX_HISTORY).fill(0),
                         borderColor: '#ffab00',
                         backgroundColor: 'rgba(255, 171, 0, 0.1)',
-                        tension: 0.3,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 0,
                         yAxisID: 'y2'
                     }
                 ]
@@ -441,7 +479,9 @@
                 plugins: {
                     legend: {
                         labels: {
-                            color: '#82b1ff'
+                            color: '#82b1ff',
+                            usePointStyle: true,
+                            pointStyle: 'line'
                         }
                     },
                     tooltip: {
@@ -469,8 +509,54 @@
                     }
                 },
                 animation: {
-                    duration: 500,
-                    easing: 'linear'
+                    duration: 1000, // Aumentamos la duración de la animación
+                    easing: 'easeOutQuart', // Usamos una easing function más suave
+                    x: {
+                        type: 'number',
+                        from: (ctx) => {
+                            // Animación de entrada desde la izquierda para nuevos datos
+                            if (ctx.type === 'data' && ctx.mode === 'default') {
+                                return ctx.chart.scales.x.getPixelForValue(MAX_HISTORY - 2);
+                            }
+                            return 0;
+                        },
+                        delay: (ctx) => {
+                            // Retraso progresivo para efecto cascada
+                            return ctx.dataIndex * 20;
+                        }
+                    },
+                    y: {
+                        type: 'number',
+                        from: (ctx) => {
+                            // Animación desde el valor anterior
+                            return ctx.chart.data.datasets[ctx.datasetIndex].data[ctx.dataIndex - 1] || 0;
+                        },
+                        delay: (ctx) => {
+                            return ctx.dataIndex * 20;
+                        }
+                    }
+                },
+                transitions: {
+                    show: {
+                        animations: {
+                            x: {
+                                from: 0
+                            },
+                            y: {
+                                from: 0
+                            }
+                        }
+                    },
+                    hide: {
+                        animations: {
+                            x: {
+                                to: 0
+                            },
+                            y: {
+                                to: 0
+                            }
+                        }
+                    }
                 }
             }
         };
@@ -588,12 +674,60 @@
                 chart.data.datasets[2].data = requestDataHistory.map(d => d.memory);
 
                 // Actualización optimizada del gráfico
+                requestDataHistory.push(chartData);
+                if (requestDataHistory.length > MAX_HISTORY) {
+                    requestDataHistory.shift();
+                }
+
+                // Guardar los datos actuales para la animación
+                const oldData = {
+                    labels: [...chart.data.labels],
+                    datasets: chart.data.datasets.map(dataset => ({
+                        data: [...dataset.data]
+                    }))
+                };
+
+                // Actualizar los nuevos datos
+                chart.data.labels = requestDataHistory.map(d => d.time);
+                chart.data.datasets[0].data = requestDataHistory.map(d => d.rps);
+                chart.data.datasets[1].data = requestDataHistory.map(d => d.cpu);
+                chart.data.datasets[2].data = requestDataHistory.map(d => d.memory);
+
+                // Configurar animación personalizada
                 if (requestDataHistory.length > 1) {
-                    chart.update('none'); // Actualizar sin animación
+                    chart.update({
+                        duration: 800,
+                        easing: 'easeOutQuart',
+                        lazy: false
+                    });
                 } else {
                     chart.update();
                 }
 
+                // Efecto de resaltado cuando hay cambios significativos
+                if (requestDataHistory.length > 2) {
+                    const last = requestDataHistory.length - 1;
+                    const prev = requestDataHistory.length - 2;
+
+                    // Resaltar cambios mayores al 10%
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const change = Math.abs((requestDataHistory[last][i === 0 ? 'rps' : i === 1 ? 'cpu' : 'memory'] -
+                            requestDataHistory[prev][i === 0 ? 'rps' : i === 1 ? 'cpu' : 'memory']) /
+                            requestDataHistory[prev][i === 0 ? 'rps' : i === 1 ? 'cpu' : 'memory']);
+
+                        if (change > 0.1) {
+                            dataset.borderWidth = 3;
+                            dataset.borderColor = i === 0 ? '#82b1ff' : i === 1 ? '#69f0ae' : '#ffd600';
+
+                            // Restaurar después de 500ms
+                            setTimeout(() => {
+                                dataset.borderWidth = 2;
+                                dataset.borderColor = i === 0 ? '#2962ff' : i === 1 ? '#00c853' : '#ffab00';
+                                chart.update();
+                            }, 500);
+                        }
+                    });
+                }
             } catch (error) {
                 console.error('Error al actualizar el dashboard:', error);
                 addLogEntry(`Error de conexión: ${error.message}`);
