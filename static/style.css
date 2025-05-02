@@ -353,8 +353,12 @@ button i {
     position: relative;
     overflow: hidden;
     background-color: white;
-    border: 2px solid var(--primary); /* Borde del color principal */
-    box-shadow: 0 4px 20px rgba(94, 53, 177, 0.15); /* Sombra suave */
+    /* Borde con gradiente (solución moderna) */
+    border: 2px solid transparent;
+    border-image: linear-gradient(to right, var(--primary), var(--primary-light)) 1;
+    
+    /* Sombra mejorada */
+    box-shadow: 0 4px 20px rgba(94, 53, 177, 0.15);
 }
 .result-container::before {
     content: "";
@@ -363,9 +367,13 @@ button i {
     left: 0;
     right: 0;
     height: 5px;
-    background: linear-gradient(to right, var(--primary));
-    border: 2px solid var(--primary); /* Borde del color principal */
-    box-shadow: 0 4px 20px rgba(94, 53, 177, 0.15); /* Sombra suave */
+    background: linear-gradient(to right, var(--primary), var(--primary-light));
+    /* Borde con gradiente (solución moderna) */
+    border: 2px solid transparent;
+    border-image: linear-gradient(to right, var(--primary), var(--primary-light)) 1;
+        
+    /* Sombra mejorada */
+    box-shadow: 0 4px 20px rgba(94, 53, 177, 0.15);
 }
 
 @keyframes fadeIn {
@@ -539,21 +547,25 @@ button i {
     color: var(--info);
 }
 
-/* Eliminar viñetas de recomendaciones clínicas */
 .recommendations ul {
-    list-style-type: none; /* Elimina las viñetas */
-    padding-left: 0; /* Elimina el padding izquierdo */
+    padding-left: 20px;
 }
 
 .recommendations li {
-    padding-left: 0; /* Elimina el padding izquierdo */
-    margin-bottom: 12px; /* Mantiene el espacio entre items */
+    margin-bottom: 10px;
     position: relative;
+    padding-left: 25px;
 }
 
-/* Eliminar completamente los puntos celestes */
 .recommendations li::before {
-    display: none; /* Oculta los pseudo-elementos */
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--info);
 }
 
 .patient-summary {
