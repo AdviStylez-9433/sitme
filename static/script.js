@@ -216,7 +216,7 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
             riskTitle: getRiskTitle(data.risk_level),
             riskDescription: getRiskDescription(data.risk_level),
             riskIcon: getRiskIcon(data.risk_level),
-            recommendation: data.recommendation,
+            recommendations: data.recommendations,
             riskFactors: mapRiskFactors(data.risk_factors || [], formData),
             formData: formData,
             guidelines: getClinicalGuidelines(data.risk_level)
@@ -275,7 +275,7 @@ function displayResults(data) {
     const recommendations = Array.isArray(data.recommendations) 
     ? data.recommendations 
     : (data.recommendation || '').split('\n').filter(r => r.trim() !== '');
-        
+
     recommendations.forEach(item => {
         const li = document.createElement('li');
         li.textContent = item;
