@@ -11,7 +11,7 @@ import joblib
 import os
 from time import time
 
-def generate_endometriosis_dataset(n_samples=30000):
+def generate_endometriosis_dataset(n_samples=10000):
     """Genera dataset sintético mejorado con mayor proporción de casos positivos"""
     np.random.seed(42)
     
