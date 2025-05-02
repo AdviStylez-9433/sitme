@@ -272,8 +272,10 @@ function displayResults(data) {
     const recommendationsList = document.getElementById('recommendationsList');
     recommendationsList.innerHTML = '';
     
-    const recommendations = data.recommendation.split('\n').filter(r => r.trim() !== '');
-    
+    const recommendations = Array.isArray(data.recommendations) 
+    ? data.recommendations 
+    : (data.recommendation || '').split('\n').filter(r => r.trim() !== '');
+        
     recommendations.forEach(item => {
         const li = document.createElement('li');
         li.textContent = item;
