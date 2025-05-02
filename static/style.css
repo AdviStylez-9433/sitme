@@ -363,7 +363,7 @@ button i {
     left: 0;
     right: 0;
     height: 5px;
-    background: linear-gradient(to right, var(--primary), var(--primary-light));
+    background: linear-gradient(to right, var(--primary));
     border: 2px solid var(--primary); /* Borde del color principal */
     box-shadow: 0 4px 20px rgba(94, 53, 177, 0.15); /* Sombra suave */
 }
