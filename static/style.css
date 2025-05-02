@@ -562,24 +562,22 @@ button i {
 }
 
 .recommendations ul {
-    padding-left: 20px;
+    list-style-type: none;
+    /* Elimina las viñetas por defecto */
+    padding-left: 0;
+    /* Elimina el padding izquierdo */
 }
 
 .recommendations li {
-    margin-bottom: 10px;
+    padding-left: 0;
+    /* Elimina el espacio para viñetas */
+    margin-bottom: 12px;
     position: relative;
-    padding-left: 25px;
 }
 
+/* Elimina completamente los puntos celestes */
 .recommendations li::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 8px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--info);
+    display: none;
 }
 
 .patient-summary {
@@ -718,12 +716,33 @@ footer {
         align-items: flex-start;
     }
 
+    /* Círculo de probabilidad con color principal */
     .probability-circle {
-        margin-bottom: 20px;
-        margin-right: 0;
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 1.8rem;
+        font-weight: 700;
+        margin-right: 30px;
+        border: 5px solid var(--primary);
+        background-color: rgba(94, 53, 177, 0.1);
+        color: var(--primary);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+
+    .probability-circle::before {
+        content: "";
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        border-radius: 50%;
+        border: 2px dashed rgba(94, 53, 177, 0.3);
     }
 
     .result-header {
