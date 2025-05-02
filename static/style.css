@@ -352,8 +352,10 @@ button i {
     animation: fadeIn 0.5s ease-out;
     position: relative;
     overflow: hidden;
+    background-color: white;
+    border: 2px solid var(--primary); /* Borde del color principal */
+    box-shadow: 0 4px 20px rgba(94, 53, 177, 0.15); /* Sombra suave */
 }
-
 .result-container::before {
     content: "";
     position: absolute;
@@ -362,7 +364,8 @@ button i {
     right: 0;
     height: 5px;
     background: linear-gradient(to right, var(--primary), var(--primary-light));
-    border-color: var(--primary);
+    border: 2px solid var(--primary); /* Borde del color principal */
+    box-shadow: 0 4px 20px rgba(94, 53, 177, 0.15); /* Sombra suave */
 }
 
 @keyframes fadeIn {
@@ -536,25 +539,21 @@ button i {
     color: var(--info);
 }
 
+/* Eliminar viñetas de recomendaciones clínicas */
 .recommendations ul {
-    padding-left: 20px;
+    list-style-type: none; /* Elimina las viñetas */
+    padding-left: 0; /* Elimina el padding izquierdo */
 }
 
 .recommendations li {
-    margin-bottom: 10px;
+    padding-left: 0; /* Elimina el padding izquierdo */
+    margin-bottom: 12px; /* Mantiene el espacio entre items */
     position: relative;
-    padding-left: 25px;
 }
 
+/* Eliminar completamente los puntos celestes */
 .recommendations li::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 8px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--info);
+    display: none; /* Oculta los pseudo-elementos */
 }
 
 .patient-summary {
