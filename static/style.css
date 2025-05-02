@@ -362,6 +362,7 @@ button i {
     right: 0;
     height: 5px;
     background: linear-gradient(to right, var(--primary), var(--primary-light));
+    border-color: var(--primary);
 }
 
 @keyframes fadeIn {
