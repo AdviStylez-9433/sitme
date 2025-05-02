@@ -717,8 +717,17 @@ footer {
         align-items: flex-start;
     }
 
+    /* Elimina primero cualquier estilo conflictivo */
+    .probability-circle,
+    .high-risk .probability-circle,
+    .moderate-risk .probability-circle,
+    .low-risk .probability-circle {
+        all: unset;
+        box-sizing: border-box;
+    }
+
+    /* Estilos base garantizados */
     .probability-circle {
-        /* Mantener estructura base */
         width: 120px;
         height: 120px;
         border-radius: 50%;
@@ -729,24 +738,19 @@ footer {
         font-weight: 700;
         margin-right: 30px;
         position: relative;
-        
-        /* Estilos CORREGIDOS */
+
+        /* Estilos del borde y fondo */
         border: 5px solid var(--primary) !important;
         background-color: rgba(94, 53, 177, 0.05) !important;
         color: var(--primary) !important;
+
+        /* Reset de sombras y otros efectos */
         box-shadow: none !important;
+        text-shadow: none !important;
+        filter: none !important;
     }
-    
-    /* Eliminar cualquier estilo específico de riesgo que esté sobrescribiendo */
-    .high-risk .probability-circle,
-    .moderate-risk .probability-circle,
-    .low-risk .probability-circle {
-        border-color: var(--primary) !important;
-        background-color: rgba(94, 53, 177, 0.05) !important;
-        color: var(--primary) !important;
-    }
-    
-    /* Opcional: mantener el borde discontinuo interno si lo deseas */
+
+    /* Borde discontinuo interno */
     .probability-circle::before {
         content: "";
         position: absolute;
@@ -757,8 +761,9 @@ footer {
         border-radius: 50%;
         border: 2px dashed var(--primary-light);
         opacity: 0.5;
+        pointer-events: none;
     }
-    
+
     .result-header {
         flex-direction: column;
         align-items: flex-start;
