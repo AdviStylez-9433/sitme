@@ -347,33 +347,28 @@ button i {
 .result-container {
     margin-top: 30px;
     padding: 30px;
-    border-radius: 10px;
+    border-radius: 10px; /* Radio del contenedor principal */
     display: none;
     animation: fadeIn 0.5s ease-out;
     position: relative;
-    overflow: hidden;
-    background-color: white;
-    /* Borde con gradiente (solución moderna) */
-    border: 2px solid transparent;
-    border-image: linear-gradient(to right, var(--primary), var(--primary-light)) 1;
-    
-    /* Sombra mejorada */
+    background: white;
+    z-index: 1;
     box-shadow: 0 4px 20px rgba(94, 53, 177, 0.15);
+    /* El borde real será transparente */
+    border: 2px solid transparent;
 }
+
+/* Borde con gradiente y radio */
 .result-container::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 5px;
+    top: -2px;  /* Grosor del borde */
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
     background: linear-gradient(to right, var(--primary), var(--primary-light));
-    /* Borde con gradiente (solución moderna) */
-    border: 2px solid transparent;
-    border-image: linear-gradient(to right, var(--primary), var(--primary-light)) 1;
-        
-    /* Sombra mejorada */
-    box-shadow: 0 4px 20px rgba(94, 53, 177, 0.15);
+    border-radius: 12px; /* 10px + 2px para compensar el grosor del borde */
+    z-index: -1;
 }
 
 @keyframes fadeIn {
