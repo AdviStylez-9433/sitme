@@ -26,7 +26,7 @@ PERFORMANCE_METRICS = {
 }
 
 # Cargar modelo
-MODEL_PATH = 'models/endometriosis_model_v4.pkl'
+MODEL_PATH = 'models/endometriosis_model_optimized.pkl'
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(f"Modelo no encontrado en {MODEL_PATH}. Ejecuta primero train_model.py")
 
