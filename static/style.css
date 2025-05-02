@@ -562,22 +562,23 @@ button i {
 }
 
 .recommendations ul {
-    list-style-type: none;
-    /* Elimina las viñetas por defecto */
-    padding-left: 0;
-    /* Elimina el padding izquierdo */
+    padding-left: 20px;
 }
 
 .recommendations li {
-    padding-left: 0;
-    /* Elimina el espacio para viñetas */
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     position: relative;
+    padding-left: 25px;
 }
 
-/* Elimina completamente los puntos celestes */
 .recommendations li::before {
-    display: none;
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
 }
 
 .patient-summary {
@@ -716,8 +717,8 @@ footer {
         align-items: flex-start;
     }
 
-    /* Círculo de probabilidad con color principal */
     .probability-circle {
+        /* Mantener estructura base */
         width: 120px;
         height: 120px;
         border-radius: 50%;
@@ -727,13 +728,25 @@ footer {
         font-size: 1.8rem;
         font-weight: 700;
         margin-right: 30px;
-        border: 5px solid var(--primary);
-        background-color: rgba(94, 53, 177, 0.1);
-        color: var(--primary);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         position: relative;
+        
+        /* Estilos CORREGIDOS */
+        border: 5px solid var(--primary) !important;
+        background-color: rgba(94, 53, 177, 0.05) !important;
+        color: var(--primary) !important;
+        box-shadow: none !important;
     }
-
+    
+    /* Eliminar cualquier estilo específico de riesgo que esté sobrescribiendo */
+    .high-risk .probability-circle,
+    .moderate-risk .probability-circle,
+    .low-risk .probability-circle {
+        border-color: var(--primary) !important;
+        background-color: rgba(94, 53, 177, 0.05) !important;
+        color: var(--primary) !important;
+    }
+    
+    /* Opcional: mantener el borde discontinuo interno si lo deseas */
     .probability-circle::before {
         content: "";
         position: absolute;
@@ -742,9 +755,10 @@ footer {
         right: 5px;
         bottom: 5px;
         border-radius: 50%;
-        border: 2px dashed rgba(94, 53, 177, 0.3);
+        border: 2px dashed var(--primary-light);
+        opacity: 0.5;
     }
-
+    
     .result-header {
         flex-direction: column;
         align-items: flex-start;
