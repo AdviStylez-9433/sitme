@@ -352,6 +352,7 @@ button i {
     animation: fadeIn 0.5s ease-out;
     position: relative;
     overflow: hidden;
+    border-color: var(--primary);
 }
 
 .result-container::before {
