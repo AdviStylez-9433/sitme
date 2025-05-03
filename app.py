@@ -325,8 +325,6 @@ def generate_clinical_record():
         # 4. Totales
         total_data = [
             ["TOTAL A PAGAR:", "$8.220"]
-            ["IVA (19%):", "$1.560"],
-            ["TOTAL CON IVA:", "$9.780"]
         ]
         
         total_table = Table(total_data, colWidths=[360, 60])
