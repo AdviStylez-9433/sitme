@@ -13,7 +13,7 @@ import io
 import base64
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Frame, PageTemplate
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
@@ -234,7 +234,7 @@ def generate_clinical_record():
     try:
         data = request.get_json()
         
-        # Crear el PDF con márgenes más pequeños
+        # Configuración con dos columnas
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter,
                               leftMargin=0.5*inch,
@@ -242,248 +242,148 @@ def generate_clinical_record():
                               topMargin=0.5*inch,
                               bottomMargin=0.5*inch)
         
-        # Estilos
         styles = getSampleStyleSheet()
         
-        # Estilo para el título (más pequeño)
-        title_style = ParagraphStyle(
-            'Title',
-            parent=styles['Heading1'],
-            fontSize=12,
-            alignment=1,
+        # Estilos personalizados
+        header_style = ParagraphStyle(
+            'Header',
+            parent=styles['Heading2'],
+            fontSize=10,
+            leading=12,
             spaceAfter=6,
             fontName='Helvetica-Bold'
         )
         
-        # Estilo para subtítulos
-        subtitle_style = ParagraphStyle(
-            'Subtitle',
-            parent=styles['Heading2'],
-            fontSize=10,
-            spaceAfter=6,
-            fontName='Helvetica-Bold',
-            leftIndent=0
-        )
-        
-        # Estilo para texto normal (más pequeño)
-        normal_style = ParagraphStyle(
-            'Normal',
+        item_style = ParagraphStyle(
+            'Item',
             parent=styles['Normal'],
             fontSize=8,
-            spaceAfter=6,
-            leading=10,
-            alignment=0,  # 0=left, 1=center, 2=right
+            leading=9,
+            spaceAfter=2,
             leftIndent=0
         )
         
-        # Contenido del PDF
-        elements = []
+        # Función para crear secciones
+        def create_section(title, items):
+            content = []
+            content.append(Paragraph(title, header_style))
+            for item in items:
+                content.append(Paragraph(item, item_style))
+            content.append(Spacer(1, 12))
+            return content
         
-        # 1. Encabezado compacto
-        elements.append(Paragraph("FICHA CLÍNICA - ENDOMETRIOSIS", title_style))
-        elements.append(Spacer(1, 6))
+        # Preparar contenido para dos columnas
+        col1 = []
+        col2 = []
         
-        # 2. Datos personales en 2 columnas
-        personal_data = [
-            ["<b>Nombre:</b>", data['personal']['full_name'],
-             "<b>Fecha Nac.:</b>", data['personal']['birth_date']],
-            ["<b>RUT:</b>", data['personal']['id_number'],
-             "<b>Edad:</b>", f"{data['personal']['age']} años"],
-            ["<b>Tipo Sangre:</b>", data['personal']['blood_type'],
-             "<b>Previsión:</b>", data['personal']['insurance']]
+        # Columna 1
+        # 1. Datos personales
+        personal_items = [
+            f"<b>Nombre:</b> {data['personal']['full_name']}",
+            f"<b>RUT:</b> {data['personal']['id_number']}",
+            f"<b>Edad:</b> {data['personal']['age']} años",
+            f"<b>Previsión:</b> {data['personal']['insurance']}",
+            f"<b>Tipo sangre:</b> {data['personal']['blood_type']}"
+        ]
+        col1.extend(create_section("DATOS PERSONALES", personal_items))
+        
+        # 2. Antecedentes médicos
+        history_items = [
+            f"<b>Cirugías ginecológicas:</b> {'Sí' if data['history']['gynecological_surgery'] else 'No'}",
+            f"<b>Enf. inflamatoria pélvica:</b> {'Sí' if data['history']['pelvic_inflammatory'] else 'No'}",
+            f"<b>Quistes ováricos:</b> {'Sí' if data['history']['ovarian_cysts'] else 'No'}",
+            f"<b>Familiar endometriosis:</b> {'Sí' if data['history']['family_endometriosis'] else 'No'}",
+            f"<b>Familiar autoinmunes:</b> {'Sí' if data['history']['family_autoimmune'] else 'No'}",
+            f"<b>Comorbilidades:</b> {'Sí' if data['history']['comorbidity_autoimmune'] or data['history']['comorbidity_thyroid'] else 'No'}",
+            f"<b>Medicamentos:</b> {data['history']['medications'] or 'Ninguno'}"
+        ]
+        col1.extend(create_section("ANTECEDENTES MÉDICOS", history_items))
+        
+        # 3. Datos menstruales
+        menstrual_items = [
+            f"<b>Menarquia:</b> {data['menstrual']['menarche_age']} años",
+            f"<b>Ciclo:</b> {data['menstrual']['cycle_length']} días",
+            f"<b>Duración:</b> {data['menstrual']['period_duration']} días",
+            f"<b>Última regla:</b> {data['menstrual']['last_period']}",
+            f"<b>Dolor:</b> {data['menstrual']['pain_level']}/10",
+            f"<b>Dolor crónico:</b> {'Sí' if data['menstrual']['pain_chronic'] else 'No'}"
+        ]
+        col1.extend(create_section("DATOS MENSTRUALES", menstrual_items))
+        
+        # Columna 2
+        # 1. Síntomas
+        symptoms_items = [
+            f"<b>Dolor durante relaciones:</b> {'Sí' if data['symptoms']['pain_during_sex'] else 'No'}",
+            f"<b>Síntomas intestinales:</b> {'Sí' if data['symptoms']['bowel_symptoms'] else 'No'}",
+            f"<b>Síntomas urinarios:</b> {'Sí' if data['symptoms']['urinary_symptoms'] else 'No'}",
+            f"<b>Fatiga:</b> {'Sí' if data['symptoms']['fatigue'] else 'No'}",
+            f"<b>Infertilidad:</b> {'Sí' if data['symptoms']['infertility'] else 'No'}",
+            f"<b>Otros síntomas:</b> {data['symptoms']['other_symptoms'] or 'Ninguno'}"
+        ]
+        col2.extend(create_section("SÍNTOMAS", symptoms_items))
+        
+        # 2. Biomarcadores
+        biomarkers_items = [
+            f"<b>CA-125:</b> {data['biomarkers']['ca125'] or 'No medido'}",
+            f"<b>IL-6:</b> {data['biomarkers']['il6'] or 'No medido'}",
+            f"<b>TNF-α:</b> {data['biomarkers']['tnf_alpha'] or 'No medido'}",
+            f"<b>VEGF:</b> {data['biomarkers']['vegf'] or 'No medido'}",
+            f"<b>AMH:</b> {data['biomarkers']['amh'] or 'No medido'}",
+            f"<b>PCR:</b> {data['biomarkers']['crp'] or 'No medido'}"
+        ]
+        col2.extend(create_section("BIOMARCADORES", biomarkers_items))
+        
+        # 3. Examen físico
+        exam_items = [
+            f"<b>IMC:</b> {data['examination']['bmi'] or 'No calculado'}",
+            f"<b>Ex. pélvico:</b> {data['examination']['pelvic_exam'] or 'No realizado'}",
+            f"<b>Ex. vaginal:</b> {data['examination']['vaginal_exam'] or 'No realizado'}",
+            f"<b>Notas clínicas:</b> {data['examination']['clinical_notes'] or 'Ninguna'}"
+        ]
+        col2.extend(create_section("EXAMEN FÍSICO", exam_items))
+        
+        # Bono de atención (ancho completo)
+        bono_items = [
+            "BONO DE ATENCIÓN AMBULATORIA",
+            f"<b>Paciente:</b> {data['personal']['full_name']}",
+            f"<b>RUT:</b> {data['personal']['id_number']}",
+            f"<b>Previsión:</b> {data['personal']['insurance']}",
+            f"<b>Fecha emisión:</b> {datetime.now().strftime('%d/%m/%Y')}",
+            f"<b>Válido hasta:</b> {(datetime.now() + timedelta(days=30)).strftime('%d/%m/%Y')}",
+            "Autoriza atención especializada en endometriosis",
+            "Firma profesional: ________________________"
         ]
         
-        personal_table = Table(personal_data, colWidths=[60, 120, 60, 120])
-        personal_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-        ]))
-        elements.append(personal_table)
-        elements.append(Spacer(1, 6))
+        # Organizar en dos columnas
+        frame1 = Frame(doc.leftMargin, doc.bottomMargin + doc.height/2, 
+                      doc.width/2 - 6, doc.height/2 - 20, id='col1')
+        frame2 = Frame(doc.leftMargin + doc.width/2, doc.bottomMargin + doc.height/2, 
+                      doc.width/2 - 6, doc.height/2 - 20, id='col2')
+        frame_bono = Frame(doc.leftMargin, doc.bottomMargin, 
+                         doc.width, doc.height/2 - 20, id='bono')
         
-        # 3. Antecedentes médicos compactos
-        elements.append(Paragraph("ANTECEDENTES MÉDICOS", subtitle_style))
+        # Construir el documento
+        doc.addPageTemplates([
+            PageTemplate(id='TwoColumns', frames=[frame1, frame2, frame_bono])
+        ])
         
-        history_data = [
-            ["<b>Cirugías ginecológicas:</b>", "Sí" if data['history']['gynecological_surgery'] else "No",
-             "<b>Enf. inflamatoria pélvica:</b>", "Sí" if data['history']['pelvic_inflammatory'] else "No"],
-            ["<b>Quistes ováricos:</b>", "Sí" if data['history']['ovarian_cysts'] else "No",
-             "<b>Familiar endometriosis:</b>", "Sí" if data['history']['family_endometriosis'] else "No"],
-            ["<b>Familiar autoinmunes:</b>", "Sí" if data['history']['family_autoimmune'] else "No",
-             "<b>Familiar cáncer:</b>", "Sí" if data['history']['family_cancer'] else "No"],
-            ["<b>Comorbilidades autoinmunes:</b>", "Sí" if data['history']['comorbidity_autoimmune'] else "No",
-             "<b>Comorbilidades tiroides:</b>", "Sí" if data['history']['comorbidity_thyroid'] else "No"],
-            ["<b>SII:</b>", "Sí" if data['history']['comorbidity_ibs'] else "No",
-             "<b>Medicamentos:</b>", data['history']['medications'] or "Ninguno"]
-        ]
+        story = []
+        story.extend(col1)
+        story.extend(col2)
+        story.extend(create_section("", bono_items))
         
-        history_table = Table(history_data, colWidths=[90, 50, 90, 50])
-        history_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
-        ]))
-        elements.append(history_table)
-        elements.append(Spacer(1, 6))
+        doc.build(story)
         
-        # 4. Datos menstruales compactos
-        elements.append(Paragraph("DATOS MENSTRUALES", subtitle_style))
-        
-        menstrual_data = [
-            ["<b>Menarquia:</b>", f"{data['menstrual']['menarche_age']} años",
-             "<b>Ciclo:</b>", f"{data['menstrual']['cycle_length']} días",
-             "<b>Duración:</b>", f"{data['menstrual']['period_duration']} días"],
-            ["<b>Última regla:</b>", data['menstrual']['last_period'],
-             "<b>Dolor:</b>", f"{data['menstrual']['pain_level']}/10",
-             "<b>Dolor crónico:</b>", "Sí" if data['menstrual']['pain_chronic'] else "No"],
-            ["<b>Dolor premenstrual:</b>", "Sí" if data['menstrual']['pain_premenstrual'] else "No",
-             "<b>Dolor menstrual:</b>", "Sí" if data['menstrual']['pain_menstrual'] else "No",
-             "<b>Dolor ovulación:</b>", "Sí" if data['menstrual']['pain_ovulation'] else "No"]
-        ]
-        
-        menstrual_table = Table(menstrual_data, colWidths=[60, 40, 50, 40, 50, 40])
-        menstrual_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
-        ]))
-        elements.append(menstrual_table)
-        elements.append(Spacer(1, 6))
-        
-        # 5. Síntomas compactos
-        elements.append(Paragraph("SÍNTOMAS", subtitle_style))
-        
-        symptoms_data = [
-            ["<b>Dolor relaciones:</b>", "Sí" if data['symptoms']['pain_during_sex'] else "No",
-             "<b>Síntomas intestinales:</b>", "Sí" if data['symptoms']['bowel_symptoms'] else "No"],
-            ["<b>Síntomas urinarios:</b>", "Sí" if data['symptoms']['urinary_symptoms'] else "No",
-             "<b>Fatiga:</b>", "Sí" if data['symptoms']['fatigue'] else "No"],
-            ["<b>Infertilidad:</b>", "Sí" if data['symptoms']['infertility'] else "No",
-             "<b>Otros síntomas:</b>", data['symptoms']['other_symptoms'] or "Ninguno"]
-        ]
-        
-        symptoms_table = Table(symptoms_data, colWidths=[80, 40, 80, 40])
-        symptoms_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
-        ]))
-        elements.append(symptoms_table)
-        elements.append(Spacer(1, 6))
-        
-        # 6. Biomarcadores compactos
-        elements.append(Paragraph("BIOMARCADORES", subtitle_style))
-        
-        biomarkers_data = [
-            ["<b>CA-125:</b>", data['biomarkers']['ca125'] or "No",
-             "<b>IL-6:</b>", data['biomarkers']['il6'] or "No",
-             "<b>TNF-α:</b>", data['biomarkers']['tnf_alpha'] or "No"],
-            ["<b>VEGF:</b>", data['biomarkers']['vegf'] or "No",
-             "<b>AMH:</b>", data['biomarkers']['amh'] or "No",
-             "<b>PCR:</b>", data['biomarkers']['crp'] or "No"],
-            ["<b>Imágenes:</b>", data['biomarkers']['imaging'] or "No",
-             "<b>Hallazgos:</b>", data['biomarkers']['imaging_details'] or "No"]
-        ]
-        
-        biomarkers_table = Table(biomarkers_data, colWidths=[50, 40, 50, 40, 50, 40])
-        biomarkers_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
-        ]))
-        elements.append(biomarkers_table)
-        elements.append(Spacer(1, 6))
-        
-        # 7. Examen físico compacto
-        elements.append(Paragraph("EXAMEN FÍSICO", subtitle_style))
-        
-        exam_data = [
-            ["<b>IMC:</b>", data['examination']['bmi'] or "No",
-             "<b>Ex. pélvico:</b>", data['examination']['pelvic_exam'] or "No"],
-            ["<b>Ex. vaginal:</b>", data['examination']['vaginal_exam'] or "No",
-             "<b>Notas:</b>", data['examination']['clinical_notes'] or "No"]
-        ]
-        
-        exam_table = Table(exam_data, colWidths=[50, 40, 60, 100])
-        exam_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
-        ]))
-        elements.append(exam_table)
-        elements.append(Spacer(1, 6))
-        
-        # 8. Bono de atención ambulatoria compacto
-        elements.append(Paragraph("BONO DE ATENCIÓN AMBULATORIA", subtitle_style))
-        
-        bono_data = [
-            ["<b>Paciente:</b>", data['personal']['full_name']],
-            ["<b>RUT:</b>", data['personal']['id_number']],
-            ["<b>Previsión:</b>", data['personal']['insurance']],
-            ["<b>Fecha:</b>", datetime.now().strftime("%d/%m/%Y")],
-            ["<b>Válido hasta:</b>", (datetime.now() + timedelta(days=30)).strftime("%d/%m/%Y")],
-            ["", ""],
-            ["Autoriza atención especializada en endometriosis dentro del período de validez."],
-            ["", ""],
-            ["<b>Firma profesional:</b>", "__________________________"]
-        ]
-        
-        bono_table = Table(bono_data, colWidths=[60, 200])
-        bono_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
-            ('SPAN', (0, 5), (1, 5)),
-            ('SPAN', (0, 6), (1, 6)),
-            ('SPAN', (0, 7), (1, 7)),
-        ]))
-        elements.append(bono_table)
-        
-        # Construir el PDF
-        doc.build(elements)
-        
-        # Preparar la respuesta
         buffer.seek(0)
         response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename=ficha_clinica_{data["personal"]["full_name"].replace(" ", "_")}.pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=ficha_{data["personal"]["full_name"].replace(" ", "_")}.pdf'
         
         return response
         
     except Exception as e:
-        app.logger.error(f"Error generando ficha clínica: {str(e)}")
-        return jsonify({
-            'error': 'Error generando el documento',
-            'details': str(e)
-        }), 500
+        app.logger.error(f"Error generando ficha: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Verificar que exista el modelo
