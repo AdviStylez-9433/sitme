@@ -401,20 +401,22 @@ def generate_clinical_record():
         <b>Recomendaciones:</b><br/>
         """
 
-        # Añadir cada recomendación en una nueva línea
+        # Añadir cada recomendación con indentación
         for recommendation in explanation['recommendations']:
-            results_text += f"• {recommendation}<br/>"
+            results_text += f"&nbsp;&nbsp;&nbsp;&nbsp;• {recommendation}<br/>"  # 4 espacios antes de la viñeta
 
-        # Crear párrafo con estilo que permita formato básico
-        results_paragraph = Paragraph(results_text, style=ParagraphStyle(
+        # Estilo para el párrafo que permita espacios no breakables
+        results_style = ParagraphStyle(
             'Results',
             parent=styles['Normal'],
             fontSize=9,
             leading=12,
             spaceAfter=12,
-            textColor=colors.black
-        ))
+            textColor=colors.black,
+            leftIndent=10  # Indentación adicional para todo el párrafo
+        )
 
+        results_paragraph = Paragraph(results_text, style=results_style)
         elements.append(results_paragraph)
         elements.append(Spacer(1, 24))
         
