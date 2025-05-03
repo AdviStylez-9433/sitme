@@ -50,16 +50,16 @@ def generate_endometriosis_dataset(n_samples=10000):
     symptoms = {}
     for name, (a, b, threshold) in symptom_params.items():
         symptoms[name] = (beta.rvs(a, b, size=n_samples)) > threshold
-    
-    # 6. Diagnóstico (vectorizar completamente)
+        
     base_risk = (
-        0.3 * (pain_level > 6).astype(float) +
-        0.2 * (ca125 > 35).astype(float) +
-        0.15 * symptoms['dysmenorrhea'].astype(float) +
-        0.1 * symptoms['family_history'].astype(float) +
-        0.05 * (menarche_age < 12).astype(float)
+    0.3 * (pain_level > 6).astype(float) +
+    0.2 * (ca125 > 35).astype(float) +
+    0.15 * symptoms['dysmenorrhea'].astype(float) +
+    0.1 * symptoms['family_history'].astype(float) +
+    0.05 * (menarche_age < 12).astype(float)
     )
-    endometriosis = (base_risk + np.random.normal(0, 0.1, n_samples)) > 0.45
+    # Ajustar el umbral para obtener ~40% positivos
+    endometriosis = (base_risk + np.random.normal(0, 0.1, n_samples)) > 0.35
     
     # 7. Crear DataFrame (optimizar usando dict comprehension)
     data = {
