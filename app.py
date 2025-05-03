@@ -13,7 +13,7 @@ import io
 import base64
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Frame, PageTemplate, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Frame, PageTemplate, PageBreak, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
@@ -421,19 +421,43 @@ def generate_clinical_record():
         elements.append(Spacer(1, 24))
         
         # 7. Firmas
-        signature_data = [
-            ["", ""],
-            ["__________________________", "__________________________"],
-            ["Firma Beneficiario", "Firma Profesional/Institución"]
-        ]
-        
-        signature_table = Table(signature_data, colWidths=[210, 210])
-        signature_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ]))
-        elements.append(signature_table)
+        try:
+            # Cargar imagen de firma (ajusta la ruta según tu estructura de archivos)
+            signature_img_path = os.path.join('static', 'signatures', 'firma_profesional.png')
+            firma_profesional = Image(signature_img_path, width=120, height=50)  # Ajusta el tamaño según necesites
+            
+            signature_data = [
+                ["", ""],
+                ["__________________________", firma_profesional],  # Imagen en lugar de línea de firma
+                ["Firma Beneficiario", "Dr. John Doe<br/>Mat. 12345"]  # Agrega información del profesional
+            ]
+            
+            signature_table = Table(signature_data, colWidths=[210, 210])
+            signature_table.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (1, 1), (1, 1), 'MIDDLE'),  # Alineación vertical para la imagen
+                ('LEADING', (1, 2), (1, 2), 12),  # Espaciado para el texto del profesional
+            ]))
+            elements.append(signature_table)
+
+        except Exception as e:
+            app.logger.error(f"No se pudo cargar la firma profesional: {str(e)}")
+            # Fallback a firma de texto si hay error
+            signature_data = [
+                ["", ""],
+                ["__________________________", "__________________________"],
+                ["Firma Beneficiario", "Firma Profesional/Institución"]
+            ]
+            
+            signature_table = Table(signature_data, colWidths=[210, 210])
+            signature_table.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ]))
+            elements.append(signature_table)
         
         # Construir el PDF
         doc.build(elements)
