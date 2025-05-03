@@ -231,6 +231,17 @@ def generate_explanation(input_data, probability):
         'recommendations': recommendations
     }
 
+from flask import request, make_response, jsonify
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from datetime import datetime
+import io
+import re
+import logging
+
 @app.route('/generate_clinical_record', methods=['POST'])
 def generate_clinical_record():
     try:
@@ -383,7 +394,7 @@ def generate_clinical_record():
         
         risk_data = [
             ["<b>Nivel de Riesgo</b>", data['riskTitle']],
-            ["<b>Probabilidad</b>", f"{int(float(data['probability']))*100}%"],
+            ["<b>Probabilidad</b>", f"{int(float(data['probability'])*100)}%"],  # Corregido aquí
             ["<b>Descripción</b>", data['riskDescription']]
         ]
         
