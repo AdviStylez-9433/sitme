@@ -325,16 +325,23 @@ def generate_clinical_record():
         # 4. Totales
         total_data = [
             ["TOTAL A PAGAR:", "$8.220"],
-            ["IVA (19%):", "$1.564"],
+            ["IVA (19%):", "$1.564"], 
             ["TOTAL CON IVA:", "$9.784"]
         ]
-        
-        total_table = Table(total_data, colWidths=[360, 60])
+
+        total_table = Table(total_data, colWidths=[300, 60])  # Ajusté el ancho de la primera columna
         total_table.setStyle(TableStyle([
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),  # Alinea las etiquetas a la derecha
+            ('ALIGN', (1, 0), (1, -1), 'RIGHT'),  # Alinea los valores a la derecha
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Centra verticalmente
+            ('LEFTPADDING', (0, 0), (0, -1), 10),  # Espacio izquierdo para etiquetas
+            ('RIGHTPADDING', (0, 0), (0, -1), 5),  # Espacio derecho para etiquetas
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),  # Espacio inferior
+            ('TOPPADDING', (0, 0), (-1, -1), 3),  # Espacio superior
         ]))
+
         elements.append(total_table)
         elements.append(Spacer(1, 12))
         
@@ -434,17 +441,6 @@ def generate_clinical_record():
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 0), (-1, -1), 9),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ]))
-        elements.append(signature_table)
-
-        # Crear la tabla de firmas
-        signature_table = Table(signature_data, colWidths=[210, 210])
-        signature_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('VALIGN', (1, 1), (1, 1), 'MIDDLE'),
-            ('VALIGN', (1, 2), (1, 2), 'TOP'),  # Alineación superior para el texto multilínea
         ]))
         elements.append(signature_table)
         
