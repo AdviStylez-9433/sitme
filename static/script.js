@@ -324,6 +324,56 @@ function displayResults(data) {
     
     // Desplazarse a los resultados
     resultContainer.scrollIntoView({ behavior: 'smooth' });
+
+    // Añadir sección de explicaciones
+    const explanationSection = `
+        <div class="explanation-section">
+            <h3><i class="fas fa-microscope"></i> Explicación del Modelo</h3>
+            <div class="explanation-tabs">
+                <button class="tab-button active" onclick="openTab(event, 'shap-tab')">SHAP</button>
+                <button class="tab-button" onclick="openTab(event, 'lime-tab')">LIME</button>
+            </div>
+            
+            <div id="shap-tab" class="tab-content" style="display:block">
+                <h4>Contribución de cada factor (SHAP)</h4>
+                <img src="data:image/png;base64,${data.explanation.shap.force_plot}" alt="SHAP Force Plot">
+                <div class="feature-importance">
+                    ${Object.entries(data.explanation.shap.feature_importance)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([feature, value]) => `
+                            <div class="feature">
+                                <span class="feature-name">${feature}:</span>
+                                <span class="feature-value">${value.toFixed(4)}</span>
+                            </div>
+                        `).join('')}
+                </div>
+            </div>
+            
+            <div id="lime-tab" class="tab-content">
+                <h4>Explicación local (LIME)</h4>
+                <img src="data:image/png;base64,${data.explanation.lime.lime_plot}" alt="LIME Explanation">
+                <ul class="lime-features">
+                    ${data.explanation.lime.explanation.map(item => `
+                        <li>${item[0]}: <strong>${item[1].toFixed(3)}</strong></li>
+                    `).join('')}
+                </ul>
+            </div>
+        </div>
+    `;
+    
+    document.querySelector('.result-container').insertAdjacentHTML('beforeend', explanationSection);
+}
+
+// Funciones para pestañas
+function openTab(evt, tabName) {
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(tab => tab.style.display = 'none');
+    
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    
+    document.getElementById(tabName).style.display = 'block';
+    evt.currentTarget.classList.add('active');
 }
 
 // Funciones auxiliares

@@ -8,6 +8,8 @@ from sklearn.metrics import classification_report, roc_auc_score
 import joblib
 import os
 from time import time
+import shap
+from lime.lime_tabular import LimeTabularExplainer
 
 def generate_endometriosis_dataset(n_samples=10000):
     """Genera dataset sintético mejorado de endometriosis con mayor eficiencia"""
@@ -126,7 +128,21 @@ def train_and_save_model():
         cv=StratifiedKFold(n_splits=3, shuffle=True, random_state=42)  # Menos folds para velocidad
     )
     
+    # 6. Generar explicaciones SHAP (post-entrenamiento)
+    print("\n🔍 Generando explicaciones SHAP...")
+    explainer_shap = shap.TreeExplainer(model.base_estimator)
+    shap_values = explainer_shap.shap_values(X_train)
+    
+    # Guardar explainers
+    joblib.dump(explainer_shap, f"{model_dir}/shap_explainer.pkl")
+    
+    # 7. Preparar explainer LIME (se creará en tiempo real en app.py)
+    print("✅ Modelo y explainers guardados")
+    
     calibrated_model.fit(X_train, y_train)
+    
+    # Guardar X_train para usar en LIME
+    joblib.dump(X_train, f"{model_dir}/X_train.pkl")  # <-- Añade esta línea
     
     # 6. Evaluar (con métricas adicionales)
     print("\n🔍 Evaluación del Modelo:")
