@@ -275,7 +275,7 @@ def generate_clinical_record():
         
                 # 0. Encabezado con logo y título
         try:
-            logo_path = os.path.join('static', 'images', 'static/faviconV4.png')  # Ajusta la ruta según tu estructura
+            logo_path = os.path.join('static', 'faviconV4.png')  # Ajusta la ruta según tu estructura
             logo = Image(logo_path, width=40, height=40)
             
             header_table = Table([
