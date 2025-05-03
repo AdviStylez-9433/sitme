@@ -422,42 +422,46 @@ def generate_clinical_record():
         
         # 7. Firmas
         try:
-            # Cargar imagen de firma (ajusta la ruta según tu estructura de archivos)
-            signature_img_path = os.path.join('static', 'signatures', 'firma_profesional.png')
-            firma_profesional = Image(signature_img_path, width=120, height=50)  # Ajusta el tamaño según necesites
+            signature_path = os.path.join('static', 'signatures', 'firma_profesional.png')
             
-            signature_data = [
-                ["", ""],
-                ["__________________________", firma_profesional],  # Imagen en lugar de línea de firma
-                ["Firma Beneficiario", "Dr. John Doe<br/>Mat. 12345"]  # Agrega información del profesional
-            ]
-            
-            signature_table = Table(signature_data, colWidths=[210, 210])
-            signature_table.setStyle(TableStyle([
-                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (1, 1), (1, 1), 'MIDDLE'),  # Alineación vertical para la imagen
-                ('LEADING', (1, 2), (1, 2), 12),  # Espaciado para el texto del profesional
-            ]))
-            elements.append(signature_table)
-
+            if os.path.exists(signature_path):
+                firma_img = Image(signature_path, width=120, height=50)
+                firma_img.hAlign = 'CENTER'
+                
+                # Usar Paragraph para el texto con salto de línea
+                profesional_text = Paragraph("Dr. John Doe<br/>RUT: 12.345.678-9", 
+                                        styles['Normal'])
+                
+                signature_data = [
+                    ["", ""],
+                    ["__________________________", firma_img],
+                    ["Firma Beneficiario", profesional_text]  # Usamos el Paragraph aquí
+                ]
+            else:
+                raise FileNotFoundError("Archivo de firma no encontrado")
+                
         except Exception as e:
-            app.logger.error(f"No se pudo cargar la firma profesional: {str(e)}")
-            # Fallback a firma de texto si hay error
+            print(f"Error al cargar firma: {str(e)} - Usando firma de texto alternativa")
+            # Versión alternativa con Paragraph también
+            profesional_text = Paragraph("Firma Profesional/<br/>Institución", 
+                                    styles['Normal'])
+            
             signature_data = [
                 ["", ""],
                 ["__________________________", "__________________________"],
-                ["Firma Beneficiario", "Firma Profesional/Institución"]
+                ["Firma Beneficiario", profesional_text]
             ]
-            
-            signature_table = Table(signature_data, colWidths=[210, 210])
-            signature_table.setStyle(TableStyle([
-                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ]))
-            elements.append(signature_table)
+
+        # Crear la tabla de firmas
+        signature_table = Table(signature_data, colWidths=[210, 210])
+        signature_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (1, 1), (1, 1), 'MIDDLE'),
+            ('VALIGN', (1, 2), (1, 2), 'TOP'),  # Alineación superior para el texto multilínea
+        ]))
+        elements.append(signature_table)
         
         # Construir el PDF
         doc.build(elements)
