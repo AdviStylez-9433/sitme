@@ -362,7 +362,6 @@ def generate_clinical_record():
         buffer.seek(0)
         response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename=resultados_endometriosis_{form_data["personal"]["id_number"]}.pdf'
         
         return response
         
