@@ -16,6 +16,8 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
+import re
+import logging
 
 # Configuración inicial
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -228,17 +230,6 @@ def generate_explanation(input_data, probability):
         'key_factors': factors,
         'recommendations': recommendations
     }
-    
-from flask import request, make_response, jsonify
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from datetime import datetime
-import io
-import re
-import logging
 
 @app.route('/generate_clinical_record', methods=['POST'])
 def generate_clinical_record():
