@@ -234,7 +234,7 @@ def generate_clinical_record():
     try:
         data = request.get_json()
         
-        # Configuración con dos columnas
+        # Configuración del documento
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter,
                               leftMargin=0.5*inch,
@@ -247,142 +247,140 @@ def generate_clinical_record():
         # Estilos personalizados
         header_style = ParagraphStyle(
             'Header',
-            parent=styles['Heading2'],
+            parent=styles['Heading1'],
+            fontSize=12,
+            alignment=1,  # Centrado
+            spaceAfter=12,
+            fontName='Helvetica-Bold'
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'Subtitle',
+            parent=styles['Normal'],
             fontSize=10,
-            leading=12,
             spaceAfter=6,
             fontName='Helvetica-Bold'
         )
         
-        item_style = ParagraphStyle(
-            'Item',
+        normal_style = ParagraphStyle(
+            'Normal',
             parent=styles['Normal'],
-            fontSize=8,
-            leading=9,
-            spaceAfter=2,
-            leftIndent=0
+            fontSize=9,
+            leading=11,
+            spaceAfter=4
         )
         
-        # Función para crear secciones
-        def create_section(title, items):
-            content = []
-            content.append(Paragraph(title, header_style))
-            for item in items:
-                content.append(Paragraph(item, item_style))
-            content.append(Spacer(1, 12))
-            return content
+        # Contenido del PDF
+        elements = []
         
-        # Preparar contenido para dos columnas
-        col1 = []
-        col2 = []
+        # 1. Encabezado del bono
+        elements.append(Paragraph("BONO DE ATENCIÓN MÉDICA", header_style))
+        elements.append(Paragraph("Evaluación de Endometriosis", subtitle_style))
+        elements.append(Spacer(1, 12))
         
-        # Columna 1
-        # 1. Datos personales
-        personal_items = [
-            f"<b>Nombre:</b> {data['personal']['full_name']}",
-            f"<b>RUT:</b> {data['personal']['id_number']}",
-            f"<b>Edad:</b> {data['personal']['age']} años",
-            f"<b>Previsión:</b> {data['personal']['insurance']}",
-            f"<b>Tipo sangre:</b> {data['personal']['blood_type']}"
-        ]
-        col1.extend(create_section("DATOS PERSONALES", personal_items))
-        
-        # 2. Antecedentes médicos
-        history_items = [
-            f"<b>Cirugías ginecológicas:</b> {'Sí' if data['history']['gynecological_surgery'] else 'No'}",
-            f"<b>Enf. inflamatoria pélvica:</b> {'Sí' if data['history']['pelvic_inflammatory'] else 'No'}",
-            f"<b>Quistes ováricos:</b> {'Sí' if data['history']['ovarian_cysts'] else 'No'}",
-            f"<b>Familiar endometriosis:</b> {'Sí' if data['history']['family_endometriosis'] else 'No'}",
-            f"<b>Familiar autoinmunes:</b> {'Sí' if data['history']['family_autoimmune'] else 'No'}",
-            f"<b>Comorbilidades:</b> {'Sí' if data['history']['comorbidity_autoimmune'] or data['history']['comorbidity_thyroid'] else 'No'}",
-            f"<b>Medicamentos:</b> {data['history']['medications'] or 'Ninguno'}"
-        ]
-        col1.extend(create_section("ANTECEDENTES MÉDICOS", history_items))
-        
-        # 3. Datos menstruales
-        menstrual_items = [
-            f"<b>Menarquia:</b> {data['menstrual']['menarche_age']} años",
-            f"<b>Ciclo:</b> {data['menstrual']['cycle_length']} días",
-            f"<b>Duración:</b> {data['menstrual']['period_duration']} días",
-            f"<b>Última regla:</b> {data['menstrual']['last_period']}",
-            f"<b>Dolor:</b> {data['menstrual']['pain_level']}/10",
-            f"<b>Dolor crónico:</b> {'Sí' if data['menstrual']['pain_chronic'] else 'No'}"
-        ]
-        col1.extend(create_section("DATOS MENSTRUALES", menstrual_items))
-        
-        # Columna 2
-        # 1. Síntomas
-        symptoms_items = [
-            f"<b>Dolor durante relaciones:</b> {'Sí' if data['symptoms']['pain_during_sex'] else 'No'}",
-            f"<b>Síntomas intestinales:</b> {'Sí' if data['symptoms']['bowel_symptoms'] else 'No'}",
-            f"<b>Síntomas urinarios:</b> {'Sí' if data['symptoms']['urinary_symptoms'] else 'No'}",
-            f"<b>Fatiga:</b> {'Sí' if data['symptoms']['fatigue'] else 'No'}",
-            f"<b>Infertilidad:</b> {'Sí' if data['symptoms']['infertility'] else 'No'}",
-            f"<b>Otros síntomas:</b> {data['symptoms']['other_symptoms'] or 'Ninguno'}"
-        ]
-        col2.extend(create_section("SÍNTOMAS", symptoms_items))
-        
-        # 2. Biomarcadores
-        biomarkers_items = [
-            f"<b>CA-125:</b> {data['biomarkers']['ca125'] or 'No medido'}",
-            f"<b>IL-6:</b> {data['biomarkers']['il6'] or 'No medido'}",
-            f"<b>TNF-α:</b> {data['biomarkers']['tnf_alpha'] or 'No medido'}",
-            f"<b>VEGF:</b> {data['biomarkers']['vegf'] or 'No medido'}",
-            f"<b>AMH:</b> {data['biomarkers']['amh'] or 'No medido'}",
-            f"<b>PCR:</b> {data['biomarkers']['crp'] or 'No medido'}"
-        ]
-        col2.extend(create_section("BIOMARCADORES", biomarkers_items))
-        
-        # 3. Examen físico
-        exam_items = [
-            f"<b>IMC:</b> {data['examination']['bmi'] or 'No calculado'}",
-            f"<b>Ex. pélvico:</b> {data['examination']['pelvic_exam'] or 'No realizado'}",
-            f"<b>Ex. vaginal:</b> {data['examination']['vaginal_exam'] or 'No realizado'}",
-            f"<b>Notas clínicas:</b> {data['examination']['clinical_notes'] or 'Ninguna'}"
-        ]
-        col2.extend(create_section("EXAMEN FÍSICO", exam_items))
-        
-        # Bono de atención (ancho completo)
-        bono_items = [
-            "BONO DE ATENCIÓN AMBULATORIA",
-            f"<b>Paciente:</b> {data['personal']['full_name']}",
-            f"<b>RUT:</b> {data['personal']['id_number']}",
-            f"<b>Previsión:</b> {data['personal']['insurance']}",
-            f"<b>Fecha emisión:</b> {datetime.now().strftime('%d/%m/%Y')}",
-            f"<b>Válido hasta:</b> {(datetime.now() + timedelta(days=30)).strftime('%d/%m/%Y')}",
-            "Autoriza atención especializada en endometriosis",
-            "Firma profesional: ________________________"
+        # 2. Información del beneficiario (en tabla)
+        beneficiary_data = [
+            ["<b>N° Bono:</b>", f"END-{datetime.now().strftime('%Y%m%d%H%M')}"],
+            ["<b>Fecha Emisión:</b>", datetime.now().strftime('%d/%m/%Y')],
+            ["<b>RUT Beneficiario:</b>", data['personal']['id_number']],
+            ["<b>Nombre:</b>", data['personal']['full_name']],
+            ["<b>Edad:</b>", f"{data['personal']['age']} años"],
+            ["<b>Previsión:</b>", data['personal']['insurance']],
+            ["<b>Nivel:</b>", "3"]  # Nivel de atención
         ]
         
-        # Organizar en dos columnas
-        frame1 = Frame(doc.leftMargin, doc.bottomMargin + doc.height/2, 
-                      doc.width/2 - 6, doc.height/2 - 20, id='col1')
-        frame2 = Frame(doc.leftMargin + doc.width/2, doc.bottomMargin + doc.height/2, 
-                      doc.width/2 - 6, doc.height/2 - 20, id='col2')
-        frame_bono = Frame(doc.leftMargin, doc.bottomMargin, 
-                         doc.width, doc.height/2 - 20, id='bono')
+        beneficiary_table = Table(beneficiary_data, colWidths=[120, 300])
+        beneficiary_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (0, -1), 0),
+            ('RIGHTPADDING', (0, 0), (0, -1), 0),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(beneficiary_table)
+        elements.append(Spacer(1, 12))
         
-        # Construir el documento
-        doc.addPageTemplates([
-            PageTemplate(id='TwoColumns', frames=[frame1, frame2, frame_bono])
-        ])
+        # 3. Detalle de la prestación (tabla con formato similar al ejemplo)
+        service_data = [
+            # Encabezados
+            ["<b>Código</b>", "<b>Descripción</b>", "<b>Fecha</b>", "<b>Valor</b>", "<b>Bonificación</b>", "<b>A Pagar</b>"],
+            # Datos
+            ["END-001", "Evaluación Endometriosis", datetime.now().strftime('%d/%m/%Y'), "$15.000", "$8.000", "$7.000"]
+        ]
         
-        story = []
-        story.extend(col1)
-        story.extend(col2)
-        story.extend(create_section("", bono_items))
+        service_table = Table(service_data, colWidths=[60, 120, 60, 60, 60, 60])
+        service_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('ALIGN', (2, 0), (-1, -1), 'RIGHT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+        ]))
+        elements.append(service_table)
+        elements.append(Spacer(1, 12))
         
-        doc.build(story)
+        # 4. Totales
+        total_data = [
+            ["<b>TOTAL A PAGAR:</b>", "$7.000"]
+        ]
         
+        total_table = Table(total_data, colWidths=[360, 60])
+        total_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+        ]))
+        elements.append(total_table)
+        elements.append(Spacer(1, 12))
+        
+        # 5. Información del profesional
+        professional_data = [
+            ["<b>Profesional/Institución:</b>", "Centro Médico Endometriosis"],
+            ["<b>RUT:</b>", "76.549.770-1"],
+            ["<b>Médico tratante:</b>", "Dr. Ginecólogo"],
+            ["<b>Fecha atención:</b>", datetime.now().strftime('%d/%m/%Y')]
+        ]
+        
+        professional_table = Table(professional_data, colWidths=[120, 300])
+        professional_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+        elements.append(professional_table)
+        elements.append(Spacer(1, 24))
+        
+        # 6. Firmas
+        signature_data = [
+            ["", ""],
+            ["__________________________", "__________________________"],
+            ["Firma Beneficiario", "Firma Profesional/Institución"]
+        ]
+        
+        signature_table = Table(signature_data, colWidths=[210, 210])
+        signature_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ]))
+        elements.append(signature_table)
+        
+        # Construir el PDF
+        doc.build(elements)
+        
+        # Preparar la respuesta
         buffer.seek(0)
         response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename=ficha_{data["personal"]["full_name"].replace(" ", "_")}.pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=bono_endometriosis_{data["personal"]["full_name"].replace(" ", "_")}.pdf'
         
         return response
         
     except Exception as e:
-        app.logger.error(f"Error generando ficha: {str(e)}")
+        app.logger.error(f"Error generando bono: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
