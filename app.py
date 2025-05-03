@@ -356,7 +356,7 @@ def generate_clinical_record():
         # 6. Resultados de la evaluación de riesgo
         elements.append(Paragraph("RESULTADOS DE EVALUACIÓN DE ENDOMETRIOSIS", subtitle_style))
         elements.append(Spacer(1, 6))
-        
+
         # Hacer predicción para incluir en el PDF
         input_data = {
             'age': int(data['personal']['age']),
@@ -373,16 +373,16 @@ def generate_clinical_record():
             'ca125': float(data['biomarkers']['ca125']) if data['biomarkers']['ca125'] is not None else 20.0,
             'crp': float(data['biomarkers']['crp']) if data['biomarkers']['crp'] is not None else 3.0
         }
-        
+
         input_df = prepare_input_data(input_data)
         proba = model.predict_proba(input_df)[0][1]
         prediction = int(proba > 0.5)
         explanation = generate_explanation(input_df.iloc[0], proba)
-        
+
         # Convertir probabilidad a porcentaje
         probability_percent = round(proba * 100, 1)
-        
-        # Determinar nivel de riesgo
+
+        # Determinar nivel de riesgo y color
         if proba >= 0.7:
             risk_level = "ALTO"
             risk_color = colors.red
@@ -392,25 +392,30 @@ def generate_clinical_record():
         else:
             risk_level = "BAJO"
             risk_color = colors.green
-        
-        # Crear tabla de resultados
-        results_data = [
-            ["Probabilidad de Endometriosis:", f"{probability_percent}%"],
-            ["Nivel de Riesgo:", f"<font color='{risk_color.hexval()}'><b>{risk_level}</b></font>"],
-            ["Factores Clave:", "<br/>".join(explanation['key_factors']) or "No identificados"],
-            ["Recomendaciones:", "<br/>".join(explanation['recommendations'])]
-        ]
-        
-        results_table = Table(results_data, colWidths=[120, 300])
-        results_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (0, -1), 0),
-            ('RIGHTPADDING', (0, 0), (0, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ]))
-        elements.append(results_table)
+
+        # Crear texto formateado para los resultados
+        results_text = f"""
+        <b>Probabilidad de Endometriosis:</b> {probability_percent}%<br/>
+        <b>Nivel de Riesgo:</b> <font color="{risk_color.hexval()}">{risk_level}</font><br/>
+        <b>Factores Clave:</b> {', '.join(explanation['key_factors']) or 'No identificados'}<br/>
+        <b>Recomendaciones:</b><br/>
+        """
+
+        # Añadir cada recomendación en una nueva línea
+        for recommendation in explanation['recommendations']:
+            results_text += f"• {recommendation}<br/>"
+
+        # Crear párrafo con estilo que permita formato básico
+        results_paragraph = Paragraph(results_text, style=ParagraphStyle(
+            'Results',
+            parent=styles['Normal'],
+            fontSize=9,
+            leading=12,
+            spaceAfter=12,
+            textColor=colors.black
+        ))
+
+        elements.append(results_paragraph)
         elements.append(Spacer(1, 24))
         
         # 7. Firmas
