@@ -242,8 +242,8 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
 // Función para mostrar resultados
 function displayResults(data) {
     const resultContainer = document.getElementById('resultContainer');
-    const probabilityPercent = (data.probability * 100).toFixed(1);
-    
+    const probabilityPercent = Math.ceil(data.probability * 100);
+        
     // Configurar el resultado principal
     document.getElementById('riskTitle').textContent = data.riskTitle;
     document.getElementById('riskDescription').textContent = data.riskDescription;
