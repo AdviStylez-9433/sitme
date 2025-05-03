@@ -9,10 +9,6 @@ import joblib
 import os
 from time import time
 
-import shap
-from lime import lime_tabular
-import matplotlib.pyplot as plt
-
 def generate_endometriosis_dataset(n_samples=10000):
     """Genera dataset sintético mejorado de endometriosis con mayor eficiencia"""
     np.random.seed(42)
@@ -132,7 +128,7 @@ def train_and_save_model():
     
     calibrated_model.fit(X_train, y_train)
     
-        # 6. Evaluar (con métricas adicionales)
+    # 6. Evaluar (con métricas adicionales)
     print("\n🔍 Evaluación del Modelo:")
     y_pred = calibrated_model.predict(X_test)
     y_proba = calibrated_model.predict_proba(X_test)[:, 1]
@@ -140,58 +136,13 @@ def train_and_save_model():
     print(classification_report(y_test, y_pred))
     print(f"AUC-ROC: {roc_auc_score(y_test, y_proba):.3f}")
     
-    # === Añadir explicabilidad con SHAP ===
-    print("\nGenerando explicaciones SHAP...")
-    try:
-        # Usar el primer estimador calibrado (hay uno por fold de calibración)
-        base_estimator = calibrated_model.calibrated_classifiers_[0].estimator
-        
-        # Crear el explainer SHAP
-        explainer = shap.TreeExplainer(base_estimator)
-        
-        # Calcular valores SHAP para una muestra de los datos de prueba (por eficiencia)
-        sample_idx = np.random.choice(X_test.index, size=min(100, len(X_test)), replace=False)
-        X_test_sample = X_test.loc[sample_idx]
-        shap_values = explainer.shap_values(X_test_sample)
-        
-        # Guardar gráfico SHAP summary
-        plt.figure()
-        shap.summary_plot(shap_values[1], X_test_sample, show=False)
-        plt.savefig("static/plots/shap_summary.png", bbox_inches='tight')
-        plt.close()
-        
-        print("✅ Explicaciones SHAP generadas correctamente")
-    except Exception as e:
-        print(f"⚠️ Error generando explicaciones SHAP: {str(e)}")
-    
-    # === Añadir explicabilidad con LIME ===
-    print("Generando explicaciones LIME...")
-    try:
-        lime_explainer = lime_tabular.LimeTabularExplainer(
-            X_train.values,
-            feature_names=features,
-            class_names=['No Endometriosis', 'Endometriosis'],
-            verbose=False,
-            mode='classification'
-        )
-        
-        # Guardar el explainer de LIME
-        joblib.dump(lime_explainer, f"{model_dir}/lime_explainer.pkl")
-        print("✅ Explicaciones LIME generadas correctamente")
-    except Exception as e:
-        print(f"⚠️ Error generando explicaciones LIME: {str(e)}")
-    
     # 7. Guardar modelo optimizado
     model_dir = "models"
     os.makedirs(model_dir, exist_ok=True)
     model_path = f"{model_dir}/endometriosis_model_optimized.pkl"
     
-    # Guardar todos los componentes necesarios
-    joblib.dump({
-        'model': calibrated_model,
-        'features': features,
-        'class_names': ['No Endometriosis', 'Endometriosis']
-    }, model_path, compress=3)
+    # Usar compresión para reducir tamaño del archivo
+    joblib.dump(calibrated_model, model_path, compress=3)
     
     print(f"\n✅ Modelo entrenado y guardado en {model_path}")
     print(f"📊 Distribución de clases: {y.mean():.2%} positivos")

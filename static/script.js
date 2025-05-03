@@ -222,49 +222,6 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
             guidelines: getClinicalGuidelines(data.risk_level)
         });
     })
-    // Modificar el then del fetch para incluir la explicación
-.then(data => {
-    if (data.error) {
-        throw new Error(data.error);
-    }
-    
-    // Mostrar resultados
-    displayResults({
-        probability: data.probability,
-        riskLevel: data.risk_level,
-        riskTitle: getRiskTitle(data.risk_level),
-        riskDescription: getRiskDescription(data.risk_level),
-        riskIcon: getRiskIcon(data.risk_level),
-        recommendations: data.recommendations,
-        riskFactors: mapRiskFactors(data.risk_factors || [], formData),
-        formData: formData,
-        guidelines: getClinicalGuidelines(data.risk_level)
-    });
-    
-    // Obtener explicación detallada
-    return fetch('https://sitme.onrender.com/api/explain', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            // Datos para el modelo predictivo
-            age: formData.personal.age,
-            menarche_age: formData.menstrual.menarche_age,
-            // ... (otros campos igual que en /predict)
-        })
-    });
-})
-.then(response => response.json())
-.then(explanation => {
-    // Añadir botón para ver explicación
-    const explainButton = document.createElement('button');
-    explainButton.className = 'explain-button';
-    explainButton.innerHTML = '<i class="fas fa-brain"></i> Ver explicación detallada';
-    explainButton.addEventListener('click', () => showExplanation(explanation));
-    
-    document.getElementById('resultContainer').appendChild(explainButton);
-})
     .catch(error => {
         console.error('Error:', error);
         showError(error.message);
@@ -367,62 +324,6 @@ function displayResults(data) {
     
     // Desplazarse a los resultados
     resultContainer.scrollIntoView({ behavior: 'smooth' });
-}
-
-// Añadir después de la función displayResults
-
-function showExplanation(data) {
-    const explanationModal = document.createElement('div');
-    explanationModal.className = 'explanation-modal';
-    explanationModal.innerHTML = `
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>Explicación detallada de la predicción</h3>
-            <div class="explanation-tabs">
-                <button class="tab-button active" data-tab="shap">Explicación SHAP</button>
-                <button class="tab-button" data-tab="lime">Explicación LIME</button>
-            </div>
-            <div class="tab-content active" id="shap-tab">
-                <h4>Contribución de cada característica (SHAP)</h4>
-                <img src="data:image/png;base64,${data.shap_force_plot}" alt="SHAP force plot">
-                <div class="shap-values">
-                    ${data.shap_values.feature_names.map((name, i) => `
-                        <div class="shap-value">
-                            <span class="feature-name">${name}</span>
-                            <span class="feature-value" style="color: ${data.shap_values.values[i] > 0 ? '#d32f2f' : '#388e3c'}">
-                                ${data.shap_values.values[i].toFixed(4)}
-                            </span>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-            <div class="tab-content" id="lime-tab">
-                <h4>Explicación local (LIME)</h4>
-                <img src="data:image/png;base64,${data.lime_explanation}" alt="LIME explanation">
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(explanationModal);
-    
-    // Manejar cierre del modal
-    explanationModal.querySelector('.close').addEventListener('click', () => {
-        explanationModal.remove();
-    });
-    
-    // Manejar pestañas
-    const tabs = explanationModal.querySelectorAll('.tab-button');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
-        });
-    });
 }
 
 // Funciones auxiliares

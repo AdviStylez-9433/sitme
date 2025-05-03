@@ -12,9 +12,6 @@ import matplotlib.pyplot as plt
 import io
 import base64
 
-import shap
-from lime import lime_tabular
-
 # Configuración inicial
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
@@ -34,11 +31,7 @@ if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(f"Modelo no encontrado en {MODEL_PATH}. Ejecuta primero train_model.py")
 
 model = joblib.load(MODEL_PATH)
-FEATURES = model.feature_names_in_  # O usa la lista de features directamente si no está disponible
-
-# Cargar explainer LIME
-LIME_EXPLAINER_PATH = 'models/lime_explainer.pkl'
-lime_explainer = joblib.load(LIME_EXPLAINER_PATH) if os.path.exists(LIME_EXPLAINER_PATH) else None
+FEATURES = model.feature_names_in_
 
 class ModelMonitor:
     def __init__(self):
@@ -267,69 +260,6 @@ def model_details():
         'calibration_method': 'isotonic',
         'classes': model.classes_.tolist()
     })
-    
-@app.route('/api/explain', methods=['POST'])
-def explain_prediction():
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'Datos no proporcionados'}), 400
-        
-        input_df = prepare_input_data(data)
-        
-        # Explicación SHAP
-        base_estimator = model.calibrated_classifiers_[0].estimator
-        explainer = shap.TreeExplainer(base_estimator)
-        shap_values = explainer.shap_values(input_df)
-        
-        # Gráfico SHAP force plot
-        plt.figure()
-        shap.force_plot(
-            explainer.expected_value[1],
-            shap_values[1][0],
-            input_df.iloc[0],
-            feature_names=FEATURES,
-            show=False,
-            matplotlib=True
-        )
-        img = io.BytesIO()
-        plt.savefig(img, format='png', bbox_inches='tight')
-        img.seek(0)
-        plt.close()
-        shap_force_plot = base64.b64encode(img.getvalue()).decode('utf-8')
-        
-        # Explicación LIME
-        lime_exp = lime_explainer.explain_instance(
-            input_df.values[0],
-            model.predict_proba,
-            num_features=min(10, len(FEATURES)),
-            top_labels=1
-        )
-        
-        # Gráfico LIME
-        lime_fig = lime_exp.as_pyplot_figure()
-        img = io.BytesIO()
-        lime_fig.savefig(img, format='png', bbox_inches='tight')
-        img.seek(0)
-        plt.close()
-        lime_plot = base64.b64encode(img.getvalue()).decode('utf-8')
-        
-        return jsonify({
-            'shap_force_plot': shap_force_plot,
-            'lime_explanation': lime_plot,
-            'shap_values': {
-                'feature_names': FEATURES,
-                'values': shap_values[1][0].tolist(),
-                'base_value': float(explainer.expected_value[1])
-            }
-        })
-    
-    except Exception as e:
-        app.logger.error(f"Error generando explicación: {str(e)}")
-        return jsonify({
-            'error': 'Error generando explicación',
-            'details': str(e)
-        }), 500
 
 if __name__ == '__main__':
     # Verificar que exista el modelo
