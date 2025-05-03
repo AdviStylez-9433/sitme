@@ -327,31 +327,21 @@ function displayResults(data) {
     // Desplazarse a los resultados
     resultContainer.scrollIntoView({ behavior: 'smooth' });
 
-    // Añadir botón de PDF SOLO SI NO EXISTE
-    if (!pdfButtonAdded) {
-        const downloadBtn = document.createElement('button');
-        downloadBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar Ficha Clínica';
-        downloadBtn.onclick = () => {
-            // Deshabilitar botón durante la generación
-            downloadBtn.disabled = true;
-            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
-            
-            downloadClinicalRecord(data)
-                .finally(() => {
-                    downloadBtn.disabled = false;
-                    downloadBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar Ficha Clínica';
-                });
-        };
-        downloadBtn.style.marginTop = '20px';
-        
-        // Añadir contenedor específico para el botón
-        const btnContainer = document.createElement('div');
-        btnContainer.id = 'pdf-btn-container';
-        btnContainer.appendChild(downloadBtn);
-        document.querySelector('.recommendations').appendChild(btnContainer);
-        
-        pdfButtonAdded = true;
-    }
+    // Botón para generar PDF - MODIFICAR ESTA PARTE
+    const downloadBtn = document.createElement('button');
+    downloadBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar Ficha Clínica';
+    downloadBtn.onclick = () => downloadClinicalRecord(data); // Pasar el objeto data completo
+    downloadBtn.style.marginTop = '20px';
+    
+    // Usar un contenedor específico para evitar duplicados
+    const btnContainer = document.getElementById('pdf-btn-container') || document.createElement('div');
+    btnContainer.id = 'pdf-btn-container';
+    btnContainer.innerHTML = ''; // Limpiar contenido previo
+    btnContainer.appendChild(downloadBtn);
+    
+    // Añadir al final de las recomendaciones
+    recommendations = document.querySelector('.recommendations');
+    recommendations.appendChild(btnContainer);
 }
 
 // Funciones auxiliares
@@ -527,14 +517,37 @@ document.getElementById('pain_level').addEventListener('input', function() {
 // Inicializar el control deslizante
 document.getElementById('pain_level').dispatchEvent(new Event('input'));
 
-async function downloadClinicalRecord(formData) {
+async function downloadClinicalRecord(resultData) {
     try {
+        const button = document.createElement('button');
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-file-pdf fa-spin"></i> Generando PDF...';
+        document.querySelector('.recommendations').appendChild(button);
+
+        // Estructurar los datos correctamente
+        const pdfData = {
+            personal: {
+                full_name: resultData.formData.personal.full_name,
+                id_number: resultData.formData.personal.id_number,
+                birth_date: resultData.formData.personal.birth_date,
+                age: resultData.formData.personal.age,
+                insurance: resultData.formData.personal.insurance
+            },
+            riskTitle: resultData.riskTitle,
+            probability: resultData.probability,
+            riskDescription: resultData.riskDescription,
+            riskFactors: resultData.riskFactors,
+            recommendations: Array.isArray(resultData.recommendations) 
+                ? resultData.recommendations 
+                : resultData.recommendation.split('\n').filter(r => r.trim() !== '')
+        };
+
         const response = await fetch('https://sitme.onrender.com/generate_clinical_record', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify(pdfData)
         });
 
         if (!response.ok) {
@@ -546,7 +559,7 @@ async function downloadClinicalRecord(formData) {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `ficha_clinica_${formData.personal.full_name.replace(/ /g, '_')}.pdf`;
+        a.download = `ficha_clinica_${pdfData.personal.full_name.replace(/ /g, '_')}.pdf`;
         document.body.appendChild(a);
         a.click();
         
@@ -558,6 +571,9 @@ async function downloadClinicalRecord(formData) {
         
     } catch (error) {
         showError('Error al generar ficha clínica: ' + error.message);
-        throw error;
+        console.error('Error detallado:', error);
+    } finally {
+        const buttons = document.querySelectorAll('.recommendations button');
+        buttons.forEach(btn => btn.remove());
     }
 }
