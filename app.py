@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, make_response
 from flask_cors import CORS
 import pandas as pd
 import joblib
@@ -11,6 +11,11 @@ from sklearn.calibration import calibration_curve
 import matplotlib.pyplot as plt
 import io
 import base64
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
 
 # Configuración inicial
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -223,43 +228,156 @@ def generate_explanation(input_data, probability):
         'key_factors': factors,
         'recommendations': recommendations
     }
-
-@app.route('/api/status')
-def service_status():
-    """Endpoint de monitoreo del servicio"""
-    uptime = time.time() - SERVICE_START_TIME
-    hours, rem = divmod(uptime, 3600)
-    minutes, seconds = divmod(rem, 60)
     
-    return jsonify({
-        'status': 'operational',
-        'uptime': f"{int(hours)}h {int(minutes)}m {int(seconds)}s",
-        'requests_processed': REQUEST_COUNTER,
-        'performance': {
-            'cpu_usage': f"{np.mean(PERFORMANCE_METRICS['cpu']):.1f}%",
-            'memory_usage': f"{np.mean(PERFORMANCE_METRICS['memory']):.1f} MB",
-            'avg_response_time': f"{np.mean(PERFORMANCE_METRICS['response_times']):.1f} ms"
-        },
-        'model': {
-            'version': 'v4.1',
-            'last_trained': datetime.fromtimestamp(
-                os.path.getmtime(MODEL_PATH)).isoformat(),
-            'calibration_plot': monitor.get_calibration_plot()
-        }
-    })
-
-@app.route('/api/model_details')
-def model_details():
-    """Endpoint con detalles técnicos del modelo"""
-    return jsonify({
-        'features': FEATURES.tolist(),
-        'feature_importance': dict(zip(
-            FEATURES,
-            model.calibrated_classifiers_[0].estimator.feature_importances_.tolist()
-        )),
-        'calibration_method': 'isotonic',
-        'classes': model.classes_.tolist()
-    })
+@app.route('/generate_clinical_record', methods=['POST'])
+def generate_clinical_record():
+    try:
+        data = request.get_json()
+        
+        # Crear buffer para el PDF
+        buffer = io.BytesIO()
+        
+        # Configurar documento
+        doc = SimpleDocTemplate(buffer, pagesize=letter,
+                              rightMargin=72, leftMargin=72,
+                              topMargin=72, bottomMargin=72)
+        
+        styles = getSampleStyleSheet()
+        
+        # Estilos personalizados
+        header_style = ParagraphStyle(
+            'Header',
+            parent=styles['Heading1'],
+            fontSize=14,
+            alignment=1,
+            spaceAfter=12,
+            textColor=colors.HexColor('#333333')
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'Subtitle',
+            parent=styles['Normal'],
+            fontSize=10,
+            alignment=1,
+            spaceAfter=24,
+            textColor=colors.HexColor('#666666')
+        )
+        
+        section_style = ParagraphStyle(
+            'Section',
+            parent=styles['Heading2'],
+            fontSize=12,
+            spaceBefore=12,
+            spaceAfter=6,
+            textColor=colors.HexColor('#5e35b1'))
+        
+        # Contenido del PDF
+        elements = []
+        
+        # Encabezado
+        elements.append(Paragraph("COMPROBANTE DE ATENCIÓN MÉDICA", header_style))
+        elements.append(Paragraph("SISTEMA INTEGRAL DE TAMIZAJE PARA ENDOMETRIOSIS", subtitle_style))
+        
+        # Línea divisoria
+        elements.append(Spacer(1, 0.1*inch))
+        elements.append(Table([[""]], colWidths=[7*inch], style=[
+            ('LINEABOVE', (0,0), (-1,-1), 1, colors.HexColor('#5e35b1'))
+        ]))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Datos del paciente
+        patient_data = [
+            ["Nombre", data['personal']['full_name']],
+            ["RUT", data['personal']['id_number']],
+            ["Fecha Nac.", data['personal']['birth_date']],
+            ["Edad", f"{data['personal']['age']} años"],
+            ["Previsión", data['personal']['insurance']],
+            ["Médico Tratante", "ESPECIALISTA EN GINECOLOGÍA"]
+        ]
+        
+        elements.append(Paragraph("DATOS DEL PACIENTE", section_style))
+        elements.append(Table(patient_data, colWidths=[2*inch, 5*inch], style=[
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('ALIGN', (0,0), (0,-1), 'LEFT'),
+            ('TEXTCOLOR', (0,0), (0,-1), colors.HexColor('#666666')),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4)
+        ]))
+        
+        # Resultados de evaluación
+        elements.append(Spacer(1, 0.2*inch))
+        elements.append(Paragraph("RESULTADOS DE EVALUACIÓN", section_style))
+        
+        risk_data = [
+            ["Nivel de Riesgo", data['riskTitle']],
+            ["Probabilidad", f"{int(data['probability']*100)}%"],
+            ["Descripción", data['riskDescription']]
+        ]
+        
+        elements.append(Table(risk_data, colWidths=[2*inch, 5*inch], style=[
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('ALIGN', (0,0), (0,-1), 'LEFT'),
+            ('TEXTCOLOR', (0,0), (0,-1), colors.HexColor('#666666')),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4)
+        ]))
+        
+        # Factores de riesgo
+        elements.append(Spacer(1, 0.2*inch))
+        elements.append(Paragraph("FACTORES DE RIESGO IDENTIFICADOS", section_style))
+        
+        risk_factors = [[factor] for factor in data['riskFactors']]
+        elements.append(Table(risk_factors, colWidths=[7*inch], style=[
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+            ('LEFTPADDING', (0,0), (-1,-1), 6),
+            ('BULLETCHAR', (0,0), (-1,-1), '•')
+        ]))
+        
+        # Recomendaciones
+        elements.append(Spacer(1, 0.2*inch))
+        elements.append(Paragraph("RECOMENDACIONES CLÍNICAS", section_style))
+        
+        recommendations = [[rec] for rec in data['recommendations']]
+        elements.append(Table(recommendations, colWidths=[7*inch], style=[
+            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+            ('LEFTPADDING', (0,0), (-1,-1), 6),
+            ('BULLETCHAR', (0,0), (-1,-1), '•')
+        ]))
+        
+        # Pie de página
+        elements.append(Spacer(1, 0.4*inch))
+        elements.append(Table([[""]], colWidths=[7*inch], style=[
+            ('LINEABOVE', (0,0), (-1,-1), 0.5, colors.HexColor('#CCCCCC'))
+        ]))
+        
+        footer_text = f"Documento generado automáticamente el {datetime.now().strftime('%d-%m-%Y %H:%M')} - Sistema Integral de Tamizaje para Endometriosis"
+        elements.append(Paragraph(footer_text, ParagraphStyle(
+            'Footer',
+            parent=styles['Normal'],
+            fontSize=8,
+            alignment=1,
+            textColor=colors.HexColor('#999999'))
+        ))
+        
+        # Generar PDF
+        doc.build(elements)
+        
+        # Preparar respuesta
+        buffer.seek(0)
+        response = make_response(buffer.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=ficha_clinica_{data["personal"]["full_name"].replace(" ", "_")}.pdf'
+        
+        return response
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Verificar que exista el modelo
