@@ -324,6 +324,17 @@ function displayResults(data) {
     
     // Desplazarse a los resultados
     resultContainer.scrollIntoView({ behavior: 'smooth' });
+
+    // Añadir botón de descarga de ficha clínica
+    const downloadButton = document.createElement('button');
+    downloadButton.className = 'download-button';
+    downloadButton.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar Ficha Clínica y Bono';
+    downloadButton.onclick = () => downloadClinicalRecord(data.formData);
+
+    const recommendationsSection = document.querySelector('.recommendations');
+    if (!document.querySelector('.download-button')) {
+        recommendationsSection.appendChild(downloadButton);
+    }
 }
 
 // Funciones auxiliares
@@ -500,10 +511,9 @@ document.getElementById('pain_level').addEventListener('input', function() {
 document.getElementById('pain_level').dispatchEvent(new Event('input'));
 
 function downloadClinicalRecord(formData) {
-    const button = document.createElement('button');
+    const button = document.querySelector('.download-button') || document.createElement('button');
     button.disabled = true;
-    button.innerHTML = '<i class="fas fa-file-pdf fa-spin"></i> Generando Ficha Clínica...';
-    document.querySelector('.recommendations').appendChild(button);
+    button.innerHTML = '<i class="fas fa-file-pdf fa-spin"></i> Generando documento...';
     
     fetch('https://sitme.onrender.com/generate_clinical_record', {
         method: 'POST',
@@ -513,7 +523,7 @@ function downloadClinicalRecord(formData) {
         body: JSON.stringify(formData)
     })
     .then(response => {
-        if (!response.ok) throw new Error('Error al generar ficha clínica');
+        if (!response.ok) throw new Error('Error al generar el documento');
         return response.blob();
     })
     .then(blob => {
@@ -526,10 +536,10 @@ function downloadClinicalRecord(formData) {
         window.URL.revokeObjectURL(url);
     })
     .catch(error => {
-        showError('Error al generar ficha clínica: ' + error.message);
+        showError('Error al generar el documento: ' + error.message);
     })
     .finally(() => {
         button.disabled = false;
-        button.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar Ficha Clínica';
+        button.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar Ficha Clínica y Bono';
     });
 }
