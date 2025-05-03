@@ -239,6 +239,8 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
     });
 });
 
+let pdfButtonAdded = false;
+
 // Función para mostrar resultados
 function displayResults(data) {
     const resultContainer = document.getElementById('resultContainer');
@@ -325,11 +327,31 @@ function displayResults(data) {
     // Desplazarse a los resultados
     resultContainer.scrollIntoView({ behavior: 'smooth' });
 
-    const downloadBtn = document.createElement('button');
-    downloadBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar Ficha Clínica';
-    downloadBtn.onclick = () => downloadClinicalRecord(data);
-    downloadBtn.style.marginTop = '20px';
-    document.querySelector('.recommendations').appendChild(downloadBtn);
+    // Añadir botón de PDF SOLO SI NO EXISTE
+    if (!pdfButtonAdded) {
+        const downloadBtn = document.createElement('button');
+        downloadBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar Ficha Clínica';
+        downloadBtn.onclick = () => {
+            // Deshabilitar botón durante la generación
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+            
+            downloadClinicalRecord(data)
+                .finally(() => {
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar Ficha Clínica';
+                });
+        };
+        downloadBtn.style.marginTop = '20px';
+        
+        // Añadir contenedor específico para el botón
+        const btnContainer = document.createElement('div');
+        btnContainer.id = 'pdf-btn-container';
+        btnContainer.appendChild(downloadBtn);
+        document.querySelector('.recommendations').appendChild(btnContainer);
+        
+        pdfButtonAdded = true;
+    }
 }
 
 // Funciones auxiliares
@@ -505,37 +527,37 @@ document.getElementById('pain_level').addEventListener('input', function() {
 // Inicializar el control deslizante
 document.getElementById('pain_level').dispatchEvent(new Event('input'));
 
-function downloadClinicalRecord(formData) {
-    const button = document.createElement('button');
-    button.disabled = true;
-    button.innerHTML = '<i class="fas fa-file-pdf fa-spin"></i> Generando Ficha Clínica...';
-    document.querySelector('.recommendations').appendChild(button);
-    
-    fetch('https://sitme.onrender.com/generate_clinical_record', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Error al generar ficha clínica');
-        return response.blob();
-    })
-    .then(blob => {
+async function downloadClinicalRecord(formData) {
+    try {
+        const response = await fetch('https://sitme.onrender.com/generate_clinical_record', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error al generar ficha clínica');
+        }
+
+        const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `ficha_clinica_${formData.personal.full_name.replace(' ', '_')}.pdf`;
+        a.download = `ficha_clinica_${formData.personal.full_name.replace(/ /g, '_')}.pdf`;
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
-    })
-    .catch(error => {
+        
+        // Limpieza
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 100);
+        
+    } catch (error) {
         showError('Error al generar ficha clínica: ' + error.message);
-    })
-    .finally(() => {
-        button.disabled = false;
-        button.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar Ficha Clínica';
-    });
+        throw error;
+    }
 }
