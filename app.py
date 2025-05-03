@@ -13,7 +13,7 @@ import io
 import base64
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Frame, PageTemplate
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Frame, PageTemplate, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
@@ -234,6 +234,10 @@ def generate_clinical_record():
     try:
         data = request.get_json()
         
+        # Extraer datos de la respuesta de predicción
+        prediction_data = data.get('prediction_results', {})
+        form_data = data.get('form_data', {})
+        
         # Configuración del documento
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter,
@@ -249,17 +253,18 @@ def generate_clinical_record():
             'Header',
             parent=styles['Heading1'],
             fontSize=12,
-            alignment=1,  # Centrado
+            alignment=1,
             spaceAfter=12,
             fontName='Helvetica-Bold'
         )
         
-        subtitle_style = ParagraphStyle(
-            'Subtitle',
-            parent=styles['Normal'],
+        section_style = ParagraphStyle(
+            'Section',
+            parent=styles['Heading2'],
             fontSize=10,
             spaceAfter=6,
-            fontName='Helvetica-Bold'
+            fontName='Helvetica-Bold',
+            underline=1
         )
         
         normal_style = ParagraphStyle(
@@ -273,100 +278,82 @@ def generate_clinical_record():
         # Contenido del PDF
         elements = []
         
-        # 1. Encabezado del bono
+        # --- PRIMERA PÁGINA (BONO) ---
         elements.append(Paragraph("BONO DE ATENCIÓN MÉDICA", header_style))
-        elements.append(Paragraph("Evaluación de Endometriosis", subtitle_style))
+        elements.append(Paragraph("Evaluación de Endometriosis", section_style))
         elements.append(Spacer(1, 12))
         
-        # 2. Información del beneficiario (en tabla)
-        beneficiary_data = [
-            ["<b>N° Bono:</b>", f"END-{datetime.now().strftime('%Y%m%d%H%M')}"],
-            ["<b>Fecha Emisión:</b>", datetime.now().strftime('%d/%m/%Y')],
-            ["<b>RUT Beneficiario:</b>", data['personal']['id_number']],
-            ["<b>Nombre:</b>", data['personal']['full_name']],
-            ["<b>Edad:</b>", f"{data['personal']['age']} años"],
-            ["<b>Previsión:</b>", data['personal']['insurance']],
-            ["<b>Nivel:</b>", "3"]  # Nivel de atención
+        # Información del paciente
+        patient_data = [
+            ["N° Bono:", f"END-{datetime.now().strftime('%Y%m%d%H%M')}"],
+            ["Fecha Emisión:", datetime.now().strftime('%d/%m/%Y')],
+            ["Nombre:", form_data['personal']['full_name']],
+            ["RUT:", form_data['personal']['id_number']],
+            ["Edad:", f"{form_data['personal']['age']} años"],
+            ["Previsión:", form_data['personal']['insurance']]
         ]
         
-        beneficiary_table = Table(beneficiary_data, colWidths=[120, 300])
-        beneficiary_table.setStyle(TableStyle([
+        patient_table = Table(patient_data, colWidths=[120, 300])
+        patient_table.setStyle(TableStyle([
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 0), (-1, -1), 9),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (0, -1), 0),
-            ('RIGHTPADDING', (0, 0), (0, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ]))
-        elements.append(beneficiary_table)
+        elements.append(patient_table)
         elements.append(Spacer(1, 12))
         
-        # 3. Detalle de la prestación (tabla con formato similar al ejemplo)
+        # Detalle de la prestación
         service_data = [
-            # Encabezados
-            ["<b>Código</b>", "<b>Descripción</b>", "<b>Fecha</b>", "<b>Valor</b>", "<b>Bonificación</b>", "<b>A Pagar</b>"],
-            # Datos
-            ["END-001", "Evaluación Endometriosis", datetime.now().strftime('%d/%m/%Y'), "$15.000", "$8.000", "$7.000"]
+            ["Código", "Descripción", "Valor", "Bonificación", "Copago"],
+            ["END-001", "Evaluación Endometriosis", "$15.000", "$7.000", "$8.000"]
         ]
         
-        service_table = Table(service_data, colWidths=[60, 120, 60, 60, 60, 60])
+        service_table = Table(service_data, colWidths=[60, 180, 60, 60, 60])
         service_table.setStyle(TableStyle([
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 0), (-1, -1), 8),
             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
             ('ALIGN', (2, 0), (-1, -1), 'RIGHT'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
         ]))
         elements.append(service_table)
         elements.append(Spacer(1, 12))
         
-        # 4. Totales
-        total_data = [
-            ["<b>TOTAL A PAGAR:</b>", "$7.000"]
-        ]
-        
-        total_table = Table(total_data, colWidths=[360, 60])
-        total_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-        ]))
-        elements.append(total_table)
-        elements.append(Spacer(1, 12))
-        
-        # 5. Información del profesional
-        professional_data = [
-            ["<b>Profesional/Institución:</b>", "Centro Médico Endometriosis"],
-            ["<b>RUT:</b>", "76.549.770-1"],
-            ["<b>Médico tratante:</b>", "Dr. Ginecólogo"],
-            ["<b>Fecha atención:</b>", datetime.now().strftime('%d/%m/%Y')]
-        ]
-        
-        professional_table = Table(professional_data, colWidths=[120, 300])
-        professional_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ]))
-        elements.append(professional_table)
-        elements.append(Spacer(1, 24))
-        
-        # 6. Firmas
+        # Firmas
         signature_data = [
             ["", ""],
             ["__________________________", "__________________________"],
-            ["Firma Beneficiario", "Firma Profesional/Institución"]
+            ["Firma Paciente", "Firma Profesional"]
         ]
         
         signature_table = Table(signature_data, colWidths=[210, 210])
         signature_table.setStyle(TableStyle([
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ]))
         elements.append(signature_table)
+        
+        # --- SEGUNDA PÁGINA (RESULTADOS) ---
+        elements.append(PageBreak())
+        elements.append(Paragraph("RESULTADOS DE EVALUACIÓN", header_style))
+        elements.append(Spacer(1, 12))
+        
+        # 1. Resumen de riesgo
+        risk_percentage = int(float(prediction_data['probability']) * 100)
+        elements.append(Paragraph(f"Riesgo estimado: {risk_percentage}%", section_style))
+        elements.append(Paragraph(f"Nivel de riesgo: {prediction_data['risk_level'].capitalize()}", normal_style))
+        elements.append(Spacer(1, 8))
+        
+        # 2. Factores clave
+        elements.append(Paragraph("FACTORES CLAVE IDENTIFICADOS", section_style))
+        for factor in prediction_data['key_factors']:
+            elements.append(Paragraph(f"• {factor}", normal_style))
+        elements.append(Spacer(1, 8))
+        
+        # 3. Recomendaciones
+        elements.append(Paragraph("RECOMENDACIONES", section_style))
+        for recommendation in prediction_data['recommendations']:
+            elements.append(Paragraph(f"• {recommendation}", normal_style))
         
         # Construir el PDF
         doc.build(elements)
@@ -375,14 +362,13 @@ def generate_clinical_record():
         buffer.seek(0)
         response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename=bono_endometriosis_{data["personal"]["full_name"].replace(" ", "_")}.pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=resultados_endometriosis_{form_data["personal"]["id_number"]}.pdf'
         
         return response
         
     except Exception as e:
-        app.logger.error(f"Error generando bono: {str(e)}")
+        app.logger.error(f"Error generando documento: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
 if __name__ == '__main__':
     # Verificar que exista el modelo
     if not os.path.exists(MODEL_PATH):
