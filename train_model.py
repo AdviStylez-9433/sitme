@@ -196,26 +196,6 @@ def train_and_save_model():
     print(f"\n✅ Modelo entrenado y guardado en {model_path}")
     print(f"📊 Distribución de clases: {y.mean():.2%} positivos")
     print(f"⏱ Tiempo total de ejecución: {time() - start_time:.2f} segundos")
-    
-    # 6. Evaluar (con métricas adicionales)
-    print("\n🔍 Evaluación del Modelo:")
-    y_pred = calibrated_model.predict(X_test)
-    y_proba = calibrated_model.predict_proba(X_test)[:, 1]
-    
-    print(classification_report(y_test, y_pred))
-    print(f"AUC-ROC: {roc_auc_score(y_test, y_proba):.3f}")
-    
-    # 7. Guardar modelo optimizado
-    model_dir = "models"
-    os.makedirs(model_dir, exist_ok=True)
-    model_path = f"{model_dir}/endometriosis_model_optimized.pkl"
-    
-    # Usar compresión para reducir tamaño del archivo
-    joblib.dump(calibrated_model, model_path, compress=3)
-    
-    print(f"\n✅ Modelo entrenado y guardado en {model_path}")
-    print(f"📊 Distribución de clases: {y.mean():.2%} positivos")
-    print(f"⏱ Tiempo total de ejecución: {time() - start_time:.2f} segundos")
 
 if __name__ == "__main__":
     train_and_save_model()

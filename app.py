@@ -33,10 +33,8 @@ MODEL_PATH = 'models/endometriosis_model_optimized.pkl'
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(f"Modelo no encontrado en {MODEL_PATH}. Ejecuta primero train_model.py")
 
-model_data = joblib.load(MODEL_PATH)
-model = model_data['model']
-shap_explainer = model_data['shap_explainer']
-FEATURES = model_data['features']
+model = joblib.load(MODEL_PATH)
+FEATURES = model.feature_names_in_  # O usa la lista de features directamente si no está disponible
 
 # Cargar explainer LIME
 LIME_EXPLAINER_PATH = 'models/lime_explainer.pkl'
