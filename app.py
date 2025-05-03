@@ -353,7 +353,67 @@ def generate_clinical_record():
         elements.append(professional_table)
         elements.append(Spacer(1, 24))
         
-        # 6. Firmas
+        # 6. Resultados de la evaluación de riesgo
+        elements.append(Paragraph("RESULTADOS DE EVALUACIÓN DE ENDOMETRIOSIS", subtitle_style))
+        elements.append(Spacer(1, 6))
+        
+        # Hacer predicción para incluir en el PDF
+        input_data = {
+            'age': int(data['personal']['age']),
+            'menarche_age': int(data['menstrual']['menarche_age']),
+            'cycle_length': int(data['menstrual']['cycle_length']),
+            'period_duration': int(data['menstrual']['period_duration']),
+            'pain_level': int(data['menstrual']['pain_level']),
+            'pain_during_sex': 1 if data['symptoms']['pain_during_sex'] else 0,
+            'family_history': 1 if data['history']['family_endometriosis'] else 0,
+            'bowel_symptoms': 1 if data['symptoms']['bowel_symptoms'] else 0,
+            'urinary_symptoms': 1 if data['symptoms']['urinary_symptoms'] else 0,
+            'fatigue': 1 if data['symptoms']['fatigue'] else 0,
+            'infertility': 1 if data['symptoms']['infertility'] else 0,
+            'ca125': float(data['biomarkers']['ca125']) if data['biomarkers']['ca125'] is not None else 20.0,
+            'crp': float(data['biomarkers']['crp']) if data['biomarkers']['crp'] is not None else 3.0
+        }
+        
+        input_df = prepare_input_data(input_data)
+        proba = model.predict_proba(input_df)[0][1]
+        prediction = int(proba > 0.5)
+        explanation = generate_explanation(input_df.iloc[0], proba)
+        
+        # Convertir probabilidad a porcentaje
+        probability_percent = round(proba * 100, 1)
+        
+        # Determinar nivel de riesgo
+        if proba >= 0.7:
+            risk_level = "ALTO"
+            risk_color = colors.red
+        elif proba >= 0.4:
+            risk_level = "MODERADO"
+            risk_color = colors.orange
+        else:
+            risk_level = "BAJO"
+            risk_color = colors.green
+        
+        # Crear tabla de resultados
+        results_data = [
+            ["Probabilidad de Endometriosis:", f"{probability_percent}%"],
+            ["Nivel de Riesgo:", f"<font color='{risk_color.hexval()}'><b>{risk_level}</b></font>"],
+            ["Factores Clave:", "<br/>".join(explanation['key_factors']) or "No identificados"],
+            ["Recomendaciones:", "<br/>".join(explanation['recommendations'])]
+        ]
+        
+        results_table = Table(results_data, colWidths=[120, 300])
+        results_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (0, -1), 0),
+            ('RIGHTPADDING', (0, 0), (0, -1), 0),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(results_table)
+        elements.append(Spacer(1, 24))
+        
+        # 7. Firmas
         signature_data = [
             ["", ""],
             ["__________________________", "__________________________"],
