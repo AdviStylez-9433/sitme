@@ -368,28 +368,6 @@ def generate_clinical_record():
         ]))
         elements.append(signature_table)
         
-                # --- SEGUNDA PÁGINA (RESULTADOS) ---
-        elements.append(PageBreak())
-        elements.append(Paragraph("RESULTADOS DE EVALUACIÓN", header_style))
-        elements.append(Spacer(1, 12))
-        
-        # 1. Resumen de riesgo
-        risk_percentage = int(float(data['probability']) * 100)
-        elements.append(Paragraph(f"Riesgo estimado: {risk_percentage}%", subtitle_style))
-        elements.append(Paragraph(f"Nivel de riesgo: {data['risk_level'].capitalize()}", normal_style))
-        elements.append(Spacer(1, 8))
-        
-        # 2. Factores clave
-        elements.append(Paragraph("FACTORES CLAVE IDENTIFICADOS", subtitle_style))
-        for factor in data['key_factors']:
-            elements.append(Paragraph(f"• {factor}", normal_style))
-        elements.append(Spacer(1, 8))
-        
-        # 3. Recomendaciones
-        elements.append(Paragraph("RECOMENDACIONES", subtitle_style))
-        for recommendation in data['recommendations']:
-            elements.append(Paragraph(f"• {recommendation}", normal_style))
-        
         # Construir el PDF
         doc.build(elements)
         
