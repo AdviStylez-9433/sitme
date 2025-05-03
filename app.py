@@ -273,6 +273,29 @@ def generate_clinical_record():
         # Contenido del PDF
         elements = []
         
+                # 0. Encabezado con logo y título
+        try:
+            logo_path = os.path.join('static', 'images', 'static/faviconV4.png')  # Ajusta la ruta según tu estructura
+            logo = Image(logo_path, width=40, height=40)
+            
+            header_table = Table([
+                [logo, Paragraph("SISTEMA INTEGRAL DE TRATAMIENTO MÉDICO <b>SITME</b>", header_style)]
+            ], colWidths=[50, 400])
+            
+            header_table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+                ('LEFTPADDING', (1, 0), (1, 0), 5),
+            ]))
+            
+            elements.append(header_table)
+            elements.append(Spacer(1, 12))
+            
+        except Exception as e:
+            app.logger.error(f"No se pudo cargar el logo: {str(e)}")
+            elements.append(Paragraph("SISTEMA INTEGRAL DE TRATAMIENTO MÉDICO <b>SITME</b>", header_style))
+            elements.append(Spacer(1, 12))
+        
         # 1. Encabezado del bono
         elements.append(Paragraph("BONO DE ATENCIÓN MÉDICA", header_style))
         elements.append(Paragraph("Evaluación de Endometriosis", subtitle_style))
