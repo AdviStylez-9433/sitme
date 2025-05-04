@@ -345,7 +345,7 @@ def generate_clinical_record():
         elements.append(service_table)
         elements.append(Spacer(1, 12))
         
-        # 4. Totales con indicadores en negrita
+        # 4. Totales con indicadores en negrita y alineación mejorada
         total_data = [
             [Paragraph("<b>TOTAL A PAGAR:</b>", bold_style), "$8.220"],
             [Paragraph("<b>IVA (19%):</b>", bold_style), "$1.564"], 
@@ -354,10 +354,17 @@ def generate_clinical_record():
 
         total_table = Table(total_data, colWidths=[300, 60])
         total_table.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
-            ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),  # Alinea las etiquetas a la derecha
+            ('ALIGN', (1, 0), (1, -1), 'RIGHT'),  # Alinea los valores a la derecha
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Centra verticalmente
+            ('LEFTPADDING', (0, 0), (0, -1), 10),  # Espacio izquierdo para etiquetas
+            ('RIGHTPADDING', (0, 0), (0, -1), 5),  # Espacio derecho para etiquetas
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),  # Espacio inferior
+            ('TOPPADDING', (0, 0), (-1, -1), 3),  # Espacio superior
         ]))
+
         elements.append(total_table)
         elements.append(Spacer(1, 12))
         
