@@ -897,7 +897,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .summary-item.critical {
-    border-left: 3px solid #e63946;
+    border-left: 3px solid var(--danger);
     padding-left: 8px;
 }
 
@@ -918,7 +918,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     bottom: 100%;
     left: 0;
     width: 200px;
-    background: #8B0000;
+    background: var(--danger);
     color: white;
     padding: 8px 12px;
     border-radius: 4px;
@@ -932,10 +932,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Para items críticos */
 .summary-item.critical .summary-label {
     font-weight: 600;
-    color: #2a3f54;
+    color: var(--dark)
 }
 
 .summary-item.critical .summary-value {
     font-weight: 700;
-    color: #e63946;
+    color: var(--dark);
 }
