@@ -274,7 +274,7 @@ def generate_clinical_record():
         elements = []
         
         # 0. Logo 
-        logo_path = "path/to/your/logo.png"  # Ajusta esta ruta
+        logo_path = "static/logo.png"  # Ajusta esta ruta
         try:
             logo = Image(logo_path, width=2*inch, height=0.5*inch)  # Ajusta las dimensiones según tu logo
             logo.hAlign = 'LEFT'  # Alinear a la izquierda
