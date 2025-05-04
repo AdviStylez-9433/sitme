@@ -894,14 +894,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Tooltips */
 .summary-item {
     position: relative;
-    padding: 10px 12px;
-    margin: 4px 0;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    background-color: white; /* Fondo blanco para todas las cards */
 }
 
-/* Items críticos - solo borde izquierdo rojo */
 .summary-item.critical {
     border-left: 3px solid var(--danger);
     padding-left: 8px;
@@ -913,33 +907,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     padding-left: 8px;
 }
 
-/* Textos (manteniendo tu estilo original) */
-.summary-item .summary-label {
-    font-weight: 600;
-    color: var(--dark);
-}
-
-.summary-item .summary-value {
-    font-weight: 700;
-    color: var(--dark);
-}
-
-/* Tooltips (iconos) */
 .tooltip-icon {
     margin-left: 5px;
+    color: var(--danger);
     font-size: 0.8em;
     cursor: help;
 }
 
-.summary-item.critical .tooltip-icon {
-    color: var(--danger);
-}
-
-.summary-item.normal .tooltip-icon {
-    color: var(--success);
-}
-
-/* Estilos del tooltip al hacer hover */
 [data-tooltip] {
     position: relative;
 }
@@ -950,6 +924,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     bottom: 100%;
     left: 0;
     width: 200px;
+    background: var(--danger);
+    color: white;
     padding: 8px 12px;
     border-radius: 4px;
     font-size: 0.8em;
@@ -959,12 +935,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     pointer-events: none;
 }
 
-.summary-item.critical [data-tooltip]:hover::after {
-    background: var(--danger);
-    color: white;
+/* Para items críticos */
+.summary-item.critical .summary-label {
+    font-weight: 600;
+    color: var(--dark)
 }
 
-.summary-item.normal [data-tooltip]:hover::after {
-    background: var(--success);
-    color: white;
+.summary-item.critical .summary-value {
+    font-weight: 700;
+    color: var(--dark);
 }
