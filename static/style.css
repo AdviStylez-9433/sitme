@@ -891,21 +891,28 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transition: border-color 0.3s ease;
 }
 
-/* Tooltips */
 .summary-item {
-    position: relative;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    transition: all 0.2s ease;
 }
 
 .summary-item.critical {
-    border-left: 3px solid var(--danger);
-    padding-left: 8px;
+    border-left: 4px solid var(--danger);
+    background-color: #ffebee;
+}
+
+.summary-item.normal {
+    border-left: 4px solid var(--success);
+    background-color: #f0f9f0;
 }
 
 .tooltip-icon {
-    margin-left: 5px;
     color: var(--danger);
-    font-size: 0.8em;
+    margin-left: 6px;
     cursor: help;
+    font-size: 0.9em;
 }
 
 [data-tooltip] {
@@ -916,26 +923,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     content: attr(data-tooltip);
     position: absolute;
     bottom: 100%;
-    left: 0;
-    width: 200px;
-    background: var(--danger);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dark);
     color: white;
     padding: 8px 12px;
     border-radius: 4px;
     font-size: 0.8em;
-    line-height: 1.4;
-    z-index: 1000;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-    pointer-events: none;
-}
-
-/* Para items críticos */
-.summary-item.critical .summary-label {
-    font-weight: 600;
-    color: var(--dark)
-}
-
-.summary-item.critical .summary-value {
-    font-weight: 700;
-    color: var(--dark);
+    width: 220px;
+    z-index: 100;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16);
 }

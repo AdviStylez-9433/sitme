@@ -286,136 +286,145 @@ function displayResults(data) {
     const patientSummary = document.getElementById('patientSummary');
     patientSummary.innerHTML = '';
 
-    // Mapeo de tooltips para factores críticos
+    // Mapeo de tooltips para factores críticos (versión optimizada)
     const tooltipMap = {
-        'Edad': (value) => {
-            const age = parseInt(value.split(' ')[0]);
-            if (age < 30) return 'Edad <30 años: Mayor prevalencia de endometriosis según estudios poblacionales';
+        'Edad': (value, isCritical) => {
+            const age = parseInt(value);
+            if (age < 30) return 'Edad <30 años: Mayor prevalencia según estudios (75% casos)';
+            if (age > 40) return 'Edad >40 años: Considerar adenomiosis coexistente';
             return '';
         },
-        'Dolor menstrual': (value) => {
+        'Dolor menstrual': (value, isCritical) => {
             const level = parseInt(value);
-            if (level >= 7) return 'Dolor severo (≥7/10) tiene alta correlación con endometriosis profunda (82% VPP)';
-            if (level >= 4) return 'Dolor moderado puede indicar endometriosis temprana o adenomiosis';
-            return '';
+            if (level >= 7) return 'Dolor severo (≥7/10): 82% valor predictivo positivo';
+            if (level >= 4) return 'Dolor moderado: posible endometriosis temprana';
+            return 'Dolor leve: menos asociado a endometriosis';
         },
-        'Dolor menstrual': (value) => {
-            const level = parseInt(value);
-            if (level >= 7) return 'Dolor severo (≥7/10) tiene alta correlación con endometriosis profunda (82% VPP)';
-            if (level >= 4) return 'Dolor moderado puede indicar endometriosis temprana o adenomiosis';
-            return '';
-        },
-        'Dispareunia': (value) => value === 'Sí' 
-            ? 'Dolor durante relaciones sugiere implantes en ligamentos uterosacros' 
-            : '',
-        'Antecedentes familiares': (value) => value === 'Sí' 
-            ? 'Riesgo aumentado 6-9x según guías ASRM 2022' 
-            : '',
-        'CA-125': (value) => {
+        'Dispareunia': (value, isCritical) => isCritical ? 
+            'Dolor durante relaciones sugiere implantes profundos' : '',
+        'Antecedentes familiares': (value, isCritical) => isCritical ?
+            'Riesgo aumentado 6-9x (Guías ASRM 2023)' : '',
+        'CA-125': (value, isCritical) => {
             if (value === 'No medido') return '';
-            const num = parseFloat(value.split(' ')[0]);
-            if (num > 35) return 'Niveles elevados (>35 U/mL) en 72% de endometriosis estadio III-IV';
-            if (num > 20) return 'Valor limítrofe puede requerir seguimiento';
-            return '';
+            const num = parseFloat(value);
+            if (num > 35) return 'CA-125 >35 U/mL en 72% de endometriosis avanzada';
+            if (num > 20) return 'Valor limítrofe (20-35 U/mL)';
+            return 'Valor normal (<20 U/mL)';
         },
-        'PCR': (value) => {
+        'PCR': (value, isCritical) => {
             if (value === 'No medido') return '';
-            const num = parseFloat(value.split(' ')[0]);
-            if (num > 10) return 'Inflamación sistémica (PCR >10) asociada a progresión de enfermedad';
-            return '';
+            const num = parseFloat(value);
+            return num > 10 ? 'PCR >10 mg/L: inflamación sistémica activa' : '';
         },
-        'Menarquia': (value) => {
-            const age = parseInt(value.split(' ')[0]);
-            if (age < 12) return 'Menarquia temprana (<12 años) es factor de riesgo significativo';
-            return '';
-        },
-        'Ciclo menstrual': (value) => {
-            const days = parseInt(value.split(' ')[0]);
-            if (days < 25) return 'Ciclos cortos (<25 días) asociados a mayor actividad estrogénica';
-            return '';
-        },
-        'Duración período': (value) => {
-            const days = parseInt(value.split(' ')[0]);
-            if (days > 7) return 'Sangrado prolongado (>7 días) puede indicar adenomiosis coexistente';
-            return '';
-        }
+        'Menarquia': (value, isCritical) => isCritical ?
+            'Menarquia <12 años: factor de riesgo significativo' : '',
+        'Ciclo menstrual': (value, isCritical) => isCritical ?
+            'Ciclos <25 días: mayor actividad estrogénica' : '',
+        'Duración período': (value, isCritical) => isCritical ?
+            'Sangrado >7 días: posible adenomiosis coexistente' : '',
+        'Examen pélvico': (value, isCritical) => isCritical ?
+            'Hallazgos anormales: nódulos o dolor a la palpación' : ''
     };
 
     const summaryData = [
         { 
             label: 'Nombre', 
             value: data.formData.personal.full_name, 
-            critical: false 
+            critical: false,
+            tooltip: false 
         },
         { 
             label: 'Edad', 
-            value: `${data.formData.personal.age} años`, 
-            critical: data.formData.personal.age < 30 
+            value: data.formData.personal.age, 
+            unit: 'años',
+            critical: data.formData.personal.age < 30 || data.formData.personal.age > 40,
+            tooltip: true
         },
         { 
             label: 'Menarquia', 
-            value: `${data.formData.menstrual.menarche_age} años`, 
-            critical: data.formData.menstrual.menarche_age < 12 
+            value: data.formData.menstrual.menarche_age, 
+            unit: 'años',
+            critical: data.formData.menstrual.menarche_age < 12,
+            tooltip: true
         },
         { 
             label: 'Ciclo menstrual', 
-            value: `${data.formData.menstrual.cycle_length} días`, 
-            critical: data.formData.menstrual.cycle_length < 25 
+            value: data.formData.menstrual.cycle_length, 
+            unit: 'días',
+            critical: data.formData.menstrual.cycle_length < 25,
+            tooltip: true
         },
         { 
             label: 'Duración período', 
-            value: `${data.formData.menstrual.period_duration} días`, 
-            critical: data.formData.menstrual.period_duration > 7 
+            value: data.formData.menstrual.period_duration, 
+            unit: 'días',
+            critical: data.formData.menstrual.period_duration > 7,
+            tooltip: true
         },
         { 
             label: 'Dolor menstrual', 
-            value: `${data.formData.menstrual.pain_level}/10`, 
-            critical: data.formData.menstrual.pain_level >= 7 
+            value: data.formData.menstrual.pain_level, 
+            unit: '/10',
+            critical: data.formData.menstrual.pain_level >= 4,
+            tooltip: true
         },
         { 
             label: 'Dispareunia', 
             value: data.formData.symptoms.pain_during_sex ? 'Sí' : 'No', 
-            critical: data.formData.symptoms.pain_during_sex 
+            critical: data.formData.symptoms.pain_during_sex,
+            tooltip: true
         },
         { 
             label: 'Antecedentes familiares', 
             value: data.formData.history.family_endometriosis ? 'Sí' : 'No', 
-            critical: data.formData.history.family_endometriosis 
+            critical: data.formData.history.family_endometriosis,
+            tooltip: true
         },
         { 
             label: 'CA-125', 
-            value: data.formData.biomarkers.ca125 !== null ? `${data.formData.biomarkers.ca125} U/mL` : 'No medido', 
-            critical: data.formData.biomarkers.ca125 > 35 
+            value: data.formData.biomarkers.ca125 ?? 'No medido', 
+            unit: 'U/mL',
+            critical: data.formData.biomarkers.ca125 > 35,
+            tooltip: true
         },
         { 
             label: 'PCR', 
-            value: data.formData.biomarkers.crp !== null ? `${data.formData.biomarkers.crp} mg/L` : 'No medido', 
-            critical: data.formData.biomarkers.crp > 10 
+            value: data.formData.biomarkers.crp ?? 'No medido', 
+            unit: 'mg/L',
+            critical: data.formData.biomarkers.crp > 10,
+            tooltip: true
         },
         { 
             label: 'IMC', 
-            value: data.formData.examination.bmi !== null ? data.formData.examination.bmi : 'No calculado', 
-            critical: false 
+            value: data.formData.examination.bmi ?? 'No calculado', 
+            critical: false,
+            tooltip: false
         },
         { 
             label: 'Examen pélvico', 
             value: data.formData.examination.pelvic_exam || 'No registrado', 
-            critical: ['tenderness', 'nodules'].includes(data.formData.examination.pelvic_exam) 
+            critical: ['tenderness', 'nodules'].includes(data.formData.examination.pelvic_exam),
+            tooltip: true
         }
     ];
 
     summaryData.forEach(item => {
         const summaryItem = document.createElement('div');
-        summaryItem.className = `summary-item ${item.critical ? 'critical' : ''}`;
+        const displayValue = typeof item.value === 'number' ? 
+            `${item.value}${item.unit || ''}` : 
+            item.value;
         
-        const tooltip = tooltipMap[item.label] ? tooltipMap[item.label](item.value) : '';
+        const tooltip = item.tooltip ? 
+            tooltipMap[item.label]?.(item.value, item.critical) || '' : 
+            '';
         
+        summaryItem.className = `summary-item ${item.critical ? 'critical' : 'normal'}`;
         summaryItem.innerHTML = `
-            <div class="summary-label" ${tooltip ? `data-tooltip="${tooltip}"` : ''}>
+            <div class="summary-label">
                 ${item.label}
-                ${tooltip ? '<i class="fas fa-info-circle tooltip-icon"></i>' : ''}
+                ${tooltip ? `<i class="fas fa-info-circle tooltip-icon" data-tooltip="${tooltip}"></i>` : ''}
             </div>
-            <div class="summary-value">${item.value}</div>
+            <div class="summary-value">${displayValue}</div>
         `;
         patientSummary.appendChild(summaryItem);
     });
