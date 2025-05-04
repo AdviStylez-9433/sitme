@@ -274,30 +274,32 @@ def generate_clinical_record():
         elements = []
         
         # 0. Logo 
-        logo_path = "static/logo.png"
+        logo_path = "static/logo.png"  # Ajusta esta ruta
         try:
-            logo = Image(logo_path, width=1.5*inch, height=0.4*inch)
-            logo.hAlign = 'LEFT'
+            # Dimensiones más pequeñas (por ejemplo, 1.5 pulgadas de ancho y 0.4 de alto)
+            logo = Image(logo_path, width=1.5*inch, height=0.4*inch)  # Ajustado a un tamaño más pequeño
+            logo.hAlign = 'LEFT'  # Alinear a la izquierda
             elements.append(logo)
-            elements.append(Spacer(1, 12))
+            elements.append(Spacer(1, 12))  # Espacio después del logo
         except Exception as e:
             app.logger.error(f"No se pudo cargar el logo: {str(e)}")
+            # Si falla la carga del logo, continuar sin él
         
-        # 1. Encabezado del bono
+        # 1. Encabezado del bono (usando Paragraph con estilo que interpreta HTML)
         elements.append(Paragraph("<b>BONO DE ATENCIÓN MÉDICA</b>", header_style))
         elements.append(Paragraph("<b>INFORMACIÓN DE LA PACIENTE:</b>", subtitle_style))
         elements.append(Spacer(1, 12))
-        
-        # 2. Información del beneficiario (con negritas)
+
+        # 2. Información del beneficiario - Versión corregida que muestra las negritas
         beneficiary_data = [
-            ["<b>N° Bono:</b>", f"END-{datetime.now().strftime('%Y%m%d%H%M')}"],
-            ["<b>Fecha Emisión:</b>", datetime.now().strftime('%d/%m/%Y')],
-            ["<b>RUT Beneficiario:</b>", data['personal']['id_number']],
-            ["<b>Nombre:</b>", data['personal']['full_name']],
-            ["<b>Edad:</b>", f"{data['personal']['age']} años"],
-            ["<b>Previsión:</b>", data['personal']['insurance']]
+            [Paragraph("<b>N° Bono:</b>", normal_style), f"END-{datetime.now().strftime('%Y%m%d%H%M')}"],
+            [Paragraph("<b>Fecha Emisión:</b>", normal_style), datetime.now().strftime('%d/%m/%Y')],
+            [Paragraph("<b>RUT Beneficiario:</b>", normal_style), data['personal']['id_number']],
+            [Paragraph("<b>Nombre:</b>", normal_style), data['personal']['full_name']],
+            [Paragraph("<b>Edad:</b>", normal_style), f"{data['personal']['age']} años"],
+            [Paragraph("<b>Previsión:</b>", normal_style), data['personal']['insurance']]
         ]
-        
+
         beneficiary_table = Table(beneficiary_data, colWidths=[120, 300])
         beneficiary_table.setStyle(TableStyle([
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
@@ -306,14 +308,23 @@ def generate_clinical_record():
             ('LEFTPADDING', (0, 0), (-1, -1), 2),
             ('RIGHTPADDING', (0, 0), (-1, -1), 2),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ('WORDWRAP', (0, 0), (-1, -1), True),
         ]))
-        elements.append(beneficiary_table)
-        elements.append(Spacer(1, 12))
-        
-        # 3. Detalle de la prestación (con negritas)
+
+        # 3. Detalle de la prestación - Versión corregida
+        service_header_style = ParagraphStyle(
+            'ServiceHeader',
+            parent=styles['Normal'],
+            fontSize=8,
+            fontName='Helvetica-Bold'
+        )
+
         service_data = [
-            ["<b>Código</b>", "<b>Descripción</b>", "<b>Fecha</b>", "<b>Valor</b>", "<b>Bonificación</b>", "<b>A Pagar</b>"],
+            [Paragraph("<b>Código</b>", service_header_style), 
+            Paragraph("<b>Descripción</b>", service_header_style),
+            Paragraph("<b>Fecha</b>", service_header_style),
+            Paragraph("<b>Valor</b>", service_header_style),
+            Paragraph("<b>Bonificación</b>", service_header_style),
+            Paragraph("<b>A Pagar</b>", service_header_style)],
             ["END-001", "Evaluación Endometriosis", datetime.now().strftime('%d/%m/%Y'), "$15.780", "$7.560", "$8.220"]
         ]
         
@@ -326,40 +337,39 @@ def generate_clinical_record():
             ('ALIGN', (2, 0), (-1, -1), 'RIGHT'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
-            ('WORDWRAP', (0, 0), (-1, -1), True),
         ]))
         elements.append(service_table)
         elements.append(Spacer(1, 12))
         
-        # 4. Totales (con negritas)
+        # 4. Totales
         total_data = [
-            ["<b>TOTAL A PAGAR:</b>", "$8.220"],
-            ["<b>IVA (19%):</b>", "$1.564"], 
-            ["<b>TOTAL CON IVA:</b>", "$9.784"]
+            ["TOTAL A PAGAR:", "$8.220"],
+            ["IVA (19%):", "$1.564"], 
+            ["TOTAL CON IVA:", "$9.784"]
         ]
 
-        total_table = Table(total_data, colWidths=[300, 60])
+        total_table = Table(total_data, colWidths=[300, 60])  # Ajusté el ancho de la primera columna
         total_table.setStyle(TableStyle([
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
-            ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('LEFTPADDING', (0, 0), (0, -1), 10),
-            ('RIGHTPADDING', (0, 0), (0, -1), 5),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-            ('TOPPADDING', (0, 0), (-1, -1), 3),
-            ('WORDWRAP', (0, 0), (-1, -1), True),
+            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),  # Alinea las etiquetas a la derecha
+            ('ALIGN', (1, 0), (1, -1), 'RIGHT'),  # Alinea los valores a la derecha
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Centra verticalmente
+            ('LEFTPADDING', (0, 0), (0, -1), 10),  # Espacio izquierdo para etiquetas
+            ('RIGHTPADDING', (0, 0), (0, -1), 5),  # Espacio derecho para etiquetas
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),  # Espacio inferior
+            ('TOPPADDING', (0, 0), (-1, -1), 3),  # Espacio superior
         ]))
+
         elements.append(total_table)
         elements.append(Spacer(1, 12))
         
-        # 5. Información del profesional (con negritas)
+        # 5. Información del profesional
         professional_data = [
-            ["<b>Profesional/Institución:</b>", "Centro Médico SITME"],
-            ["<b>RUT:</b>", "76.549.770-1"],
-            ["<b>Médico tratante:</b>", "Dr. John Doe"],
-            ["<b>Fecha atención:</b>", datetime.now().strftime('%d/%m/%Y')]
+            ["Profesional/Institución:", "Centro Médico SITME"],
+            ["RUT:", "76.549.770-1"],
+            ["Médico tratante:", "Dr. John Doe"],
+            ["Fecha atención:", datetime.now().strftime('%d/%m/%Y')]
         ]
         
         professional_table = Table(professional_data, colWidths=[120, 300])
@@ -367,15 +377,15 @@ def generate_clinical_record():
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 0), (-1, -1), 9),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('WORDWRAP', (0, 0), (-1, -1), True),
         ]))
         elements.append(professional_table)
         elements.append(Spacer(1, 24))
         
-        # 6. Resultados de la evaluación de riesgo (ya tiene negritas)
-        elements.append(Paragraph("<b>RESULTADOS DE LA EVALUACIÓN:</b>", subtitle_style))
+        # 6. Resultados de la evaluación de riesgo
+        elements.append(Paragraph("RESULTADOS DE LA EVALUACIÓN:", subtitle_style))
         elements.append(Spacer(1, 6))
 
+        # Hacer predicción para incluir en el PDF
         input_data = {
             'age': int(data['personal']['age']),
             'menarche_age': int(data['menstrual']['menarche_age']),
@@ -396,8 +406,11 @@ def generate_clinical_record():
         proba = model.predict_proba(input_df)[0][1]
         prediction = int(proba > 0.5)
         explanation = generate_explanation(input_df.iloc[0], proba)
+
+        # Convertir probabilidad a porcentaje
         probability_percent = round(proba * 100, 1)
 
+        # Determinar nivel de riesgo y color
         if proba >= 0.7:
             risk_level = "ALTO"
         elif proba >= 0.4:
@@ -405,15 +418,19 @@ def generate_clinical_record():
         else:
             risk_level = "BAJO"
 
+        # Crear texto formateado para los resultados
         results_text = f"""
-        <b>Probabilidad de Endometriosis:</b> {probability_percent}%<br/>
-        <b>Nivel de Riesgo:</b> {risk_level}<br/>
-        <b>Factores Clave:</b> {', '.join(explanation['key_factors']) or 'No identificados'}<br/>
-        <b>Recomendaciones:</b><br/>
+        Probabilidad de Endometriosis: {probability_percent}%<br/>
+        Nivel de Riesgo: {risk_level}<br/>
+        Factores Clave: {', '.join(explanation['key_factors']) or 'No identificados'}<br/>
+        Recomendaciones:<br/>
         """
-        for recommendation in explanation['recommendations']:
-            results_text += f"&nbsp;&nbsp;&nbsp;&nbsp;• {recommendation}<br/>"
 
+        # Añadir cada recomendación con indentación
+        for recommendation in explanation['recommendations']:
+            results_text += f"&nbsp;&nbsp;&nbsp;&nbsp;• {recommendation}<br/>"  # 4 espacios antes de la viñeta
+
+        # Estilo para el párrafo que permita espacios no breakables
         results_style = ParagraphStyle(
             'Results',
             parent=styles['Normal'],
@@ -421,7 +438,7 @@ def generate_clinical_record():
             leading=12,
             spaceAfter=12,
             textColor=colors.black,
-            leftIndent=10
+            leftIndent=10  # Indentación adicional para todo el párrafo
         )
 
         results_paragraph = Paragraph(results_text, style=results_style)
@@ -432,7 +449,7 @@ def generate_clinical_record():
         signature_data = [
             ["", ""],
             ["__________________________", "__________________________"],
-            ["<b>Firma Beneficiario</b>", "<b>Firma Profesional/Institución</b>"]
+            ["Firma Beneficiario", "Firma Profesional/Institución"]
         ]
         
         signature_table = Table(signature_data, colWidths=[210, 210])
@@ -440,7 +457,6 @@ def generate_clinical_record():
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 0), (-1, -1), 9),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('WORDWRAP', (0, 0), (-1, -1), True),
         ]))
         elements.append(signature_table)
         
@@ -449,6 +465,7 @@ def generate_clinical_record():
         
         # Preparar la respuesta
         buffer.seek(0)
+        # Crear nombre de archivo con formato: NombreApellido_END_YYYYMMDD.pdf
         filename = f"{data['personal']['full_name'].replace(' ', '_')}_END_{datetime.now().strftime('%Y%m%d')}.pdf"
         response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
