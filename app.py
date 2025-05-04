@@ -345,14 +345,14 @@ def generate_clinical_record():
         elements.append(service_table)
         elements.append(Spacer(1, 12))
         
-        # 4. Totales con indicadores en negrita y alineación mejorada
+        # 4. Totales
         total_data = [
-            [Paragraph("<b>TOTAL A PAGAR:</b>", bold_style), "$8.220"],
-            [Paragraph("<b>IVA (19%):</b>", bold_style), "$1.564"], 
-            [Paragraph("<b>TOTAL CON IVA:</b>", bold_style), "$9.784"]
+            ["TOTAL A PAGAR:", "$8.220"],
+            ["IVA (19%):", "$1.564"], 
+            ["TOTAL CON IVA:", "$9.784"]
         ]
 
-        total_table = Table(total_data, colWidths=[300, 60])
+        total_table = Table(total_data, colWidths=[300, 60])  # Ajusté el ancho de la primera columna
         total_table.setStyle(TableStyle([
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, -1), 9),
@@ -364,6 +364,9 @@ def generate_clinical_record():
             ('BOTTOMPADDING', (0, 0), (-1, -1), 3),  # Espacio inferior
             ('TOPPADDING', (0, 0), (-1, -1), 3),  # Espacio superior
         ]))
+
+        elements.append(total_table)
+        elements.append(Spacer(1, 12))
 
         elements.append(total_table)
         elements.append(Spacer(1, 12))
@@ -425,7 +428,7 @@ def generate_clinical_record():
 
         # Crear tabla para los resultados con el mismo formato que información del paciente
         results_data = [
-            [Paragraph("<b>Probabilidad de Endometriosis:</b>", bold_style), 
+            [Paragraph("<b>Probabilidad:</b>", bold_style), 
             Paragraph(f"{probability_percent}%", normal_style)],
             
             [Paragraph("<b>Nivel de Riesgo:</b>", bold_style), 
@@ -445,14 +448,34 @@ def generate_clinical_record():
         elements.append(results_table)
         elements.append(Spacer(1, 6))
 
-        # Mantener las recomendaciones con viñetas como estaban
-        recommendations_text = "<b>Recomendaciones:</b><br/>"
-        for recommendation in explanation['recommendations']:
-            recommendations_text += f"&nbsp;&nbsp;&nbsp;&nbsp;• {recommendation}<br/>"
+        # Estilo para las recomendaciones (añadir junto a los otros estilos)
+        recommendation_style = ParagraphStyle(
+            'Recommendation',
+            parent=styles['Normal'],
+            fontSize=9,
+            leading=12,
+            spaceBefore=6,
+            spaceAfter=6,
+            leftIndent=10,
+            textColor=colors.black,
+            bulletIndent=5
+        )
 
-        recommendations_paragraph = Paragraph(recommendations_text, normal_style)
-        elements.append(recommendations_paragraph)
-        elements.append(Spacer(1, 24))
+        # Sección de recomendaciones mejorada
+        recommendations_title = Paragraph("<b>Recomendaciones:</b>", bold_style)
+        elements.append(recommendations_title)
+        elements.append(Spacer(1, 4))
+
+        # Lista de recomendaciones con formato mejorado
+        recommendation_items = []
+        for recommendation in explanation['recommendations']:
+            recommendation_items.append(
+                Paragraph(f"• {recommendation}", recommendation_style)
+            )
+            recommendation_items.append(Spacer(1, 4))  # Espacio entre items
+
+        elements.extend(recommendation_items)
+        elements.append(Spacer(1, 18))  # Espacio final después de la sección
         
         # 7. Firmas
         signature_data = [
