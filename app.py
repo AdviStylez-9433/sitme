@@ -306,7 +306,6 @@ def generate_clinical_record():
         # 2. Información del paciente con negritas en indicadores
         beneficiary_data = [
             [Paragraph("<b>N° Bono:</b>", bold_style), Paragraph(f"END-{datetime.now().strftime('%Y%m%d%H%M')}", normal_style)],
-            [Paragraph("<b>Fecha Emisión:</b>", bold_style), Paragraph(datetime.now().strftime('%d/%m/%Y'), normal_style)],
             [Paragraph("<b>RUT Beneficiario:</b>", bold_style), Paragraph(data['personal']['id_number'], normal_style)],
             [Paragraph("<b>Nombre:</b>", bold_style), Paragraph(data['personal']['full_name'], normal_style)],
             [Paragraph("<b>Edad:</b>", bold_style), Paragraph(f"{data['personal']['age']} años", normal_style)],
@@ -376,9 +375,8 @@ def generate_clinical_record():
         
         # 5. Información profesional con indicadores en negrita
         professional_data = [
-            [Paragraph("<b>Profesional/Institución:</b>", bold_style), "Centro Médico SITME"],
-            [Paragraph("<b>RUT:</b>", bold_style), "76.549.770-1"],
             [Paragraph("<b>Médico tratante:</b>", bold_style), "Dr. John Doe"],
+            [Paragraph("<b>RUT:</b>", bold_style), "12.345.678-9"],
             [Paragraph("<b>Fecha atención:</b>", bold_style), datetime.now().strftime('%d/%m/%Y')]
         ]
         
