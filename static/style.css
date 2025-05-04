@@ -908,7 +908,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: help;
 }
 
-
 [data-tooltip] {
     position: relative;
 }
@@ -939,13 +938,4 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .summary-item.critical .summary-value {
     font-weight: 700;
     color: var(--dark);
-}
-
-[data-tooltip-color="green"]::after {
-    background-color: #4CAF50;
-    color: white;
-}
-
-[data-tooltip-color="green"]::before {
-    border-top-color: #4CAF50;
 }
