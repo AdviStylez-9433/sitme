@@ -376,44 +376,91 @@ def generate_clinical_record():
         elements.append(professional_table)
         elements.append(Spacer(1, 24))
         
-        # 6. Resultados con negritas en indicadores
+        # 6. Resultados de la evaluación de riesgo
         elements.append(Paragraph("RESULTADOS DE LA EVALUACIÓN:", subtitle_style))
         elements.append(Spacer(1, 6))
 
-        # [Resto del código de predicción...]
+        # Hacer predicción para incluir en el PDF
+        input_data = {
+            'age': int(data['personal']['age']),
+            'menarche_age': int(data['menstrual']['menarche_age']),
+            'cycle_length': int(data['menstrual']['cycle_length']),
+            'period_duration': int(data['menstrual']['period_duration']),
+            'pain_level': int(data['menstrual']['pain_level']),
+            'pain_during_sex': 1 if data['symptoms']['pain_during_sex'] else 0,
+            'family_history': 1 if data['history']['family_endometriosis'] else 0,
+            'bowel_symptoms': 1 if data['symptoms']['bowel_symptoms'] else 0,
+            'urinary_symptoms': 1 if data['symptoms']['urinary_symptoms'] else 0,
+            'fatigue': 1 if data['symptoms']['fatigue'] else 0,
+            'infertility': 1 if data['symptoms']['infertility'] else 0,
+            'ca125': float(data['biomarkers']['ca125']) if data['biomarkers']['ca125'] is not None else 20.0,
+            'crp': float(data['biomarkers']['crp']) if data['biomarkers']['crp'] is not None else 3.0
+        }
 
+        input_df = prepare_input_data(input_data)
+        proba = model.predict_proba(input_df)[0][1]
+        prediction = int(proba > 0.5)
+        explanation = generate_explanation(input_df.iloc[0], proba)
+
+        # Convertir probabilidad a porcentaje
+        probability_percent = round(proba * 100, 1)
+
+        # Determinar nivel de riesgo y color
+        if proba >= 0.7:
+            risk_level = "ALTO"
+        elif proba >= 0.4:
+            risk_level = "MODERADO"
+        else:
+            risk_level = "BAJO"
+
+        # Crear texto formateado para los resultados
         results_text = f"""
-        <b>Probabilidad de Endometriosis:</b> {probability_percent}%<br/>
-        <b>Nivel de Riesgo:</b> {risk_level}<br/>
-        <b>Factores Clave:</b> {', '.join(explanation['key_factors']) or 'No identificados'}<br/>
-        <b>Recomendaciones:</b><br/>
+        Probabilidad de Endometriosis: {probability_percent}%<br/>
+        Nivel de Riesgo: {risk_level}<br/>
+        Factores Clave: {', '.join(explanation['key_factors']) or 'No identificados'}<br/>
+        Recomendaciones:<br/>
         """
-        for recommendation in explanation['recommendations']:
-            results_text += f"&nbsp;&nbsp;&nbsp;&nbsp;• {recommendation}<br/>"
 
-        results_paragraph = Paragraph(results_text, normal_style)
+        # Añadir cada recomendación con indentación
+        for recommendation in explanation['recommendations']:
+            results_text += f"&nbsp;&nbsp;&nbsp;&nbsp;• {recommendation}<br/>"  # 4 espacios antes de la viñeta
+
+        # Estilo para el párrafo que permita espacios no breakables
+        results_style = ParagraphStyle(
+            'Results',
+            parent=styles['Normal'],
+            fontSize=9,
+            leading=12,
+            spaceAfter=12,
+            textColor=colors.black,
+            leftIndent=10  # Indentación adicional para todo el párrafo
+        )
+
+        results_paragraph = Paragraph(results_text, style=results_style)
         elements.append(results_paragraph)
         elements.append(Spacer(1, 24))
         
-        # 7. Firmas con negritas
+        # 7. Firmas
         signature_data = [
             ["", ""],
             ["__________________________", "__________________________"],
-            [Paragraph("<b>Firma Beneficiario</b>", bold_style), 
-             Paragraph("<b>Firma Profesional/Institución</b>", bold_style)]
+            ["Firma Beneficiario", "Firma Profesional/Institución"]
         ]
         
         signature_table = Table(signature_data, colWidths=[210, 210])
         signature_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ]))
         elements.append(signature_table)
         
-        # Generar PDF
+        # Construir el PDF
         doc.build(elements)
         
-        # Preparar respuesta
+        # Preparar la respuesta
         buffer.seek(0)
+        # Crear nombre de archivo con formato: NombreApellido_END_YYYYMMDD.pdf
         filename = f"{data['personal']['full_name'].replace(' ', '_')}_END_{datetime.now().strftime('%Y%m%d')}.pdf"
         response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
