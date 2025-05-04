@@ -13,7 +13,7 @@ import io
 import base64
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Frame, PageTemplate, PageBreak, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
@@ -416,60 +416,51 @@ def generate_clinical_record():
         else:
             risk_level = "BAJO"
 
-        # Crear texto formateado para los resultados con mejor espaciado
-        results_text = f"""
-        <para spaceAfter="12"><b>Probabilidad de Endometriosis:</b> {probability_percent}%</para>
-        <para spaceAfter="12"><b>Nivel de Riesgo:</b> {risk_level}</para>
-        <para spaceAfter="12"><b>Factores Clave:</b> {', '.join(explanation['key_factors']) or 'No identificados'}</para>
-        <para spaceAfter="6"><b>Recomendaciones:</b></para>
-        """
-
-        for recommendation in explanation['recommendations']:
-            results_text += f'<para leftIndent="20" spaceAfter="6" bulletIndent="10">• {recommendation}</para>'
-
-        results_style = ParagraphStyle(
-            'Results',
-            parent=styles['Normal'],
-            fontSize=9,
-            leading=12,
-            spaceBefore=12,  # Espacio antes de la sección
-            textColor=colors.black
-        )
-
-        results_paragraph = Paragraph(results_text, results_style)
-        elements.append(results_paragraph)
-        elements.append(Spacer(1, 18))  # Espacio adicional después de los resultados
-
-        # 7. Firmas con mejor formato
-        signature_data = [
-            [Spacer(1, 24), Spacer(1, 24)],  # Espacio antes de las líneas
-            ["__________________________", "__________________________"],
-            [Spacer(1, 6), Spacer(1, 6)],  # Espacio entre línea y texto
-            [Paragraph("<b>Firma Beneficiario</b>", style=ParagraphStyle(
-                'Signature',
-                parent=styles['Normal'],
-                fontSize=9,
-                alignment=1,
-                spaceBefore=6
-            )), 
-            Paragraph("<b>Firma Profesional/Institución</b>", style=ParagraphStyle(
-                'Signature',
-                parent=styles['Normal'],
-                fontSize=9,
-                alignment=1,
-                spaceBefore=6
-            ))]
+        # Crear tabla para los resultados con el mismo formato que información del paciente
+        results_data = [
+            [Paragraph("<b>Probabilidad de Endometriosis:</b>", bold_style), 
+            Paragraph(f"{probability_percent}%", normal_style)],
+            
+            [Paragraph("<b>Nivel de Riesgo:</b>", bold_style), 
+            Paragraph(risk_level, normal_style)],
+            
+            [Paragraph("<b>Factores Clave:</b>", bold_style), 
+            Paragraph(', '.join(explanation['key_factors']) or 'No identificados', normal_style)]
         ]
 
+        results_table = Table(results_data, colWidths=[120, 300])
+        results_table.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 2),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 2),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(results_table)
+        elements.append(Spacer(1, 6))
+
+        # Mantener las recomendaciones con viñetas como estaban
+        recommendations_text = "<b>Recomendaciones:</b><br/>"
+        for recommendation in explanation['recommendations']:
+            recommendations_text += f"&nbsp;&nbsp;&nbsp;&nbsp;• {recommendation}<br/>"
+
+        recommendations_paragraph = Paragraph(recommendations_text, normal_style)
+        elements.append(recommendations_paragraph)
+        elements.append(Spacer(1, 24))
+        
+        # 7. Firmas
+        signature_data = [
+            ["", ""],
+            ["__________________________", "__________________________"],
+            ["Firma Beneficiario", "Firma Profesional/Institución"]
+        ]
+        
         signature_table = Table(signature_data, colWidths=[210, 210])
         signature_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
         ]))
         elements.append(signature_table)
-        elements.append(Spacer(1, 12))  # Espacio final después de firmas
         
         # Generar PDF
         doc.build(elements)
