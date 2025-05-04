@@ -890,3 +890,52 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .form-group input {
     transition: border-color 0.3s ease;
 }
+
+/* Tooltips */
+.summary-item {
+    position: relative;
+}
+
+.summary-item.critical {
+    border-left: 3px solid #e63946;
+    padding-left: 8px;
+}
+
+.tooltip-icon {
+    margin-left: 5px;
+    color: var(--primary);
+    font-size: 0.8em;
+    cursor: help;
+}
+
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    width: 200px;
+    background: #2a3f54;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    line-height: 1.4;
+    z-index: 1000;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    pointer-events: none;
+}
+
+/* Para items críticos */
+.summary-item.critical .summary-label {
+    font-weight: 600;
+    color: #2a3f54;
+}
+
+.summary-item.critical .summary-value {
+    font-weight: 700;
+    color: #e63946;
+}
