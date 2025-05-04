@@ -622,7 +622,28 @@ document.getElementById('pain_level').dispatchEvent(new Event('input'));
 function downloadClinicalRecord(formData) {
     const button = document.querySelector('.download-button') || document.createElement('button');
     button.disabled = true;
-    button.innerHTML = '<i class="fas fa-file-pdf fa-spin"></i> Generando documento...';
+    button.innerHTML = `
+        <div class="spinner-container">
+            <div class="loading-spinner"></div>
+            <span>Generando documento...</span>
+        </div>
+    `;
+    
+    // Obtener fecha actual en formato DD-MM-YYYY
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Los meses van de 0-11
+    const year = today.getFullYear();
+    const currentDate = `${day}-${month}-${year}`;
+    
+    // Formatear nombre del paciente (eliminar espacios extras y caracteres especiales)
+    const patientName = formData.personal.full_name
+        .trim()
+        .replace(/\s+/g, '_') // Reemplazar espacios por _
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Eliminar acentos
+        .replace(/[^a-zA-Z0-9_]/g, ''); // Eliminar caracteres especiales
+    
+    const fileName = `Ficha_${patientName}_${currentDate}.pdf`;
     
     fetch('https://sitme.onrender.com/generate_clinical_record', {
         method: 'POST',
@@ -639,7 +660,7 @@ function downloadClinicalRecord(formData) {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `ficha_clinica_${formData.personal.full_name.replace(' ', '_')}.pdf`;
+        a.download = fileName;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
