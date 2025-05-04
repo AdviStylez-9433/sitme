@@ -330,12 +330,12 @@ def generate_clinical_record():
              Paragraph("<b>Descripción</b>", service_header_style),
              Paragraph("<b>Fecha</b>", service_header_style),
              Paragraph("<b>Valor</b>", service_header_style),
-             Paragraph("<b>Bonificación</b>", service_header_style),
+             Paragraph("<b>Copago</b>", service_header_style),
              Paragraph("<b>A Pagar</b>", service_header_style)],
             ["END-001", "Evaluación Endometriosis", datetime.now().strftime('%d/%m/%Y'), "$15.780", "$7.560", "$8.220"]
         ]
         
-        service_table = Table(service_data, colWidths=[60, 120, 60, 60, 60, 60])
+        service_table = Table(service_data, colWidths=[60, 130, 60, 60, 60, 60])
         service_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
@@ -372,6 +372,9 @@ def generate_clinical_record():
         professional_table = Table(professional_data, colWidths=[120, 300])
         professional_table.setStyle(TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 2),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 2),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ]))
         elements.append(professional_table)
         elements.append(Spacer(1, 24))
@@ -415,52 +418,37 @@ def generate_clinical_record():
 
         # Crear texto formateado para los resultados
         results_text = f"""
-        Probabilidad de Endometriosis: {probability_percent}%<br/>
-        Nivel de Riesgo: {risk_level}<br/>
-        Factores Clave: {', '.join(explanation['key_factors']) or 'No identificados'}<br/>
-        Recomendaciones:<br/>
+        <b>Probabilidad de Endometriosis:</b> {probability_percent}%<br/>
+        <b>Nivel de Riesgo:</b> {risk_level}<br/>
+        <b>Factores Clave:</b> {', '.join(explanation['key_factors']) or 'No identificados'}<br/>
+        <b>Recomendaciones:</b><br/>
         """
-
-        # Añadir cada recomendación con indentación
         for recommendation in explanation['recommendations']:
-            results_text += f"&nbsp;&nbsp;&nbsp;&nbsp;• {recommendation}<br/>"  # 4 espacios antes de la viñeta
+            results_text += f"&nbsp;&nbsp;&nbsp;&nbsp;• {recommendation}<br/>"
 
-        # Estilo para el párrafo que permita espacios no breakables
-        results_style = ParagraphStyle(
-            'Results',
-            parent=styles['Normal'],
-            fontSize=9,
-            leading=12,
-            spaceAfter=12,
-            textColor=colors.black,
-            leftIndent=10  # Indentación adicional para todo el párrafo
-        )
-
-        results_paragraph = Paragraph(results_text, style=results_style)
+        results_paragraph = Paragraph(results_text, normal_style)
         elements.append(results_paragraph)
         elements.append(Spacer(1, 24))
         
-        # 7. Firmas
+        # 7. Firmas con negritas
         signature_data = [
             ["", ""],
             ["__________________________", "__________________________"],
-            ["Firma Beneficiario", "Firma Profesional/Institución"]
+            [Paragraph("<b>Firma Beneficiario</b>", bold_style), 
+             Paragraph("<b>Firma Profesional/Institución</b>", bold_style)]
         ]
         
         signature_table = Table(signature_data, colWidths=[210, 210])
         signature_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ]))
         elements.append(signature_table)
         
-        # Construir el PDF
+        # Generar PDF
         doc.build(elements)
         
-        # Preparar la respuesta
+        # Preparar respuesta
         buffer.seek(0)
-        # Crear nombre de archivo con formato: NombreApellido_END_YYYYMMDD.pdf
         filename = f"{data['personal']['full_name'].replace(' ', '_')}_END_{datetime.now().strftime('%Y%m%d')}.pdf"
         response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
