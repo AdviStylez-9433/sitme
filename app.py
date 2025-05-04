@@ -332,12 +332,17 @@ def generate_clinical_record():
         
         service_data = [
             [Paragraph("<b>Código</b>", service_header_style),
-             Paragraph("<b>Descripción</b>", service_header_style),
-             Paragraph("<b>Fecha</b>", service_header_style),
-             Paragraph("<b>Valor</b>", service_header_style),
-             Paragraph("<b>Copago</b>", service_header_style),
-             Paragraph("<b>A Pagar</b>", service_header_style)],
-            ["END-001", "Evaluación Endometriosis", datetime.now().strftime('%d/%m/%Y'), "$15.780", "$7.560", "$8.220"]
+            Paragraph("<b>Descripción</b>", service_header_style),
+            Paragraph("<b>Fecha</b>", service_header_style),
+            Paragraph("<b>Valor</b>", service_header_style),
+            Paragraph("<b>Copago</b>", service_header_style),
+            Paragraph("<b>A Pagar</b>", service_header_style)],
+            [Paragraph("END-001", normal_style),
+            Paragraph("Evaluación Endometriosis", normal_style),
+            Paragraph(datetime.now().strftime('%d/%m/%Y'), normal_style),
+            Paragraph("$15.780", normal_style),
+            Paragraph("$7.560", normal_style),
+            Paragraph("$8.220", normal_style)]
         ]
         
         service_table = Table(service_data, colWidths=[60, 130, 60, 60, 60, 60])
