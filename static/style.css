@@ -891,30 +891,55 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transition: border-color 0.3s ease;
 }
 
+/* Tooltips */
 .summary-item {
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 5px;
+    position: relative;
+    padding: 10px 12px;
+    margin: 4px 0;
+    border-radius: 4px;
     transition: all 0.2s ease;
+    background-color: white; /* Fondo blanco para todas las cards */
 }
 
+/* Items críticos - solo borde izquierdo rojo */
 .summary-item.critical {
-    border-left: 4px solid var(--danger);
-    background-color: #ffebee;
+    border-left: 3px solid var(--danger);
+    padding-left: 8px;
 }
 
+/* Items normales - solo borde izquierdo verde */
 .summary-item.normal {
-    border-left: 4px solid var(--success);
-    background-color: #f0f9f0;
+    border-left: 3px solid var(--success);
+    padding-left: 8px;
 }
 
+/* Textos (manteniendo tu estilo original) */
+.summary-item .summary-label {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.summary-item .summary-value {
+    font-weight: 700;
+    color: var(--dark);
+}
+
+/* Tooltips (iconos) */
 .tooltip-icon {
-    color: var(--danger);
-    margin-left: 6px;
+    margin-left: 5px;
+    font-size: 0.8em;
     cursor: help;
-    font-size: 0.9em;
 }
 
+.summary-item.critical .tooltip-icon {
+    color: var(--danger);
+}
+
+.summary-item.normal .tooltip-icon {
+    color: var(--success);
+}
+
+/* Estilos del tooltip al hacer hover */
 [data-tooltip] {
     position: relative;
 }
@@ -923,14 +948,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     content: attr(data-tooltip);
     position: absolute;
     bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--dark);
-    color: white;
+    left: 0;
+    width: 200px;
     padding: 8px 12px;
     border-radius: 4px;
     font-size: 0.8em;
-    width: 220px;
-    z-index: 100;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+    line-height: 1.4;
+    z-index: 1000;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    pointer-events: none;
+}
+
+.summary-item.critical [data-tooltip]:hover::after {
+    background: var(--danger);
+    color: white;
+}
+
+.summary-item.normal [data-tooltip]:hover::after {
+    background: var(--success);
+    color: white;
 }
