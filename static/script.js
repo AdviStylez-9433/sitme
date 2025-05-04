@@ -219,7 +219,7 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
             recommendations: data.recommendations,
             riskFactors: mapRiskFactors(data.risk_factors || [], formData),
             formData: formData,
-            guidelines: getClinicalGuidelines(data.risk_level)
+            guidelines: getClinicalGuidelines(data.probability)
         });
     })
     .catch(error => {
@@ -508,30 +508,30 @@ function mapRiskFactors(riskFactors, formData) {
     return riskFactors.map(factor => factorMap[factor] || factor);
 }
 
-function getClinicalGuidelines(riskLevel) {
-    const guidelines = {
-        high: {
+function getClinicalGuidelines(probability) {
+    // Convertir probability a número si es necesario
+    const prob = typeof probability === 'number' ? probability : parseFloat(probability);
+    
+    // Definir las guías basadas en rangos de probabilidad
+    if (prob >= 0.7) { // Alto riesgo (>70%)
+        return {
             asrm: "Paciente cumple criterios para evaluación laparoscópica diagnóstica según ASRM. Considerar estadificación quirúrgica.",
             eshre: "Recomendación ESHRE: Derivación a unidad especializada en endometriosis. Considerar tratamiento médico agresivo y evaluación quirúrgica.",
             nice: "Guía NICE: Paciente de alto riesgo requiere evaluación multidisciplinaria (ginecólogo, especialista en dolor, fertilidad)."
-        },
-        moderate: {
+        };
+    } else if (prob >= 0.4) { // Riesgo moderado (40-69%)
+        return {
             asrm: "Paciente puede beneficiarse de tratamiento médico empírico según ASRM. Considerar imagenología avanzada antes de cirugía.",
             eshre: "Recomendación ESHRE: Prueba de tratamiento médico de 3-6 meses. Si no mejora, considerar evaluación quirúrgica.",
             nice: "Guía NICE: Manejo inicial con AINEs y terapia hormonal. Evaluar respuesta en 3 meses."
-        },
-        low: {
+        };
+    } else { // Bajo riesgo (<40%)
+        return {
             asrm: "ASRM sugiere manejo conservador con seguimiento. Educación sobre síntomas de alerta.",
             eshre: "Recomendación ESHRE: Manejo sintomático. Reevaluar si síntomas progresan o cambian.",
             nice: "Guía NICE: Educación y analgesia según necesidad. Seguimiento anual o ante nuevos síntomas."
-        }
-    };
-    
-    return guidelines[riskLevel] || {
-        asrm: "Consulte las guías ASRM más recientes para recomendaciones específicas.",
-        eshre: "Ver directrices ESHRE actualizadas para el manejo de casos individuales.",
-        nice: "Referir a las guías NICE completas para protocolos de tratamiento."
-    };
+        };
+    }
 }
 
 function showError(message) {
@@ -602,7 +602,7 @@ function showSimulation(formData) {
             ...(formData.symptoms.bowel_symptoms ? ['sintomas_intestinales'] : [])
         ], formData),
         formData: formData,
-        guidelines: getClinicalGuidelines(riskLevel)
+        guidelines: getClinicalGuidelines(probability)
     });
 }
 
