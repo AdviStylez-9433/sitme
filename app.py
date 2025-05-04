@@ -287,7 +287,7 @@ def generate_clinical_record():
         
         # 1. Encabezado del bono
         elements.append(Paragraph("BONO DE ATENCIÓN MÉDICA", header_style))
-        elements.append(Paragraph("Evaluación de Endometriosis", subtitle_style))
+        elements.append(Paragraph("Informacion de la paciente:", subtitle_style))
         elements.append(Spacer(1, 12))
         
         # 2. Información del beneficiario (en tabla)
@@ -297,8 +297,7 @@ def generate_clinical_record():
             ["RUT Beneficiario:", data['personal']['id_number']],
             ["Nombre:", data['personal']['full_name']],
             ["Edad:", f"{data['personal']['age']} años"],
-            ["Previsión:", data['personal']['insurance']],
-            ["Nivel:", "3"]  # Nivel de atención
+            ["Previsión:", data['personal']['insurance']]
         ]
         
         beneficiary_table = Table(beneficiary_data, colWidths=[120, 300])
@@ -375,7 +374,7 @@ def generate_clinical_record():
         elements.append(Spacer(1, 24))
         
         # 6. Resultados de la evaluación de riesgo
-        elements.append(Paragraph("RESULTADOS DE EVALUACIÓN DE ENDOMETRIOSIS", subtitle_style))
+        elements.append(Paragraph("Resultados de evaluacion:", subtitle_style))
         elements.append(Spacer(1, 6))
 
         # Hacer predicción para incluir en el PDF
@@ -406,20 +405,17 @@ def generate_clinical_record():
         # Determinar nivel de riesgo y color
         if proba >= 0.7:
             risk_level = "ALTO"
-            risk_color = colors.red
         elif proba >= 0.4:
             risk_level = "MODERADO"
-            risk_color = colors.orange
         else:
             risk_level = "BAJO"
-            risk_color = colors.green
 
         # Crear texto formateado para los resultados
         results_text = f"""
-        <b>Probabilidad de Endometriosis:</b> {probability_percent}%<br/>
-        <b>Nivel de Riesgo:</b> <font color="{risk_color.hexval()}">{risk_level}</font><br/>
-        <b>Factores Clave:</b> {', '.join(explanation['key_factors']) or 'No identificados'}<br/>
-        <b>Recomendaciones:</b><br/>
+        Probabilidad de Endometriosis: {probability_percent}%<br/>
+        Nivel de Riesgo: {risk_level}<br/>
+        Factores Clave: {', '.join(explanation['key_factors']) or 'No identificados'}<br/>
+        Recomendaciones:<br/>
         """
 
         # Añadir cada recomendación con indentación
