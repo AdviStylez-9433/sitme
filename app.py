@@ -367,9 +367,6 @@ def generate_clinical_record():
 
         elements.append(total_table)
         elements.append(Spacer(1, 12))
-
-        elements.append(total_table)
-        elements.append(Spacer(1, 12))
         
         # 5. Información profesional con indicadores en negrita
         professional_data = [
