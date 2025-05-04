@@ -202,25 +202,31 @@ def generate_explanation(input_data, probability):
     
     # Determinar nivel de riesgo
     if probability >= 0.7:
-        risk_level = "alto"
+        risk_level = "ALTO"
         recommendations = [
-            "Consulta urgente con especialista",
-            "Ecografía transvaginal",
-            "Análisis de marcadores inflamatorios"
+            "Consulta inmediata con ginecólogo especializado en endometriosis",
+            "Ecografía transvaginal con protocolo ESUR para caracterización de implantes",
+            "Perfil de marcadores inflamatorios (CA-125, IL-6, PCR ultrasensible)",
+            "Resonancia magnética pélvica con protocolo de endometriosis",
+            "Evaluación multidisciplinaria (ginecología, gastroenterología, urología según sintomatología)"
         ]
     elif probability >= 0.4:
-        risk_level = "moderado"
+        risk_level = "MODERADO" 
         recommendations = [
-            "Evaluación ginecológica",
-            "Control del dolor",
-            "Seguimiento en 3 meses"
+            "Evaluación ginecológica con escala visual analógica (EVA) para cuantificación del dolor",
+            "Terapia analgésica escalonada (AINES como primera línea, considerando opioides débiles si EVA >7)",
+            "Estudio hormonal básico (FSH, LH, estradiol) y marcador CA-125",
+            "Ecografía pélvica transvaginal de alta resolución",
+            "Seguimiento clínico a 8-12 semanas con reevaluación de score de riesgo"
         ]
     else:
-        risk_level = "bajo"
+        risk_level = "BAJO"
         recommendations = [
-            "Monitoreo de síntomas",
-            "Analgesia según necesidad",
-            "Educación sobre endometriosis"
+            "Registro estructurado de síntomas mediante diario menstrual (frecuencia, intensidad, dismenorrea)",
+            "Analgesia con AINES selectivos (ej. celecoxib 200mg/12h) según patrón dolor",
+            "Educación sobre signos de alarma (disquecia, dispareunia profunda, hematuria cíclica)",
+            "Suplementación con ácidos grasos omega-3 (1000mg/día) como modulador inflamatorio",
+            "Control anual con evaluación de progresión sintomática"
         ]
     
     return {
