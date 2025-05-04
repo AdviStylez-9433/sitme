@@ -459,7 +459,7 @@ def generate_clinical_record():
         )
 
         # Sección de recomendaciones mejorada
-        recommendations_title = Paragraph("<b>Recomendaciones:</b>", bold_style)
+        recommendations_title = Paragraph("<b>RECOMENDACIONES:</b>", subtitle_style)
         elements.append(recommendations_title)
         elements.append(Spacer(1, 4))
 
