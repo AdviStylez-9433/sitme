@@ -276,7 +276,8 @@ def generate_clinical_record():
         # 0. Logo 
         logo_path = "static/logo.png"  # Ajusta esta ruta
         try:
-            logo = Image(logo_path, width=2*inch, height=1*inch)  # Ajusta las dimensiones según tu logo
+            # Dimensiones más pequeñas (por ejemplo, 1.5 pulgadas de ancho y 0.4 de alto)
+            logo = Image(logo_path, width=1.5*inch, height=0.4*inch)  # Ajustado a un tamaño más pequeño
             logo.hAlign = 'LEFT'  # Alinear a la izquierda
             elements.append(logo)
             elements.append(Spacer(1, 12))  # Espacio después del logo
@@ -460,10 +461,12 @@ def generate_clinical_record():
         
         # Preparar la respuesta
         buffer.seek(0)
+        # Crear nombre de archivo con formato: NombreApellido_END_YYYYMMDD.pdf
+        filename = f"{data['personal']['full_name'].replace(' ', '_')}_END_{datetime.now().strftime('%Y%m%d')}.pdf"
         response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename=bono_endometriosis_{data["personal"]["full_name"].replace(" ", "_")}.pdf'
-        
+        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+
         return response
         
     except Exception as e:
