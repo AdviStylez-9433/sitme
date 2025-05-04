@@ -373,13 +373,13 @@ def generate_clinical_record():
         elements.append(total_table)
         elements.append(Spacer(1, 12))
         
-        # 5. Información profesional con indicadores en negrita
+        # 5. Información profesional con indicadores en negrita y respuestas en normal_style
         professional_data = [
-            [Paragraph("<b>Médico tratante:</b>", bold_style), "Dr. John Doe"],
-            [Paragraph("<b>RUT:</b>", bold_style), "12.345.678-9"],
-            [Paragraph("<b>Fecha atención:</b>", bold_style), datetime.now().strftime('%d/%m/%Y')]
+            [Paragraph("<b>Médico tratante:</b>", bold_style), Paragraph("Dr. John Doe", normal_style)],
+            [Paragraph("<b>RUT:</b>", bold_style), Paragraph("12.345.678-9", normal_style)],
+            [Paragraph("<b>Fecha atención:</b>", bold_style), Paragraph(datetime.now().strftime('%d/%m/%Y'), normal_style)]
         ]
-        
+
         professional_table = Table(professional_data, colWidths=[120, 300])
         professional_table.setStyle(TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
