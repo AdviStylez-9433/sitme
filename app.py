@@ -13,7 +13,7 @@ import io
 import base64
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, TA_CENTER
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
@@ -449,14 +449,14 @@ def generate_clinical_record():
                 'Signature',
                 parent=styles['Normal'],
                 fontSize=9,
-                alignment=TA_CENTER,
+                alignment=1,
                 spaceBefore=6
             )), 
             Paragraph("<b>Firma Profesional/Institución</b>", style=ParagraphStyle(
                 'Signature',
                 parent=styles['Normal'],
                 fontSize=9,
-                alignment=TA_CENTER,
+                alignment=1,
                 spaceBefore=6
             ))]
         ]
