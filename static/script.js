@@ -629,21 +629,20 @@ function downloadClinicalRecord(formData) {
         </div>
     `;
     
-    // Obtener fecha actual en formato DD-MM-YYYY
     const today = new Date();
     const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Los meses van de 0-11
+    const month = String(today.getMonth() + 1).padStart(2, '0');
     const year = today.getFullYear();
     const currentDate = `${day}-${month}-${year}`;
+    const timestamp = new Date().getTime(); // Timestamp único
     
-    // Formatear nombre del paciente (eliminar espacios extras y caracteres especiales)
     const patientName = formData.personal.full_name
         .trim()
-        .replace(/\s+/g, '_') // Reemplazar espacios por _
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Eliminar acentos
-        .replace(/[^a-zA-Z0-9_]/g, ''); // Eliminar caracteres especiales
+        .replace(/\s+/g, '_')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9_]/g, '');
     
-    const fileName = `Ficha_${patientName}_${currentDate}.pdf`;
+    const fileName = `Ficha_${patientName}_${currentDate}_${timestamp}.pdf`; // Nombre único
     
     fetch('https://sitme.onrender.com/generate_clinical_record', {
         method: 'POST',
