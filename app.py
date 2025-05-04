@@ -450,9 +450,9 @@ def generate_clinical_record():
             'Recommendation',
             parent=styles['Normal'],
             fontSize=9,
-            leading=12,
-            spaceBefore=6,
-            spaceAfter=6,
+            leading=10,
+            spaceBefore=3,
+            spaceAfter=3,
             leftIndent=10,
             textColor=colors.black,
             bulletIndent=5
@@ -466,13 +466,12 @@ def generate_clinical_record():
         # Lista de recomendaciones con formato mejorado
         recommendation_items = []
         for recommendation in explanation['recommendations']:
-            recommendation_items.append(
-                Paragraph(f"• {recommendation}", recommendation_style)
+            recommendation_items.append(Paragraph(f"• {recommendation}", recommendation_style)
             )
-            recommendation_items.append(Spacer(1, 4))  # Espacio entre items
+            recommendation_items.append(Spacer(1, 2))  # Espacio entre items
 
         elements.extend(recommendation_items)
-        elements.append(Spacer(1, 18))  # Espacio final después de la sección
+        elements.append(Spacer(1, 12))  # Espacio final después de la sección
         
         # 7. Firmas
         signature_data = [
