@@ -918,7 +918,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     bottom: 100%;
     left: 0;
     width: 200px;
-    background: #2a3f54;
+    background: #8B0000;
     color: white;
     padding: 8px 12px;
     border-radius: 4px;
