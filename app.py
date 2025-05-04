@@ -273,6 +273,17 @@ def generate_clinical_record():
         # Contenido del PDF
         elements = []
         
+        # 0. Logo 
+        logo_path = "path/to/your/logo.png"  # Ajusta esta ruta
+        try:
+            logo = Image(logo_path, width=2*inch, height=0.5*inch)  # Ajusta las dimensiones según tu logo
+            logo.hAlign = 'LEFT'  # Alinear a la izquierda
+            elements.append(logo)
+            elements.append(Spacer(1, 12))  # Espacio después del logo
+        except Exception as e:
+            app.logger.error(f"No se pudo cargar el logo: {str(e)}")
+            # Si falla la carga del logo, continuar sin él
+        
         # 1. Encabezado del bono
         elements.append(Paragraph("BONO DE ATENCIÓN MÉDICA", header_style))
         elements.append(Paragraph("Evaluación de Endometriosis", subtitle_style))
