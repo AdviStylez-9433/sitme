@@ -903,7 +903,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .tooltip-icon {
     margin-left: 5px;
-    color: var(--primary);
+    color: var(--danger);
     font-size: 0.8em;
     cursor: help;
 }

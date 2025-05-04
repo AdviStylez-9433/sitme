@@ -288,6 +288,17 @@ function displayResults(data) {
 
     // Mapeo de tooltips para factores críticos
     const tooltipMap = {
+        'Edad': (value) => {
+            const age = parseInt(value.split(' ')[0]);
+            if (age < 30) return 'Edad <30 años: Mayor prevalencia de endometriosis según estudios poblacionales';
+            return '';
+        },
+        'Dolor menstrual': (value) => {
+            const level = parseInt(value);
+            if (level >= 7) return 'Dolor severo (≥7/10) tiene alta correlación con endometriosis profunda (82% VPP)';
+            if (level >= 4) return 'Dolor moderado puede indicar endometriosis temprana o adenomiosis';
+            return '';
+        },
         'Dolor menstrual': (value) => {
             const level = parseInt(value);
             if (level >= 7) return 'Dolor severo (≥7/10) tiene alta correlación con endometriosis profunda (82% VPP)';
