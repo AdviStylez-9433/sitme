@@ -275,21 +275,27 @@ def generate_clinical_record():
         
         # 0. Encabezado con logo y título
         try:
-            logo_path = os.path.join('static', 'logo.png')
-            logo = Image(logo_path, width=40, height=40)
+            logo_path = os.path.join('static', 'faviconV4.png')
             
-            logo_table = Table([[logo]], colWidths=[50])  # Ancho reducido para alinear a izquierda
+            # Mantener proporciones originales del logo rectangular
+            logo_width = 100  # Ancho deseado en puntos (1 pulgada = 72 puntos)
+            logo = Image(logo_path, width=logo_width, height=None, kind='proportional') 
+            
+            # Tabla de una celda alineada a izquierda
+            logo_table = Table([[logo]], colWidths=[logo_width])
             logo_table.setStyle(TableStyle([
-                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),  # Alineación izquierda
                 ('VALIGN', (0, 0), (-1, -1), 'BOTTOM'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 0),  # Sin padding izquierdo
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
             ]))
             
             elements.append(logo_table)
-            elements.append(Spacer(1, 8))
+            elements.append(Spacer(1, 10))  # Espacio después del logo
             
         except Exception as e:
             app.logger.error(f"Error cargando logo: {str(e)}")
-            elements.append(Spacer(1, 32))
+            elements.append(Spacer(1, 30))  # Espacio equivalente si falla el logo
         
         # 1. Encabezado del bono
         elements.append(Paragraph("BONO DE ATENCIÓN MÉDICA", header_style))
