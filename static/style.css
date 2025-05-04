@@ -901,18 +901,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     padding-left: 8px;
 }
 
-/* Items normales - solo borde izquierdo verde */
-.summary-item.normal {
-    border-left: 3px solid var(--success);
-    padding-left: 8px;
-}
-
 .tooltip-icon {
     margin-left: 5px;
     color: var(--danger);
     font-size: 0.8em;
     cursor: help;
 }
+
 
 [data-tooltip] {
     position: relative;
@@ -924,7 +919,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     bottom: 100%;
     left: 0;
     width: 200px;
-    background: var(--danger);
+    background: var(--dark);
     color: white;
     padding: 8px 12px;
     border-radius: 4px;
@@ -944,4 +939,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .summary-item.critical .summary-value {
     font-weight: 700;
     color: var(--dark);
+}
+
+[data-tooltip-color="green"]::after {
+    background-color: #4CAF50;
+    color: white;
+}
+
+[data-tooltip-color="green"]::before {
+    border-top-color: #4CAF50;
 }
