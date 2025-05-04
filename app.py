@@ -277,25 +277,38 @@ def generate_clinical_record():
         try:
             logo_path = os.path.join('static', 'faviconV4.png')
             
-            # Mantener proporciones originales del logo rectangular
-            logo_width = 100  # Ancho deseado en puntos (1 pulgada = 72 puntos)
-            logo = Image(logo_path, width=logo_width, height=None, kind='proportional') 
+            # Cargar logo manteniendo proporciones (ajustar solo el ancho)
+            logo_width = 40  # Ancho deseado en puntos
+            logo = Image(logo_path, width=logo_width, height=None, kind='proportional')
             
-            # Tabla de una celda alineada a izquierda
-            logo_table = Table([[logo]], colWidths=[logo_width])
-            logo_table.setStyle(TableStyle([
-                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),  # Alineación izquierda
-                ('VALIGN', (0, 0), (-1, -1), 'BOTTOM'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 0),  # Sin padding izquierdo
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            # Tabla con logo y título alineados a la izquierda
+            header_table = Table([
+                [logo, Paragraph("SITME", header_style)]
+            ], colWidths=[logo_width + 10, 400])  # +10 para espacio entre logo y texto
+            
+            header_table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'BOTTOM'),  # Alinea elementos en la parte inferior
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),     # Alineación izquierda para todo
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+                ('LEFTPADDING', (1, 0), (1, 0), 10),     # Espacio entre logo y texto
             ]))
             
-            elements.append(logo_table)
-            elements.append(Spacer(1, 10))  # Espacio después del logo
+            elements.append(header_table)
+            elements.append(Spacer(1, 12))
             
         except Exception as e:
-            app.logger.error(f"Error cargando logo: {str(e)}")
-            elements.append(Spacer(1, 30))  # Espacio equivalente si falla el logo
+            app.logger.error(f"No se pudo cargar el logo: {str(e)}")
+            # Fallback solo con texto alineado a la izquierda
+            elements.append(Paragraph("SITME", ParagraphStyle(
+                'HeaderFallback',
+                parent=styles['Heading1'],
+                fontSize=12,
+                alignment=0,  # Alineación izquierda
+                spaceAfter=12,
+                fontName='Helvetica-Bold',
+                textColor=colors.HexColor('#143f6a')
+            )))
+            elements.append(Spacer(1, 12))
         
         # 1. Encabezado del bono
         elements.append(Paragraph("BONO DE ATENCIÓN MÉDICA", header_style))
