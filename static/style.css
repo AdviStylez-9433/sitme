@@ -5,7 +5,11 @@
     --secondary: #26a69a;
     --danger: #d32f2f;
     --warning: #ffa000;
+    --warning-light: #ffc046;   /* Versión 30% más clara */
+    --warning-dark: #e69100;    /* Versión 10% más oscura para hover */
     --success: #388e3c;
+    --success-light: #80c283; /* 40% más claro */
+    --success-dark: #1c5a20; /* 40% oscuro */
     --info: #1976d2;
     --light: #f5f5f5;
     --dark: #212121;
@@ -711,7 +715,7 @@
   .info-tooltip .tooltip-text {
     visibility: hidden;
     width: 250px;
-    background-color: var(--dark);
+    background-color: var(--danger);
     color: white;
     text-align: center;
     border-radius: 6px;
@@ -909,3 +913,220 @@
       transition: all 0.3s ease;
     }
   }
+
+/* Botones */
+.form-actions {
+    display: flex;
+    gap: 15px; /* Espacio entre botones */
+    margin-top: 20px;
+    width: 100%;
+}
+
+.form-actions button {
+    background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
+    color: white;
+    border: none;
+    padding: 16px 25px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 6px rgba(94, 53, 177, 0.16);
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* Efecto hover con pseudo-elemento para transición suave */
+.form-actions button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--success-dark) 0%, var(--success) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+}
+
+.form-actions button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(94, 53, 177, 0.24);
+}
+
+.form-actions button:hover::after {
+    opacity: 1;
+}
+
+.form-actions button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(94, 53, 177, 0.24);
+    transition: all 0.1s ease;
+}
+
+/* Animación para el icono */
+.form-actions button i {
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+.form-actions button:hover i {
+    transform: scale(1.15);
+}
+
+/* Estilo específico para el botón Limpiar Todo con efectos mejorados */
+.clear-all-btn {
+    background: linear-gradient(135deg, #f44336 0%, #ff7961 100%) !important;
+    box-shadow: 0 3px 6px rgba(244, 67, 54, 0.16) !important;
+}
+
+.clear-all-btn::after {
+    background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%) !important;
+}
+
+.clear-all-btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 16px rgba(244, 67, 54, 0.24) !important;
+}
+
+.clear-all-btn:active {
+    transform: translateY(1px) !important;
+    box-shadow: 0 2px 4px rgba(244, 67, 54, 0.24) !important;
+}
+
+/* Efecto de "onda" al hacer clic */
+@keyframes ripple {
+    to {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+.form-actions button:focus:not(:active)::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    animation: ripple 0.6s ease-out;
+    z-index: 0;
+}
+
+/* Estilo base del botón PDF */
+.download-button {
+    background: linear-gradient(135deg, var(--warning) 0%, var(--warning-light) 100%);
+    color: #2c3e50; /* Texto oscuro para mejor contraste */
+    border: none;
+    padding: 16px 25px;
+    font-size: 16px;
+    font-weight: 600; /* Más grueso para mejor legibilidad */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 6px rgba(255, 160, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    margin-top: 15px;
+    width: 100%;
+}
+
+/* Efecto hover con pseudo-elemento */
+.download-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--warning-dark) 0%, var(--warning) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+}
+
+.download-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(255, 160, 0, 0.3);
+    color: white; /* Cambio de color de texto en hover */
+}
+
+.download-button:hover::after {
+    opacity: 1;
+}
+
+.download-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(255, 160, 0, 0.3);
+    transition: all 0.1s ease;
+}
+
+/* Estilo para el icono */
+.download-button i {
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+    color: currentColor; /* Hereda el color del texto */
+}
+
+.download-button:hover i {
+    transform: scale(1.15);
+}
+
+/* Estado de carga */
+.download-button .spinner-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.download-button .loading-spinner {
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(44, 62, 80, 0.3);
+    border-radius: 50%;
+    border-top-color: currentColor;
+    animation: spin 1s ease-in-out infinite;
+}
+
+.download-button:hover .loading-spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Efecto ripple */
+.download-button:focus:not(:active)::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: rgba(44, 62, 80, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    animation: ripple 0.6s ease-out;
+    z-index: 0;
+}
+
+.download-button:hover:focus:not(:active)::before {
+    background: rgba(255, 255, 255, 0.3);
+}

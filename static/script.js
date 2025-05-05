@@ -620,7 +620,13 @@ document.getElementById('pain_level').addEventListener('input', function() {
 document.getElementById('pain_level').dispatchEvent(new Event('input'));
 
 function downloadClinicalRecord(formData) {
-    const button = document.querySelector('.download-button') || document.createElement('button');
+    const button = document.querySelector('.download-button');
+    if (!button) return;
+    
+    // Guardar el contenido original para restaurarlo después
+    const originalContent = button.innerHTML;
+    
+    // Estado de carga
     button.disabled = true;
     button.innerHTML = `
         <div class="spinner-container">
@@ -629,46 +635,60 @@ function downloadClinicalRecord(formData) {
         </div>
     `;
     
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const year = today.getFullYear();
-    const currentDate = `${day}-${month}-${year}`;
-    const timestamp = new Date().getTime(); // Timestamp único
+    // Añadir clase de loading para posibles estilos adicionales
+    button.classList.add('loading');
+    
+    // Generar nombre de archivo
+    const today = new Date().toLocaleDateString('es-CL', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    }).replace(/\//g, '-');
     
     const patientName = formData.personal.full_name
         .trim()
+        .toLowerCase()
         .replace(/\s+/g, '_')
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-zA-Z0-9_]/g, '');
+        .replace(/[^a-z0-9_]/g, '');
     
-    const fileName = `Ficha_${patientName}_${currentDate}_${timestamp}.pdf`; // Nombre único
+    const fileName = `ficha_${patientName}_${today}.pdf`;
     
+    // Solicitud de generación del PDF
     fetch('https://sitme.onrender.com/generate_clinical_record', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
     })
     .then(response => {
-        if (!response.ok) throw new Error('Error al generar el documento');
+        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
         return response.blob();
     })
     .then(blob => {
-        const url = window.URL.createObjectURL(blob);
+        // Descarga del archivo
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = fileName;
+        a.style.display = 'none';
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
+        
+        // Limpieza
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 100);
     })
     .catch(error => {
-        showError('Error al generar el documento: ' + error.message);
+        console.error('Error:', error);
+        showError(`Error al generar el documento: ${error.message}`);
     })
     .finally(() => {
+        // Restaurar estado normal
         button.disabled = false;
-        button.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar Ficha Clínica y Bono';
+        button.innerHTML = originalContent;
+        button.classList.remove('loading');
     });
 }
+

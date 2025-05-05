@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SITME</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="../static/faviconV4.png" type="image/png">
     <link rel="stylesheet" href="../static/style.css">
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -18,26 +22,24 @@
                 <i class="fas fa-id-card" aria-hidden="true"></i> ID Clínico: ENDO-<span id="clinicId">0000</span>
             </div>
         </header>
-        
+
         <div class="form-container">
             <form id="endometriosisForm">
                 <!-- Sección 1: Identificación del Paciente -->
                 <div class="form-section">
                     <h2 class="section-title"><i class="fas fa-user-circle"></i> Datos de Identificación</h2>
                     <p class="section-subtitle">Complete la información básica del paciente según registro clínico</p>
-                    
+
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="full_name" class="required">Nombre completo</label>
                             <input type="text" id="full_name" name="full_name" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="rut">RUT</label>
-                            <input type="text" id="rut" name="rut" 
-                                   pattern="\d{7,8}-[\dkK]"
-                                   placeholder="12345678-9"
-                                   maxlength="10">
+                            <input type="text" id="rut" name="rut" pattern="\d{7,8}-[\dkK]" placeholder="12345678-9"
+                                maxlength="10">
                             <div id="rut-error" class="error-message" style="display: none;"></div>
                         </div>
 
@@ -45,12 +47,12 @@
                             <label for="birth_date" class="required">Fecha de nacimiento</label>
                             <input type="date" id="birth_date" name="birth_date" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="age">Edad</label>
                             <input type="number" id="age" name="age" min="15" max="50" readonly>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="blood_type">Tipo de sangre</label>
                             <select id="blood_type" name="blood_type">
@@ -65,7 +67,7 @@
                                 <option value="O-">O-</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label class="required">Previsión</label>
                             <div class="radio-group">
@@ -81,12 +83,12 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Sección 2: Antecedentes Médicos -->
                 <div class="form-section">
                     <h2 class="section-title"><i class="fas fa-medical-record"></i> Antecedentes Médicos</h2>
                     <p class="section-subtitle">Historial clínico relevante para la evaluación de endometriosis</p>
-                    
+
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Antecedentes ginecológicos</label>
@@ -105,7 +107,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Antecedentes familiares</label>
                             <div class="checkbox-group">
@@ -123,7 +125,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Comorbilidades</label>
                             <div class="checkbox-group">
@@ -141,43 +143,44 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="medications">Medicamentos actuales</label>
-                            <textarea id="medications" name="medications" rows="3" placeholder="Lista de medicamentos, dosis y frecuencia"></textarea>
+                            <textarea id="medications" name="medications" rows="3"
+                                placeholder="Lista de medicamentos, dosis y frecuencia"></textarea>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Sección 3: Historia Menstrual -->
                 <div class="form-section">
                     <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Historial Menstrual</h2>
                     <p class="section-subtitle">Características del ciclo menstrual y síntomas asociados</p>
-                    
+
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="menarche_age" class="required">Edad de la menarquia</label>
                             <input type="number" id="menarche_age" name="menarche_age" min="8" max="20" required>
                             <div class="normal-range">Rango normal: 10-14 años</div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="cycle_length" class="required">Duración del ciclo (días)</label>
                             <input type="number" id="cycle_length" name="cycle_length" min="15" max="45" required>
                             <div class="normal-range">Rango normal: 21-35 días</div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="period_duration" class="required">Duración del sangrado (días)</label>
                             <input type="number" id="period_duration" name="period_duration" min="1" max="15" required>
                             <div class="normal-range">Rango normal: 3-7 días</div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="last_period" class="required">Última menstruación</label>
                             <input type="date" id="last_period" name="last_period" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="pain_level" class="required">Dolor menstrual (1-10)</label>
                             <input type="range" id="pain_level" name="pain_level" min="1" max="10" value="1" required>
@@ -194,7 +197,7 @@
                                 <span class="pain-scale-label">10</span>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Características del dolor</label>
                             <div class="checkbox-group">
@@ -218,18 +221,19 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Sección 4: Síntomas Actuales -->
                 <div class="form-section">
                     <h2 class="section-title"><i class="fas fa-heartbeat"></i> Síntomas Actuales</h2>
                     <p class="section-subtitle">Síntomas característicos de endometriosis según guías clínicas</p>
-                    
+
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="required">Dolor durante/después de relaciones sexuales</label>
                             <div class="radio-group">
                                 <div class="radio-option">
-                                    <input type="radio" id="pain_during_sex_yes" name="pain_during_sex" value="1" required>
+                                    <input type="radio" id="pain_during_sex_yes" name="pain_during_sex" value="1"
+                                        required>
                                     <label for="pain_during_sex_yes">Sí</label>
                                 </div>
                                 <div class="radio-option">
@@ -238,12 +242,13 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label class="required">Síntomas intestinales cíclicos</label>
                             <div class="radio-group">
                                 <div class="radio-option">
-                                    <input type="radio" id="bowel_symptoms_yes" name="bowel_symptoms" value="1" required>
+                                    <input type="radio" id="bowel_symptoms_yes" name="bowel_symptoms" value="1"
+                                        required>
                                     <label for="bowel_symptoms_yes">Sí</label>
                                 </div>
                                 <div class="radio-option">
@@ -252,12 +257,13 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label class="required">Síntomas urinarios cíclicos</label>
                             <div class="radio-group">
                                 <div class="radio-option">
-                                    <input type="radio" id="urinary_symptoms_yes" name="urinary_symptoms" value="1" required>
+                                    <input type="radio" id="urinary_symptoms_yes" name="urinary_symptoms" value="1"
+                                        required>
                                     <label for="urinary_symptoms_yes">Sí</label>
                                 </div>
                                 <div class="radio-option">
@@ -266,7 +272,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label class="required">Fatiga crónica</label>
                             <div class="radio-group">
@@ -280,7 +286,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Dificultades para concebir</label>
                             <div class="radio-group">
@@ -298,19 +304,21 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="other_symptoms">Otros síntomas</label>
-                            <textarea id="other_symptoms" name="other_symptoms" rows="3" placeholder="Descripción de otros síntomas relevantes"></textarea>
+                            <textarea id="other_symptoms" name="other_symptoms" rows="3"
+                                placeholder="Descripción de otros síntomas relevantes"></textarea>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Sección 5: Biomarcadores y Exámenes -->
                 <div class="form-section">
                     <h2 class="section-title"><i class="fas fa-flask"></i> Biomarcadores y Exámenes</h2>
-                    <p class="section-subtitle">Resultados de laboratorio relevantes para el diagnóstico de endometriosis</p>
-                    
+                    <p class="section-subtitle">Resultados de laboratorio relevantes para el diagnóstico de
+                        endometriosis</p>
+
                     <div class="form-group">
                         <div class="biomarker-row">
                             <div class="form-group">
@@ -319,9 +327,12 @@
                                     <input type="number" id="ca125" name="ca125" step="0.1" min="0">
                                     <span class="biomarker-unit">U/mL</span>
                                 </div>
-                                <div class="normal-range">Normal: &lt;35 U/mL <span class="info-tooltip"><i class="fas fa-info-circle"></i><span class="tooltip-text">Puede estar elevado en endometriosis, pero también en otras condiciones ginecológicas</span></span></div>
+                                <div class="normal-range">Normal: &lt;35 U/mL <span class="info-tooltip"><i
+                                            class="fas fa-info-circle"></i><span class="tooltip-text">Puede estar
+                                            elevado en endometriosis, pero también en otras condiciones
+                                            ginecológicas</span></span></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="il6">IL-6</label>
                                 <div class="biomarker-value">
@@ -330,7 +341,7 @@
                                 </div>
                                 <div class="normal-range">Normal: &lt;5 pg/mL</div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="tnf_alpha">TNF-α</label>
                                 <div class="biomarker-value">
@@ -340,7 +351,7 @@
                                 <div class="normal-range">Normal: &lt;15 pg/mL</div>
                             </div>
                         </div>
-                        
+
                         <div class="biomarker-row">
                             <div class="form-group">
                                 <label for="vegf">VEGF</label>
@@ -350,7 +361,7 @@
                                 </div>
                                 <div class="normal-range">Normal: &lt;500 pg/mL</div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="amh">Hormona Antimulleriana (AMH)</label>
                                 <div class="biomarker-value">
@@ -359,7 +370,7 @@
                                 </div>
                                 <div class="normal-range">Normal: 1.0-4.0 ng/mL</div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="crp">Proteína C Reactiva (PCR)</label>
                                 <div class="biomarker-value">
@@ -370,7 +381,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="imaging">Resultados de imágenes</label>
                         <select id="imaging" name="imaging">
@@ -382,23 +393,25 @@
                             <option value="other">Otros hallazgos</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="imaging_details">Detalles de estudios por imágenes</label>
-                        <textarea id="imaging_details" name="imaging_details" rows="3" placeholder="Descripción de ecografía, resonancia u otros estudios"></textarea>
+                        <textarea id="imaging_details" name="imaging_details" rows="3"
+                            placeholder="Descripción de ecografía, resonancia u otros estudios"></textarea>
                     </div>
                 </div>
-                
+
                 <!-- Sección 6: Evaluación Clínica -->
                 <div class="form-section">
                     <h2 class="section-title"><i class="fas fa-stethoscope"></i> Evaluación Clínica</h2>
                     <p class="section-subtitle">Hallazgos del examen físico y evaluación ginecológica</p>
-                    
+
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="height">Estatura</label>
                             <div class="biomarker-value">
-                                <input type="number" id="height" name="height" min="100" max="250" placeholder="Ej. 165">
+                                <input type="number" id="height" name="height" min="100" max="250"
+                                    placeholder="Ej. 165">
                                 <span class="biomarker-unit">cm</span>
                             </div>
                         </div>
@@ -406,7 +419,8 @@
                         <div class="form-group">
                             <label for="weight">Peso</label>
                             <div class="biomarker-value">
-                                <input type="number" id="weight" name="weight" min="30" max="200" step="0.1" placeholder="Ej. 65.5">
+                                <input type="number" id="weight" name="weight" min="30" max="200" step="0.1"
+                                    placeholder="Ej. 65.5">
                                 <span class="biomarker-unit">kg</span>
                             </div>
                         </div>
@@ -418,7 +432,7 @@
                             </div>
                             <div class="normal-range">Normal: &lt;18.5, &gt;24.9</div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="pelvic_exam">Examen pélvico</label>
                             <select id="pelvic_exam" name="pelvic_exam">
@@ -430,7 +444,7 @@
                                 <option value="mass">Masa anexial</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="vaginal_exam">Examen vaginal</label>
                             <select id="vaginal_exam" name="vaginal_exam">
@@ -441,17 +455,24 @@
                                 <option value="other">Otros hallazgos</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="clinical_notes">Notas clínicas</label>
-                            <textarea id="clinical_notes" name="clinical_notes" rows="3" placeholder="Observaciones relevantes del examen físico"></textarea>
+                            <textarea id="clinical_notes" name="clinical_notes" rows="3"
+                                placeholder="Observaciones relevantes del examen físico"></textarea>
                         </div>
                     </div>
                 </div>
-                
-                <button type="submit"><i class="fas fa-heartbeat"></i> Evaluar Riesgo de Endometriosis</button>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn"><i class="fas fa-heartbeat"></i> Evaluar Riesgo de
+                        Endometriosis</button>
+                    <button type="button" id="clearAllBtn" class="clear-all-btn">
+                        <i class="fas fa-trash-alt"></i> Limpiar Todo
+                    </button>
+                </div>
             </form>
-            
+
             <!-- Resultados -->
             <div id="resultContainer" class="result-container">
                 <div class="result-header">
@@ -463,7 +484,7 @@
                         <p class="result-description" id="riskDescription"></p>
                     </div>
                 </div>
-                
+
                 <div class="probability-container">
                     <div class="probability-circle" id="probabilityCircle">
                         0%
@@ -471,7 +492,7 @@
                     <div class="result-details">
                         <h3>Probabilidad de Endometriosis</h3>
                         <p id="probabilityText"></p>
-                        
+
                         <div class="risk-factors">
                             <div class="risk-factors-title">
                                 <i class="fas fa-exclamation-circle"></i> Factores de Riesgo Identificados
@@ -482,24 +503,24 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="recommendations">
                     <h3><i class="fas fa-clipboard-list"></i> Recomendaciones Clínicas</h3>
                     <ul id="recommendationsList">
                         <!-- Las recomendaciones se llenarán con JavaScript -->
                     </ul>
                 </div>
-                
+
                 <div class="patient-summary">
                     <h3><i class="fas fa-file-medical"></i> Resumen Clínico del Paciente</h3>
                     <div class="summary-grid" id="patientSummary">
                         <!-- Los datos del paciente se llenarán aquí -->
                     </div>
                 </div>
-                
+
                 <div class="clinical-guidelines">
                     <h3><i class="fas fa-book-medical"></i> Guías Clínicas Aplicables</h3>
-                    
+
                     <div class="guideline">
                         <div class="guideline-title">
                             <i class="fas fa-check-circle"></i> ASRM (American Society for Reproductive Medicine)
@@ -508,16 +529,17 @@
                             Criterios de clasificación de endometriosis basados en hallazgos quirúrgicos.
                         </div>
                     </div>
-                    
+
                     <div class="guideline">
                         <div class="guideline-title">
-                            <i class="fas fa-check-circle"></i> ESHRE (European Society of Human Reproduction and Embryology)
+                            <i class="fas fa-check-circle"></i> ESHRE (European Society of Human Reproduction and
+                            Embryology)
                         </div>
                         <div class="guideline-content" id="eshreGuideline">
                             Guías para el manejo de mujeres con endometriosis.
                         </div>
                     </div>
-                    
+
                     <div class="guideline">
                         <div class="guideline-title">
                             <i class="fas fa-check-circle"></i> NICE (National Institute for Health and Care Excellence)
@@ -529,7 +551,7 @@
                 </div>
             </div>
         </div>
-        
+
         <footer>
             <p>&copy; 2025 SITME - Sistema Integral de Tamizaje Multimodal para Endometriosis.</p>
             <p>Este sistema no sustituye el juicio clínico profesional. Consulte siempre a un especialista.</p>
@@ -539,5 +561,34 @@
         </footer>
     </div>
     <script src="../static/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const clearAllBtn = document.getElementById('clearAllBtn');
+
+            clearAllBtn.addEventListener('click', function () {
+                // Preguntar al usuario antes de limpiar
+                if (confirm('¿Estás seguro que deseas limpiar todo el formulario?')) {
+                    const formElements = document.querySelectorAll('input, select, textarea');
+
+                    formElements.forEach(element => {
+                        if (element.type !== 'button' && element.type !== 'submit') {
+                            element.value = '';
+                        }
+
+                        if (element.type === 'checkbox' || element.type === 'radio') {
+                            element.checked = false;
+                        }
+
+                        if (element.tagName === 'SELECT') {
+                            element.selectedIndex = 0;
+                        }
+                    });
+
+                    console.log('Formulario limpiado');
+                }
+            });
+        });
+    </script>
 </body>
+
 </html>
