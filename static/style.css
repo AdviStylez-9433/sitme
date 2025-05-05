@@ -1023,30 +1023,30 @@
     z-index: 0;
 }
 
+/* Estilo base del botón PDF */
 .download-button {
     background: linear-gradient(135deg, var(--warning) 0%, var(--warning-light) 100%);
-    color: white;
+    color: white; /* Texto oscuro para mejor contraste */
     border: none;
     padding: 16px 25px;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 600; /* Más grueso para mejor legibilidad */
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease-out;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 3px 6px rgba(255, 160, 0, 0.2);
     position: relative;
     overflow: hidden;
+    z-index: 1;
     margin-top: 15px;
     width: 100%;
-    /* Nueva propiedad clave: */
-    isolation: isolate;
 }
 
-/* Reemplaza ::after por ::before y simplifica */
-.download-button::before {
+/* Efecto hover con pseudo-elemento */
+.download-button::after {
     content: '';
     position: absolute;
     top: 0;
@@ -1055,16 +1055,17 @@
     height: 100%;
     background: linear-gradient(135deg, var(--warning-dark) 0%, var(--warning) 100%);
     opacity: 0;
-    transition: opacity 0.3s ease-out;
+    transition: opacity 0.4s ease;
     z-index: -1;
 }
 
 .download-button:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 16px rgba(255, 160, 0, 0.3);
+    color: white; /* Cambio de color de texto en hover */
 }
 
-.download-button:hover::before {
+.download-button:hover::after {
     opacity: 1;
 }
 
@@ -1078,7 +1079,7 @@
 .download-button i {
     margin-right: 10px;
     transition: transform 0.3s ease;
-    color: white
+    color: white /* Hereda el color del texto */
 }
 
 .download-button:hover i {
