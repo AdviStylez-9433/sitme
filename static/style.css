@@ -377,7 +377,7 @@
     font-style: italic;
   }
   
-  /* Botones */
+  /* Botones
   button {
     background: linear-gradient(to right, var(--primary), var(--primary-light));
     color: white;
@@ -408,7 +408,7 @@
   
   button i {
     margin-right: 10px;
-  }
+  } */
   
   /* Resultados */
   .result-container {
