@@ -1079,7 +1079,7 @@
 .download-button i {
     margin-right: 10px;
     transition: transform 0.3s ease;
-    color: currentColor; /* Hereda el color del texto */
+    color: white
 }
 
 .download-button:hover i {
