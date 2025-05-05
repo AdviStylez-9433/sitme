@@ -1023,7 +1023,6 @@
     z-index: 0;
 }
 
-/* Estilo base del botón PDF */
 .download-button {
     background: linear-gradient(135deg, var(--warning) 0%, var(--warning-light) 100%);
     color: white;
@@ -1033,20 +1032,20 @@
     font-weight: 600;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.3s ease-out;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 3px 6px rgba(255, 160, 0, 0.2);
     position: relative;
     overflow: hidden;
-    z-index: 1;
     margin-top: 15px;
     width: 100%;
-    /* Cambios clave: */
-    isolation: isolate; /* Crea un nuevo stacking context */
+    /* Nueva propiedad clave: */
+    isolation: isolate;
 }
 
+/* Reemplaza ::after por ::before y simplifica */
 .download-button::before {
     content: '';
     position: absolute;
@@ -1056,15 +1055,18 @@
     height: 100%;
     background: linear-gradient(135deg, var(--warning-dark) 0%, var(--warning) 100%);
     opacity: 0;
-    transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: opacity 0.3s ease-out;
     z-index: -1;
+}
+
+.download-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(255, 160, 0, 0.3);
 }
 
 .download-button:hover::before {
     opacity: 1;
 }
-
-/* Resto de tus estilos permanecen igual... */
 
 .download-button:active {
     transform: translateY(1px);
