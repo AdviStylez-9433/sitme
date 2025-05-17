@@ -109,9 +109,9 @@ def improved_train_and_save_model():
     
     # 4. Pipeline de modelado mejorado
     base_model = RandomForestClassifier(
-        n_estimators=300,
-        max_depth=12,
-        min_samples_split=5,
+        n_estimators=150,
+        max_depth=6,
+        min_samples_split=10,
         min_samples_leaf=2,
         max_features='sqrt',
         class_weight='balanced_subsample',
