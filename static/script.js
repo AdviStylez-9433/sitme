@@ -445,6 +445,15 @@ function displayResults(data) {
     if (!document.querySelector('.download-button')) {
         recommendationsSection.appendChild(downloadButton);
     }
+    // Añadir botón de guardar simulación
+    const saveButton = document.createElement('button');
+    saveButton.className = 'save-button';
+    saveButton.innerHTML = '<i class="fas fa-save"></i> Guardar Simulación';
+    saveButton.onclick = () => saveSimulationToDB(data);
+
+    if (!document.querySelector('.save-button')) {
+        recommendationsSection.appendChild(saveButton);
+    }
 }
 
 // Funciones auxiliares
@@ -694,5 +703,79 @@ function downloadClinicalRecord(formData) {
             button.innerHTML = originalContent;
             button.classList.remove('loading');
         });
+}
+
+function saveSimulationToDB(simulationData) {
+    const saveButton = document.querySelector('.save-button');
+    if (!saveButton) return;
+
+    // Guardar el contenido original para restaurarlo después
+    const originalContent = saveButton.innerHTML;
+
+    // Estado de carga
+    saveButton.disabled = true;
+    saveButton.innerHTML = `
+        <div class="spinner-container">
+            <div class="loading-spinner"></div>
+            <span>Guardando...</span>
+        </div>
+    `;
+
+    // Solicitud para guardar la simulación
+    fetch('https://sitme.onrender.com/save_simulation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(simulationData)
+    })
+        .then(response => {
+            if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+
+            // Mostrar notificación de éxito
+            showSuccessNotification('Simulación guardada exitosamente en la base de datos');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError(`Error al guardar: ${error.message}`);
+        })
+        .finally(() => {
+            // Restaurar estado normal
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalContent;
+        });
+}
+
+// Función para mostrar notificación de éxito
+function showSuccessNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'success-notification';
+    notification.innerHTML = `
+        <i class="fas fa-check-circle"></i>
+        <span>${message}</span>
+    `;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        padding: 15px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        z-index: 1000;
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.transition = 'opacity 1s';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 1000);
+    }, 5000);
 }
 

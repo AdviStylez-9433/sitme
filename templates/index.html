@@ -904,31 +904,6 @@
 
             // Inicializar barra de progreso
             updateProgressBar('tab1');
-
-            // Limpiar formulario
-            clearAllBtn.addEventListener('click', function () {
-                if (confirm('¿Estás seguro que deseas limpiar todo el formulario?')) {
-                    const formElements = document.querySelectorAll('input, select, textarea');
-
-                    formElements.forEach(element => {
-                        if (element.type !== 'button' && element.type !== 'submit') {
-                            element.value = '';
-                        }
-
-                        if (element.type === 'checkbox' || element.type === 'radio') {
-                            element.checked = false;
-                        }
-
-                        if (element.tagName === 'SELECT') {
-                            element.selectedIndex = 0;
-                        }
-                    });
-
-                    // Volver a la primera pestaña
-                    document.querySelector('.tab-btn[data-tab="tab1"]').click();
-                    console.log('Formulario limpiado');
-                }
-            });
         });
 
         // Función para limpiar solo la pestaña actual

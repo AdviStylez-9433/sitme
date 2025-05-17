@@ -16,10 +16,108 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Frame, PageTemplate, PageBreak, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
+import psycopg2
+from psycopg2 import sql
+from psycopg2.extras import RealDictCursor
+import json
 
 # Configuración inicial
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
+
+# Configuración de PostgreSQL (añade esto después de las otras configuraciones)
+POSTGRES_CONFIG = {
+    'host': os.getenv('POSTGRES_HOST', 'localhost'),
+    'database': os.getenv('POSTGRES_DB', 'endometriosis_db'),
+    'user': os.getenv('POSTGRES_USER', 'postgres'),
+    'password': os.getenv('POSTGRES_PASSWORD', 'secret'),
+    'port': os.getenv('POSTGRES_PORT', '5432')
+}
+
+# Función para obtener conexión a PostgreSQL
+def get_db_connection():
+    conn = psycopg2.connect(**POSTGRES_CONFIG)
+    return conn
+
+# Función para crear la tabla si no existe (ejecutar al inicio)
+def init_db():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS patient_simulations (
+                id SERIAL PRIMARY KEY,
+                patient_data JSONB NOT NULL,
+                prediction_result JSONB NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                patient_name VARCHAR(255),
+                patient_age INTEGER,
+                risk_level VARCHAR(50)
+            )
+        """)
+        conn.commit()
+    except Exception as e:
+        app.logger.error(f"Error initializing database: {str(e)}")
+    finally:
+        if conn:
+            conn.close()
+
+# Ejecutar init_db al iniciar la aplicación
+init_db()
+
+# Añade esta nueva ruta al final de app.py, antes del if __name__ == '__main__':
+@app.route('/save_simulation', methods=['POST'])
+def save_simulation():
+    try:
+        data = request.get_json()
+        if not data or 'form_data' not in data or 'prediction' not in data:
+            return jsonify({'error': 'Datos incompletos'}), 400
+        
+        # Extraer datos importantes para facilitar consultas
+        patient_name = data['form_data']['personal']['full_name']
+        patient_age = int(data['form_data']['personal']['age'])
+        risk_level = data['riskLevel']  # 'high', 'moderate' o 'low'
+        
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        query = sql.SQL("""
+            INSERT INTO patient_simulations 
+            (patient_data, prediction_result, patient_name, patient_age, risk_level)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id
+        """)
+        
+        cursor.execute(query, [
+            json.dumps(data['form_data']),
+            json.dumps({
+                'probability': data['probability'],
+                'risk_level': risk_level,
+                'recommendations': data['recommendations']
+            }),
+            patient_name,
+            patient_age,
+            risk_level
+        ])
+        
+        simulation_id = cursor.fetchone()['id']
+        conn.commit()
+        
+        return jsonify({
+            'success': True,
+            'simulation_id': simulation_id,
+            'message': 'Simulación guardada exitosamente'
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error guardando simulación: {str(e)}")
+        return jsonify({
+            'error': 'Error al guardar la simulación',
+            'details': str(e)
+        }), 500
+    finally:
+        if 'conn' in locals():
+            conn.close()
 
 # Variables globales para monitoreo
 SERVICE_START_TIME = time.time()
