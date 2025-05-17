@@ -27,10 +27,10 @@ CORS(app)
 
 # Configuración de PostgreSQL (añade esto después de las otras configuraciones)
 POSTGRES_CONFIG = {
-    'host': os.getenv('POSTGRES_HOST', 'localhost'),
-    'database': os.getenv('POSTGRES_DB', 'endometriosis_db'),
-    'user': os.getenv('POSTGRES_USER', 'postgres'),
-    'password': os.getenv('POSTGRES_PASSWORD', 'secret'),
+    'host': os.getenv('POSTGRES_HOST', 'dpg-d0kabdje5dus73bk5vlg-a'),
+    'database': os.getenv('POSTGRES_DB', 'sitme'),
+    'user': os.getenv('POSTGRES_USER', 'admin'),
+    'password': os.getenv('POSTGRES_PASSWORD', 'R6O9tKpno0sBi45LUSFKA6mkVZX7KKbc'),
     'port': os.getenv('POSTGRES_PORT', '5432')
 }
 
