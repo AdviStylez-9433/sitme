@@ -93,9 +93,9 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('endometriosisForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    const button = this.querySelector('button');
-    button.disabled = true;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    const submitButton = this.querySelector('button[type="submit"], .submit-btn');
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
     
     // Validar campos requeridos
     const requiredFields = ['full_name', 'birth_date', 'menarche_age', 'cycle_length', 'period_duration', 'last_period'];
@@ -103,7 +103,7 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
         if (!document.getElementById(field).value) {
             alert(`Por favor complete el campo requerido: "${document.querySelector(`label[for="${field}"]`).textContent.replace(' *', '')}"`);
             button.disabled = false;
-            button.innerHTML = '<i class="fas fa-heartbeat"></i> Evaluar Riesgo de Endometriosis';
+            //button.innerHTML = '<i class="fas fa-heartbeat"></i> Evaluar Riesgo de Endometriosis';
             return;
         }
     }
@@ -234,8 +234,8 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
         }
     })
     .finally(() => {
-        button.disabled = false;
-        button.innerHTML = '<i class="fas fa-heartbeat"></i> Evaluar Riesgo de Endometriosis';
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-heartbeat"></i> Evaluar Riesgo';
     });
 });
 

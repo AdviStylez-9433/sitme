@@ -16,14 +16,14 @@
         .tab-container {
             margin-bottom: 20px;
         }
-        
+
         .tab-header {
             display: flex;
             flex-wrap: wrap;
             border-bottom: 1px solid #ddd;
             margin-bottom: 20px;
         }
-        
+
         .tab-btn {
             padding: 12px 20px;
             background: #f8f9fa;
@@ -36,41 +36,46 @@
             display: flex;
             align-items: center;
         }
-        
+
         .tab-btn i {
             margin-right: 8px;
         }
-        
+
         .tab-btn:hover {
             background: #e9ecef;
         }
-        
+
         .tab-btn.active {
             background: #143f6a;
             color: white;
             border-bottom: 3px solid #0c2a4a;
         }
-        
+
         .tab-content {
             display: none;
             animation: fadeIn 0.5s ease;
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
-        
+
         .navigation-buttons {
             display: flex;
             justify-content: space-between;
             margin-top: 20px;
         }
-        
+
         .nav-btn {
             padding: 10px 20px;
             border: none;
@@ -79,32 +84,32 @@
             font-weight: 500;
             transition: all 0.3s ease;
         }
-        
+
         .nav-btn.prev {
             background: #f8f9fa;
         }
-        
+
         .nav-btn.next {
             background: #143f6a;
             color: white;
         }
-        
+
         .nav-btn:hover {
             opacity: 0.9;
         }
-        
+
         .nav-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
         .progress-container {
             width: 100%;
             background-color: #e9ecef;
             border-radius: 5px;
             margin-bottom: 20px;
         }
-        
+
         .progress-bar {
             height: 10px;
             background-color: #143f6a;
@@ -112,7 +117,7 @@
             width: 0%;
             transition: width 0.5s ease;
         }
-        
+
         .progress-text {
             text-align: center;
             font-size: 14px;
@@ -138,7 +143,7 @@
                     <div class="progress-bar" id="progressBar"></div>
                     <div class="progress-text" id="progressText">Paso 1 de 6</div>
                 </div>
-                
+
                 <div class="tab-container">
                     <div class="tab-header">
                         <button type="button" class="tab-btn active" data-tab="tab1">
@@ -160,12 +165,13 @@
                             <i class="fas fa-stethoscope"></i> Evaluación
                         </button>
                     </div>
-                    
+
                     <!-- Pestaña 1: Identificación del Paciente -->
                     <div id="tab1" class="tab-content active">
                         <div class="form-section">
                             <h2 class="section-title"><i class="fas fa-user-circle"></i> Datos de Identificación</h2>
-                            <p class="section-subtitle">Complete la información básica del paciente según registro clínico</p>
+                            <p class="section-subtitle">Complete la información básica del paciente según registro
+                                clínico</p>
 
                             <div class="form-grid">
                                 <div class="form-group">
@@ -175,8 +181,8 @@
 
                                 <div class="form-group">
                                     <label for="rut">RUT</label>
-                                    <input type="text" id="rut" name="rut" pattern="\d{7,8}-[\dkK]" placeholder="12345678-9"
-                                        maxlength="10">
+                                    <input type="text" id="rut" name="rut" pattern="\d{7,8}-[\dkK]"
+                                        placeholder="12345678-9" maxlength="10">
                                     <div id="rut-error" class="error-message" style="display: none;"></div>
                                 </div>
 
@@ -220,7 +226,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="navigation-buttons">
                             <button type="button" class="nav-btn prev" disabled>
                                 <i class="fas fa-arrow-left"></i> Anterior
@@ -230,19 +236,21 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Pestaña 2: Antecedentes Médicos -->
                     <div id="tab2" class="tab-content">
                         <div class="form-section">
                             <h2 class="section-title"><i class="fas fa-clipboard-list"></i> Antecedentes Médicos</h2>
-                            <p class="section-subtitle">Historial clínico relevante para la evaluación de endometriosis</p>
+                            <p class="section-subtitle">Historial clínico relevante para la evaluación de endometriosis
+                            </p>
 
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label>Antecedentes ginecológicos</label>
                                     <div class="checkbox-group">
                                         <div class="checkbox-option">
-                                            <input type="checkbox" id="gynecological_surgery" name="gynecological_surgery">
+                                            <input type="checkbox" id="gynecological_surgery"
+                                                name="gynecological_surgery">
                                             <label for="gynecological_surgery">Cirugías ginecológicas</label>
                                         </div>
                                         <div class="checkbox-option">
@@ -260,7 +268,8 @@
                                     <label>Antecedentes familiares</label>
                                     <div class="checkbox-group">
                                         <div class="checkbox-option">
-                                            <input type="checkbox" id="family_endometriosis" name="family_endometriosis">
+                                            <input type="checkbox" id="family_endometriosis"
+                                                name="family_endometriosis">
                                             <label for="family_endometriosis">Endometriosis</label>
                                         </div>
                                         <div class="checkbox-option">
@@ -278,7 +287,8 @@
                                     <label>Comorbilidades</label>
                                     <div class="checkbox-group">
                                         <div class="checkbox-option">
-                                            <input type="checkbox" id="comorbidity_autoimmune" name="comorbidity_autoimmune">
+                                            <input type="checkbox" id="comorbidity_autoimmune"
+                                                name="comorbidity_autoimmune">
                                             <label for="comorbidity_autoimmune">Enfermedad autoinmune</label>
                                         </div>
                                         <div class="checkbox-option">
@@ -299,7 +309,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="navigation-buttons">
                             <button type="button" class="nav-btn prev" data-prev="tab1">
                                 <i class="fas fa-arrow-left"></i> Anterior
@@ -309,7 +319,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Pestaña 3: Historia Menstrual -->
                     <div id="tab3" class="tab-content">
                         <div class="form-section">
@@ -319,19 +329,22 @@
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label for="menarche_age" class="required">Edad de la menarquia</label>
-                                    <input type="number" id="menarche_age" name="menarche_age" min="8" max="20" required>
+                                    <input type="number" id="menarche_age" name="menarche_age" min="8" max="20"
+                                        required>
                                     <div class="normal-range">Rango normal: 10-14 años</div>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="cycle_length" class="required">Duración del ciclo (días)</label>
-                                    <input type="number" id="cycle_length" name="cycle_length" min="15" max="45" required>
+                                    <input type="number" id="cycle_length" name="cycle_length" min="15" max="45"
+                                        required>
                                     <div class="normal-range">Rango normal: 21-35 días</div>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="period_duration" class="required">Duración del sangrado (días)</label>
-                                    <input type="number" id="period_duration" name="period_duration" min="1" max="15" required>
+                                    <input type="number" id="period_duration" name="period_duration" min="1" max="15"
+                                        required>
                                     <div class="normal-range">Rango normal: 3-7 días</div>
                                 </div>
 
@@ -342,7 +355,8 @@
 
                                 <div class="form-group">
                                     <label for="pain_level" class="required">Dolor menstrual (1-10)</label>
-                                    <input type="range" id="pain_level" name="pain_level" min="1" max="10" value="1" required>
+                                    <input type="range" id="pain_level" name="pain_level" min="1" max="10" value="1"
+                                        required>
                                     <div class="pain-scale">
                                         <span class="pain-scale-label">1</span>
                                         <span class="pain-scale-label">2</span>
@@ -380,7 +394,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="navigation-buttons">
                             <button type="button" class="nav-btn prev" data-prev="tab2">
                                 <i class="fas fa-arrow-left"></i> Anterior
@@ -390,24 +404,26 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Pestaña 4: Síntomas Actuales -->
                     <div id="tab4" class="tab-content">
                         <div class="form-section">
                             <h2 class="section-title"><i class="fas fa-heartbeat"></i> Síntomas Actuales</h2>
-                            <p class="section-subtitle">Síntomas característicos de endometriosis según guías clínicas</p>
+                            <p class="section-subtitle">Síntomas característicos de endometriosis según guías clínicas
+                            </p>
 
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label class="required">Dolor durante/después de relaciones sexuales</label>
                                     <div class="radio-group">
                                         <div class="radio-option">
-                                            <input type="radio" id="pain_during_sex_yes" name="pain_during_sex" value="1"
-                                                required>
+                                            <input type="radio" id="pain_during_sex_yes" name="pain_during_sex"
+                                                value="1" required>
                                             <label for="pain_during_sex_yes">Sí</label>
                                         </div>
                                         <div class="radio-option">
-                                            <input type="radio" id="pain_during_sex_no" name="pain_during_sex" value="0">
+                                            <input type="radio" id="pain_during_sex_no" name="pain_during_sex"
+                                                value="0">
                                             <label for="pain_during_sex_no">No</label>
                                         </div>
                                     </div>
@@ -432,12 +448,13 @@
                                     <label class="required">Síntomas urinarios cíclicos</label>
                                     <div class="radio-group">
                                         <div class="radio-option">
-                                            <input type="radio" id="urinary_symptoms_yes" name="urinary_symptoms" value="1"
-                                                required>
+                                            <input type="radio" id="urinary_symptoms_yes" name="urinary_symptoms"
+                                                value="1" required>
                                             <label for="urinary_symptoms_yes">Sí</label>
                                         </div>
                                         <div class="radio-option">
-                                            <input type="radio" id="urinary_symptoms_no" name="urinary_symptoms" value="0">
+                                            <input type="radio" id="urinary_symptoms_no" name="urinary_symptoms"
+                                                value="0">
                                             <label for="urinary_symptoms_no">No</label>
                                         </div>
                                     </div>
@@ -482,7 +499,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="navigation-buttons">
                             <button type="button" class="nav-btn prev" data-prev="tab3">
                                 <i class="fas fa-arrow-left"></i> Anterior
@@ -492,7 +509,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Pestaña 5: Biomarcadores y Exámenes -->
                     <div id="tab5" class="tab-content">
                         <div class="form-section">
@@ -509,7 +526,8 @@
                                             <span class="biomarker-unit">U/mL</span>
                                         </div>
                                         <div class="normal-range">Normal: &lt;35 U/mL <span class="info-tooltip"><i
-                                                    class="fas fa-info-circle"></i><span class="tooltip-text">Puede estar
+                                                    class="fas fa-info-circle"></i><span class="tooltip-text">Puede
+                                                    estar
                                                     elevado en endometriosis, pero también en otras condiciones
                                                     ginecológicas</span></span></div>
                                     </div>
@@ -581,7 +599,7 @@
                                     placeholder="Descripción de ecografía, resonancia u otros estudios"></textarea>
                             </div>
                         </div>
-                        
+
                         <div class="navigation-buttons">
                             <button type="button" class="nav-btn prev" data-prev="tab4">
                                 <i class="fas fa-arrow-left"></i> Anterior
@@ -591,7 +609,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Pestaña 6: Evaluación Clínica -->
                     <div id="tab6" class="tab-content">
                         <div class="form-section">
@@ -655,7 +673,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="navigation-buttons">
                             <button type="button" class="nav-btn prev" data-prev="tab5">
                                 <i class="fas fa-arrow-left"></i> Anterior
@@ -765,85 +783,85 @@
             const prevButtons = document.querySelectorAll('.nav-btn.prev');
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
-            
+
             // Manejar clic en las pestañas
             tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     const tabId = this.getAttribute('data-tab');
-                    
+
                     // Ocultar todos los contenidos de pestaña
                     tabContents.forEach(content => {
                         content.classList.remove('active');
                     });
-                    
+
                     // Mostrar el contenido de la pestaña seleccionada
                     document.getElementById(tabId).classList.add('active');
-                    
+
                     // Actualizar botones activos
                     tabButtons.forEach(btn => {
                         btn.classList.remove('active');
                     });
                     this.classList.add('active');
-                    
+
                     // Actualizar barra de progreso
                     updateProgressBar(tabId);
                 });
             });
-            
+
             // Manejar botones de siguiente
             nextButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     if (this.classList.contains('submit-btn')) return;
-                    
+
                     const nextTabId = this.getAttribute('data-next');
                     const currentTab = this.closest('.tab-content').id;
-                    
+
                     // Validar campos requeridos antes de avanzar
                     if (!validateTab(currentTab)) {
                         return;
                     }
-                    
+
                     // Cambiar a la siguiente pestaña
                     document.querySelector(`.tab-btn[data-tab="${nextTabId}"]`).click();
-                    
+
                     // Desplazar hacia arriba para mejor experiencia de usuario
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
             });
-            
+
             // Manejar botones de anterior
             prevButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     if (this.disabled) return;
-                    
+
                     const prevTabId = this.getAttribute('data-prev');
-                    
+
                     // Cambiar a la pestaña anterior
                     document.querySelector(`.tab-btn[data-tab="${prevTabId}"]`).click();
-                    
+
                     // Desplazar hacia arriba para mejor experiencia de usuario
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
             });
-            
+
             // Función para validar campos requeridos en la pestaña actual
             function validateTab(tabId) {
                 const tab = document.getElementById(tabId);
                 const requiredInputs = tab.querySelectorAll('[required]');
                 let isValid = true;
-                
+
                 requiredInputs.forEach(input => {
                     if (!input.value) {
                         input.classList.add('error');
                         isValid = false;
-                        
+
                         // Mostrar mensaje de error
                         const errorMsg = document.createElement('div');
                         errorMsg.className = 'error-message';
                         errorMsg.textContent = 'Este campo es obligatorio';
                         errorMsg.style.color = 'red';
                         errorMsg.style.fontSize = '0.8em';
-                        
+
                         // Insertar después del campo si no existe ya
                         if (!input.nextElementSibling || !input.nextElementSibling.classList.contains('error-message')) {
                             input.insertAdjacentElement('afterend', errorMsg);
@@ -855,7 +873,7 @@
                         }
                     }
                 });
-                
+
                 if (!isValid) {
                     // Desplazar al primer error
                     const firstError = tab.querySelector('.error');
@@ -863,22 +881,22 @@
                         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
                 }
-                
+
                 return isValid;
             }
-            
+
             // Función para actualizar la barra de progreso
             function updateProgressBar(tabId) {
                 const tabIndex = Array.from(tabContents).findIndex(tab => tab.id === tabId);
                 const progress = ((tabIndex + 1) / tabContents.length) * 100;
-                
+
                 progressBar.style.width = `${progress}%`;
                 progressText.textContent = `Paso ${tabIndex + 1} de ${tabContents.length}`;
             }
-            
+
             // Inicializar barra de progreso
             updateProgressBar('tab1');
-            
+
             // Limpiar formulario
             clearAllBtn.addEventListener('click', function () {
                 if (confirm('¿Estás seguro que deseas limpiar todo el formulario?')) {
@@ -902,6 +920,43 @@
                     document.querySelector('.tab-btn[data-tab="tab1"]').click();
                     console.log('Formulario limpiado');
                 }
+            });
+        });
+
+        // Función para limpiar solo la pestaña actual
+        function clearCurrentTab() {
+            const currentTab = document.querySelector('.tab-content.active');
+
+            if (currentTab && confirm('¿Estás seguro que deseas limpiar todos los campos de esta pestaña?')) {
+                const formElements = currentTab.querySelectorAll('input, select, textarea');
+
+                formElements.forEach(element => {
+                    // No limpiar botones
+                    if (element.type !== 'button' && element.type !== 'submit') {
+                        element.value = '';
+
+                        // Para checkboxes y radios
+                        if (element.type === 'checkbox' || element.type === 'radio') {
+                            element.checked = false;
+                        }
+
+                        // Para selects
+                        if (element.tagName === 'SELECT') {
+                            element.selectedIndex = 0;
+                        }
+                    }
+                });
+
+                console.log(`Pestaña ${currentTab.id} limpiada`);
+            }
+        }
+
+        // Asignar evento a los botones de limpiar
+        document.addEventListener('DOMContentLoaded', function () {
+            const clearButtons = document.querySelectorAll('.clear-tab-btn');
+
+            clearButtons.forEach(button => {
+                button.addEventListener('click', clearCurrentTab);
             });
         });
     </script>
