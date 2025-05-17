@@ -715,7 +715,7 @@
   .info-tooltip .tooltip-text {
     visibility: hidden;
     width: 250px;
-    background-color: var(--danger);
+    background-color: var(--primary-light);
     color: white;
     text-align: center;
     border-radius: 6px;
@@ -783,7 +783,7 @@
     bottom: 100%;
     left: 0;
     width: 200px;
-    background: var(--dark);
+    background: var(--primary-light);
     color: white;
     padding: 8px 12px;
     border-radius: 4px;

@@ -1,66 +1,66 @@
 // Generar ID clínico aleatorio
 document.getElementById('clinicId').textContent = Math.floor(1000 + Math.random() * 9000);
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const rutInput = document.getElementById('rut');
     const rutError = document.getElementById('rut-error');
-    
+
     // Formateo automático mientras escribe
-    rutInput.addEventListener('input', function(e) {
+    rutInput.addEventListener('input', function (e) {
         // Limpiar error si está visible
         rutError.style.display = 'none';
         rutInput.classList.remove('invalid');
-        
+
         // Formateo del RUT
         let value = e.target.value.replace(/[^\dkK-]/gi, '');
-        
-        if(value.length > 1) {
+
+        if (value.length > 1) {
             value = value.replace(/-/g, '');
-            if(value.length > 7) {
+            if (value.length > 7) {
                 value = value.substring(0, value.length - 1) + '-' + value.slice(-1);
             }
-            if(value.includes('-')) {
+            if (value.includes('-')) {
                 const parts = value.split('-');
                 value = parts[0] + '-' + parts[1].toUpperCase();
             }
         }
-        
+
         e.target.value = value;
     });
-    
+
     // Validar al perder foco
-    rutInput.addEventListener('blur', function(e) {
-        if(e.target.value && !validarRUT(e.target.value)) {
+    rutInput.addEventListener('blur', function (e) {
+        if (e.target.value && !validarRUT(e.target.value)) {
             rutInput.classList.add('invalid');
             rutError.textContent = 'RUT inválido. Verifique el dígito verificador.';
             rutError.style.display = 'block';
         }
     });
-    
+
     function validarRUT(rut) {
         rut = rut.replace(/[^\dkK-]/gi, '');
-        if(!/^\d{7,8}-[\dkK]$/i.test(rut)) return false;
-        
+        if (!/^\d{7,8}-[\dkK]$/i.test(rut)) return false;
+
         const [numero, dv] = rut.split('-');
         return calcularDV(numero) === dv.toUpperCase();
     }
-    
+
     function calcularDV(numero) {
         let suma = 0;
         let multiplo = 2;
-        
-        for(let i = numero.length - 1; i >= 0; i--) {
+
+        for (let i = numero.length - 1; i >= 0; i--) {
             suma += parseInt(numero.charAt(i)) * multiplo;
             multiplo = multiplo === 7 ? 2 : multiplo + 1;
         }
-        
+
         const resto = suma % 11;
         return resto === 0 ? '0' : resto === 1 ? 'K' : (11 - resto).toString();
     }
 });
-        
+
 // Calcular edad automáticamente desde fecha de nacimiento
-document.getElementById('birth_date').addEventListener('change', function() {
+document.getElementById('birth_date').addEventListener('change', function () {
     const birthDate = new Date(this.value);
     const ageDifMs = Date.now() - birthDate.getTime();
     const ageDate = new Date(ageDifMs);
@@ -68,15 +68,15 @@ document.getElementById('birth_date').addEventListener('change', function() {
     document.getElementById('age').value = age;
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const heightInput = document.getElementById('height');
     const weightInput = document.getElementById('weight');
     const bmiInput = document.getElementById('bmi');
-    
+
     function calculateBMI() {
         const height = parseFloat(heightInput.value) / 100; // Convertir cm a m
         const weight = parseFloat(weightInput.value);
-        
+
         if (height && weight) {
             const bmi = weight / (height * height);
             bmiInput.value = bmi.toFixed(1);
@@ -84,19 +84,19 @@ document.addEventListener('DOMContentLoaded', function() {
             bmiInput.value = '';
         }
     }
-    
+
     heightInput.addEventListener('input', calculateBMI);
     weightInput.addEventListener('input', calculateBMI);
 });
 
 // Manejar envío del formulario
-document.getElementById('endometriosisForm').addEventListener('submit', function(e) {
+document.getElementById('endometriosisForm').addEventListener('submit', function (e) {
     e.preventDefault();
-    
+
     const submitButton = this.querySelector('button[type="submit"], .submit-btn');
     submitButton.disabled = true;
     submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-    
+
     // Validar campos requeridos
     const requiredFields = ['full_name', 'birth_date', 'menarche_age', 'cycle_length', 'period_duration', 'last_period'];
     for (const field of requiredFields) {
@@ -136,7 +136,7 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
             period_duration: document.getElementById('period_duration').value,
             last_period: document.getElementById('last_period').value,
             pain_level: document.getElementById('pain_level'
-                
+
             ).value,
             pain_premenstrual: document.getElementById('pain_premenstrual').checked,
             pain_menstrual: document.getElementById('pain_menstrual').checked,
@@ -168,7 +168,7 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
             clinical_notes: document.getElementById('clinical_notes').value
         }
     };
-    
+
     // Hacer la petición al backend
     fetch('https://sitme.onrender.com/predict', {
         method: 'POST',
@@ -198,45 +198,45 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
             full_form_data: formData
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Error del servidor: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.error) {
-            throw new Error(data.error);
-        }
-        
-        // Mostrar resultados
-        displayResults({
-            probability: data.probability,
-            riskLevel: data.risk_level,
-            riskTitle: getRiskTitle(data.risk_level),
-            riskDescription: getRiskDescription(data.risk_level),
-            riskIcon: getRiskIcon(data.risk_level),
-            recommendations: data.recommendations,
-            riskFactors: mapRiskFactors(data.risk_factors || [], formData),
-            formData: formData,
-            guidelines: getClinicalGuidelines(data.probability)
-        });
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showError(error.message);
-        
-        // Opción de simulación solo en desarrollo
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            if (confirm('Error al conectar con el servidor. ¿Desea ver una simulación local?')) {
-                showSimulation(formData);
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error del servidor: ${response.status}`);
             }
-        }
-    })
-    .finally(() => {
-        submitButton.disabled = false;
-        submitButton.innerHTML = '<i class="fas fa-heartbeat"></i> Evaluar Riesgo';
-    });
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            // Mostrar resultados
+            displayResults({
+                probability: data.probability,
+                riskLevel: data.risk_level,
+                riskTitle: getRiskTitle(data.risk_level),
+                riskDescription: getRiskDescription(data.risk_level),
+                riskIcon: getRiskIcon(data.risk_level),
+                recommendations: data.recommendations,
+                riskFactors: mapRiskFactors(data.risk_factors || [], formData),
+                formData: formData,
+                guidelines: getClinicalGuidelines(data.probability)
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError(error.message);
+
+            // Opción de simulación solo en desarrollo
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                if (confirm('Error al conectar con el servidor. ¿Desea ver una simulación local?')) {
+                    showSimulation(formData);
+                }
+            }
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="fas fa-heartbeat"></i> Evaluar Riesgo';
+        });
 });
 
 // Función para mostrar resultados
@@ -248,32 +248,32 @@ function displayResults(data) {
     document.getElementById('riskTitle').textContent = data.riskTitle;
     document.getElementById('riskDescription').textContent = data.riskDescription;
     document.getElementById('riskIcon').className = data.riskIcon;
-    
+
     // Configurar el círculo de probabilidad
     const probabilityCircle = document.getElementById('probabilityCircle');
     probabilityCircle.textContent = `${probabilityPercent}%`;
-    
+
     // Configurar el texto de probabilidad
-    document.getElementById('probabilityText').textContent = 
+    document.getElementById('probabilityText').textContent =
         `El sistema ha calculado un ${probabilityPercent}% de probabilidad de endometriosis basado en los síntomas y marcadores proporcionados.`;
-    
+
     // Configurar factores de riesgo
     const riskFactorsList = document.getElementById('riskFactorsList');
     riskFactorsList.innerHTML = '';
-    
+
     data.riskFactors.forEach(factor => {
         const factorElement = document.createElement('div');
         factorElement.className = 'risk-factor';
         factorElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${factor}`;
         riskFactorsList.appendChild(factorElement);
     });
-    
+
     // Configurar recomendaciones
     const recommendationsList = document.getElementById('recommendationsList');
     recommendationsList.innerHTML = '';
-    
-    const recommendations = Array.isArray(data.recommendations) 
-        ? data.recommendations 
+
+    const recommendations = Array.isArray(data.recommendations)
+        ? data.recommendations
         : (data.recommendation || '').split('\n').filter(r => r.trim() !== '');
 
     recommendations.forEach(item => {
@@ -281,7 +281,7 @@ function displayResults(data) {
         li.textContent = item;
         recommendationsList.appendChild(li);
     });
-    
+
     // Configurar resumen del paciente CON TOOLTIPS Y FACTORES CRÍTICOS
     const patientSummary = document.getElementById('patientSummary');
     patientSummary.innerHTML = '';
@@ -305,11 +305,11 @@ function displayResults(data) {
             if (level >= 4) return 'Dolor moderado puede indicar endometriosis temprana o adenomiosis';
             return '';
         },
-        'Dispareunia': (value) => value === 'Sí' 
-            ? 'Dolor durante relaciones sugiere implantes en ligamentos uterosacros' 
+        'Dispareunia': (value) => value === 'Sí'
+            ? 'Dolor durante relaciones sugiere implantes en ligamentos uterosacros'
             : '',
-        'Antecedentes familiares': (value) => value === 'Sí' 
-            ? 'Riesgo aumentado 6-9x según guías ASRM 2022' 
+        'Antecedentes familiares': (value) => value === 'Sí'
+            ? 'Riesgo aumentado 6-9x según guías ASRM 2022'
             : '',
         'CA-125': (value) => {
             if (value === 'No medido') return '';
@@ -342,74 +342,74 @@ function displayResults(data) {
     };
 
     const summaryData = [
-        { 
-            label: 'Nombre', 
-            value: data.formData.personal.full_name, 
-            critical: false 
+        {
+            label: 'Nombre',
+            value: data.formData.personal.full_name,
+            critical: false
         },
-        { 
-            label: 'Edad', 
-            value: `${data.formData.personal.age} años`, 
-            critical: data.formData.personal.age < 30 
+        {
+            label: 'Edad',
+            value: `${data.formData.personal.age} años`,
+            critical: data.formData.personal.age < 30
         },
-        { 
-            label: 'Menarquia', 
-            value: `${data.formData.menstrual.menarche_age} años`, 
-            critical: data.formData.menstrual.menarche_age < 12 
+        {
+            label: 'Menarquia',
+            value: `${data.formData.menstrual.menarche_age} años`,
+            critical: data.formData.menstrual.menarche_age < 12
         },
-        { 
-            label: 'Ciclo menstrual', 
-            value: `${data.formData.menstrual.cycle_length} días`, 
-            critical: data.formData.menstrual.cycle_length < 25 
+        {
+            label: 'Ciclo menstrual',
+            value: `${data.formData.menstrual.cycle_length} días`,
+            critical: data.formData.menstrual.cycle_length < 25
         },
-        { 
-            label: 'Duración período', 
-            value: `${data.formData.menstrual.period_duration} días`, 
-            critical: data.formData.menstrual.period_duration > 7 
+        {
+            label: 'Duración período',
+            value: `${data.formData.menstrual.period_duration} días`,
+            critical: data.formData.menstrual.period_duration > 7
         },
-        { 
-            label: 'Dolor menstrual', 
-            value: `${data.formData.menstrual.pain_level}/10`, 
-            critical: data.formData.menstrual.pain_level >= 7 
+        {
+            label: 'Dolor menstrual',
+            value: `${data.formData.menstrual.pain_level}/10`,
+            critical: data.formData.menstrual.pain_level >= 7
         },
-        { 
-            label: 'Dispareunia', 
-            value: data.formData.symptoms.pain_during_sex ? 'Sí' : 'No', 
-            critical: data.formData.symptoms.pain_during_sex 
+        {
+            label: 'Dispareunia',
+            value: data.formData.symptoms.pain_during_sex ? 'Sí' : 'No',
+            critical: data.formData.symptoms.pain_during_sex
         },
-        { 
-            label: 'Antecedentes familiares', 
-            value: data.formData.history.family_endometriosis ? 'Sí' : 'No', 
-            critical: data.formData.history.family_endometriosis 
+        {
+            label: 'Antecedentes familiares',
+            value: data.formData.history.family_endometriosis ? 'Sí' : 'No',
+            critical: data.formData.history.family_endometriosis
         },
-        { 
-            label: 'CA-125', 
-            value: data.formData.biomarkers.ca125 !== null ? `${data.formData.biomarkers.ca125} U/mL` : 'No medido', 
-            critical: data.formData.biomarkers.ca125 > 35 
+        {
+            label: 'CA-125',
+            value: data.formData.biomarkers.ca125 !== null ? `${data.formData.biomarkers.ca125} U/mL` : 'No medido',
+            critical: data.formData.biomarkers.ca125 > 35
         },
-        { 
-            label: 'PCR', 
-            value: data.formData.biomarkers.crp !== null ? `${data.formData.biomarkers.crp} mg/L` : 'No medido', 
-            critical: data.formData.biomarkers.crp > 10 
+        {
+            label: 'PCR',
+            value: data.formData.biomarkers.crp !== null ? `${data.formData.biomarkers.crp} mg/L` : 'No medido',
+            critical: data.formData.biomarkers.crp > 10
         },
-        { 
-            label: 'IMC', 
-            value: data.formData.examination.bmi !== null ? data.formData.examination.bmi : 'No calculado', 
-            critical: false 
+        {
+            label: 'IMC',
+            value: data.formData.examination.bmi !== null ? data.formData.examination.bmi : 'No calculado',
+            critical: false
         },
-        { 
-            label: 'Examen pélvico', 
-            value: data.formData.examination.pelvic_exam || 'No registrado', 
-            critical: ['tenderness', 'nodules'].includes(data.formData.examination.pelvic_exam) 
+        {
+            label: 'Examen pélvico',
+            value: data.formData.examination.pelvic_exam || 'No registrado',
+            critical: ['tenderness', 'nodules'].includes(data.formData.examination.pelvic_exam)
         }
     ];
 
     summaryData.forEach(item => {
         const summaryItem = document.createElement('div');
         summaryItem.className = `summary-item ${item.critical ? 'critical' : ''}`;
-        
+
         const tooltip = tooltipMap[item.label] ? tooltipMap[item.label](item.value) : '';
-        
+
         summaryItem.innerHTML = `
             <div class="summary-label" ${tooltip ? `data-tooltip="${tooltip}"` : ''}>
                 ${item.label}
@@ -419,18 +419,19 @@ function displayResults(data) {
         `;
         patientSummary.appendChild(summaryItem);
     });
-    
+
     // Configurar guías clínicas
     if (data.guidelines) {
         document.getElementById('asrmGuideline').textContent = data.guidelines.asrm;
         document.getElementById('eshreGuideline').textContent = data.guidelines.eshre;
         document.getElementById('niceGuideline').textContent = data.guidelines.nice;
+        document.getElementById('')
     }
-    
+
     // Mostrar el contenedor de resultados con la clase de riesgo adecuada
     resultContainer.className = `result-container ${data.riskLevel}-risk`;
     resultContainer.style.display = 'block';
-    
+
     // Desplazarse a los resultados
     resultContainer.scrollIntoView({ behavior: 'smooth' });
 
@@ -488,48 +489,51 @@ function mapRiskFactors(riskFactors, formData) {
         'ciclos_cortos': `Ciclos menstruales cortos (${formData.menstrual.cycle_length} días)`,
         'sangrado_prolongado': `Sangrado menstrual prolongado (${formData.menstrual.period_duration} días)`
     };
-    
+
     // Añadir factores basados en los datos del formulario
     if (formData.history.gynecological_surgery) {
         riskFactors.push('cirugias_ginecologicas');
         factorMap['cirugias_ginecologicas'] = 'Historial de cirugías ginecológicas';
     }
-    
+
     if (formData.biomarkers.crp > 10) {
         riskFactors.push('pcr_elevada');
         factorMap['pcr_elevada'] = `PCR elevada (${formData.biomarkers.crp} mg/L)`;
     }
-    
+
     if (formData.examination.pelvic_exam === 'tenderness' || formData.examination.pelvic_exam === 'nodules') {
         riskFactors.push('hallazgos_pelvicos');
         factorMap['hallazgos_pelvicos'] = 'Hallazgos anormales en examen pélvico';
     }
-    
+
     return riskFactors.map(factor => factorMap[factor] || factor);
 }
 
 function getClinicalGuidelines(probability) {
     // Convertir probability a número si es necesario
     const prob = typeof probability === 'number' ? probability : parseFloat(probability);
-    
+
     // Definir las guías basadas en rangos de probabilidad
     if (prob >= 0.7) { // Alto riesgo (>70%)
         return {
             asrm: "Paciente cumple criterios para evaluación laparoscópica diagnóstica según ASRM. Considerar estadificación quirúrgica.",
             eshre: "Recomendación ESHRE: Derivación a unidad especializada en endometriosis. Considerar tratamiento médico agresivo y evaluación quirúrgica.",
-            nice: "Guía NICE: Paciente de alto riesgo requiere evaluación multidisciplinaria (ginecólogo, especialista en dolor, fertilidad)."
+            nice: "Guía NICE: Paciente de alto riesgo requiere evaluación multidisciplinaria (ginecólogo, especialista en dolor, fertilidad).",
+            minsal: "Guía Chilena (GES 12): Derivación urgente a especialista. Laparoscopia diagnóstica/terapéutica prioritaria (AUGE). Tratamiento hormonal postquirúrgico obligatorio."
         };
     } else if (prob >= 0.4) { // Riesgo moderado (40-69%)
         return {
             asrm: "Paciente puede beneficiarse de tratamiento médico empírico según ASRM. Considerar imagenología avanzada antes de cirugía.",
             eshre: "Recomendación ESHRE: Prueba de tratamiento médico de 3-6 meses. Si no mejora, considerar evaluación quirúrgica.",
-            nice: "Guía NICE: Manejo inicial con AINEs y terapia hormonal. Evaluar respuesta en 3 meses."
+            nice: "Guía NICE: Manejo inicial con AINEs y terapia hormonal. Evaluar respuesta en 3 meses.",
+            minsal: "Guía Chilena (GES 12): Iniciar tratamiento hormonal (anticonceptivos orales/progestágenos) + AINEs. Ecografía transvaginal. Si no mejora en 6 meses, derivar a especialista."
         };
     } else { // Bajo riesgo (<40%)
         return {
             asrm: "ASRM sugiere manejo conservador con seguimiento. Educación sobre síntomas de alerta.",
             eshre: "Recomendación ESHRE: Manejo sintomático. Reevaluar si síntomas progresan o cambian.",
-            nice: "Guía NICE: Educación y analgesia según necesidad. Seguimiento anual o ante nuevos síntomas."
+            nice: "Guía NICE: Educación y analgesia según necesidad. Seguimiento anual o ante nuevos síntomas.",
+            minsal: "Guía Chilena (GES 12): Educación en síntomas y control anual. Analgesia con AINEs. Considerar anticonceptivos si dismenorrea. Derivar si empeora."
         };
     }
 }
@@ -554,9 +558,9 @@ function showError(message) {
         box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         z-index: 1000;
     `;
-    
+
     document.body.appendChild(errorContainer);
-    
+
     setTimeout(() => {
         errorContainer.style.transition = 'opacity 1s';
         errorContainer.style.opacity = '0';
@@ -567,7 +571,7 @@ function showError(message) {
 // Función de simulación solo para desarrollo
 function showSimulation(formData) {
     let probability = 0.2;
-    
+
     // Factores de riesgo simulados
     if (formData.menstrual.pain_level >= 7) probability += 0.25;
     if (formData.symptoms.pain_during_sex) probability += 0.15;
@@ -576,16 +580,16 @@ function showSimulation(formData) {
     if (formData.symptoms.urinary_symptoms) probability += 0.1;
     if (formData.symptoms.fatigue) probability += 0.05;
     if (formData.symptoms.infertility) probability += 0.05;
-    
+
     // Ajustar según biomarcadores
     if (formData.biomarkers.ca125 > 35) probability += 0.1;
     if (formData.biomarkers.il6 > 5) probability += 0.05;
     if (formData.biomarkers.crp > 10) probability += 0.05;
-    
+
     probability = Math.min(probability, 0.95);
-    
+
     const riskLevel = probability > 0.7 ? 'high' : probability > 0.4 ? 'moderate' : 'low';
-    
+
     displayResults({
         probability: probability,
         riskLevel: riskLevel,
@@ -607,7 +611,7 @@ function showSimulation(formData) {
 }
 
 // Actualizar visualización del nivel de dolor
-document.getElementById('pain_level').addEventListener('input', function() {
+document.getElementById('pain_level').addEventListener('input', function () {
     const value = this.value;
     const min = this.min || 1;
     const max = this.max || 10;
@@ -622,10 +626,10 @@ document.getElementById('pain_level').dispatchEvent(new Event('input'));
 function downloadClinicalRecord(formData) {
     const button = document.querySelector('.download-button');
     if (!button) return;
-    
+
     // Guardar el contenido original para restaurarlo después
     const originalContent = button.innerHTML;
-    
+
     // Estado de carga
     button.disabled = true;
     button.innerHTML = `
@@ -634,61 +638,61 @@ function downloadClinicalRecord(formData) {
             <span>Generando documento...</span>
         </div>
     `;
-    
+
     // Añadir clase de loading para posibles estilos adicionales
     button.classList.add('loading');
-    
+
     // Generar nombre de archivo
     const today = new Date().toLocaleDateString('es-CL', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
     }).replace(/\//g, '-');
-    
+
     const patientName = formData.personal.full_name
         .trim()
         .toLowerCase()
         .replace(/\s+/g, '_')
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9_]/g, '');
-    
+
     const fileName = `ficha_${patientName}_${today}.pdf`;
-    
+
     // Solicitud de generación del PDF
     fetch('https://sitme.onrender.com/generate_clinical_record', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
     })
-    .then(response => {
-        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-        return response.blob();
-    })
-    .then(blob => {
-        // Descarga del archivo
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        
-        // Limpieza
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 100);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showError(`Error al generar el documento: ${error.message}`);
-    })
-    .finally(() => {
-        // Restaurar estado normal
-        button.disabled = false;
-        button.innerHTML = originalContent;
-        button.classList.remove('loading');
-    });
+        .then(response => {
+            if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+            return response.blob();
+        })
+        .then(blob => {
+            // Descarga del archivo
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+
+            // Limpieza
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError(`Error al generar el documento: ${error.message}`);
+        })
+        .finally(() => {
+            // Restaurar estado normal
+            button.disabled = false;
+            button.innerHTML = originalContent;
+            button.classList.remove('loading');
+        });
 }
 
