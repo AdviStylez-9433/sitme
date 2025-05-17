@@ -48,13 +48,29 @@ def init_db():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS patient_simulations (
                 id SERIAL PRIMARY KEY,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                -- JSON completos
                 patient_data JSONB NOT NULL,
                 prediction_result JSONB NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                -- Datos individuales para consultas rápidas
                 patient_name VARCHAR(255),
                 patient_age INTEGER,
-                risk_level VARCHAR(50)
-            )
+                risk_level VARCHAR(50),
+                probability NUMERIC(5,2),
+                
+                menarche_age INTEGER,
+                cycle_length INTEGER,
+                period_duration INTEGER,
+                menstrual_pain_level INTEGER,
+                dyspareunia BOOLEAN,
+                family_history BOOLEAN,
+                ca125_value NUMERIC,
+                crp_value NUMERIC,
+                bmi NUMERIC,
+                pelvic_exam VARCHAR(255)
+            );
         """)
         conn.commit()
     except Exception as e:
@@ -73,24 +89,50 @@ def save_simulation():
         data = request.get_json()
         if not data or 'form_data' not in data or 'prediction' not in data:
             return jsonify({'error': 'Datos incompletos'}), 400
+
+        form = data['form_data']
+        prediction = data['prediction']
         
-        # Extraer datos importantes para facilitar consultas
-        patient_name = data['form_data']['personal']['full_name']
-        patient_age = int(data['form_data']['personal']['age'])
-        risk_level = data['riskLevel']  # 'high', 'moderate' o 'low'
-        
+        # Extraer campos clave
+        patient_name = form['personal']['full_name']
+        patient_age = int(form['personal']['age'])
+        risk_level = data['riskLevel']
+        probability = float(data['probability']) * 100  # Porcentaje
+
+        menarche_age = int(form['menstrual'].get('menarche_age', 0))
+        cycle_length = int(form['menstrual'].get('cycle_length', 0))
+        period_duration = int(form['menstrual'].get('period_duration', 0))
+        menstrual_pain_level = int(form['menstrual'].get('pain_level', 0))
+        dyspareunia = bool(form['symptoms'].get('pain_during_sex', False))
+        family_history = bool(form['history'].get('family_endometriosis', False))
+
+        ca125_value = form['biomarkers'].get('ca125')
+        crp_value = form['biomarkers'].get('crp')
+        bmi = form['examination'].get('bmi')
+        pelvic_exam = form['examination'].get('pelvic_exam', '')
+
+        # Insertar en la base de datos
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        
         query = sql.SQL("""
-            INSERT INTO patient_simulations 
-            (patient_data, prediction_result, patient_name, patient_age, risk_level)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO patient_simulations (
+                patient_data, prediction_result,
+                patient_name, patient_age, risk_level, probability,
+                menarche_age, cycle_length, period_duration,
+                menstrual_pain_level, dyspareunia, family_history,
+                ca125_value, crp_value, bmi, pelvic_exam
+            ) VALUES (
+                %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s,
+                %s, %s, %s, %s
+            )
             RETURNING id
         """)
         
         cursor.execute(query, [
-            json.dumps(data['form_data']),
+            json.dumps(form),
             json.dumps({
                 'probability': data['probability'],
                 'risk_level': risk_level,
@@ -98,7 +140,18 @@ def save_simulation():
             }),
             patient_name,
             patient_age,
-            risk_level
+            risk_level,
+            probability,
+            menarche_age,
+            cycle_length,
+            period_duration,
+            menstrual_pain_level,
+            dyspareunia,
+            family_history,
+            ca125_value,
+            crp_value,
+            bmi,
+            pelvic_exam
         ])
         
         simulation_id = cursor.fetchone()['id']
@@ -109,7 +162,7 @@ def save_simulation():
             'simulation_id': simulation_id,
             'message': 'Simulación guardada exitosamente'
         })
-        
+
     except Exception as e:
         app.logger.error(f"Error guardando simulación: {str(e)}")
         return jsonify({
