@@ -721,31 +721,51 @@ function saveSimulationToDB(simulationData) {
         </div>
     `;
 
+    // Preparamos los datos para enviar
+    const dataToSend = {
+        form_data: simulationData.formData || simulationData.form_data, // Compatibilidad con ambos nombres
+        prediction: {
+            probability: simulationData.probability,
+            risk_level: simulationData.riskLevel || simulationData.risk_level,
+            recommendations: simulationData.recommendations
+        },
+        riskLevel: simulationData.riskLevel || simulationData.risk_level
+    };
+
+    console.log("Datos a enviar:", dataToSend); // Para depuración
+
     // Solicitud para guardar la simulación
     fetch('https://sitme.onrender.com/save_simulation', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(simulationData)
+        headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(dataToSend)
     })
-        .then(response => {
-            if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-            return response.json();
-        })
-        .then(data => {
-            if (data.error) throw new Error(data.error);
-
-            // Mostrar notificación de éxito
-            showSuccessNotification('Simulación guardada exitosamente en la base de datos');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showError(`Error al guardar: ${error.message}`);
-        })
-        .finally(() => {
-            // Restaurar estado normal
-            saveButton.disabled = false;
-            saveButton.innerHTML = originalContent;
-        });
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errData => {
+                throw new Error(`Error ${response.status}: ${errData.error || response.statusText}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) throw new Error(data.error);
+        
+        // Mostrar notificación de éxito
+        showSuccessNotification('Simulación guardada exitosamente en la base de datos');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showError(`Error al guardar: ${error.message}`);
+    })
+    .finally(() => {
+        // Restaurar estado normal
+        saveButton.disabled = false;
+        saveButton.innerHTML = originalContent;
+    });
 }
 
 // Función para mostrar notificación de éxito
