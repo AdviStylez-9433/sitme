@@ -41,6 +41,7 @@ def get_db_connection():
 
 # Función para crear la tabla si no existe (ejecutar al inicio)
 def init_db():
+    conn = None  # <- define conn antes del try
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
