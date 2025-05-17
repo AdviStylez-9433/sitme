@@ -49,11 +49,11 @@ def init_db():
             CREATE TABLE IF NOT EXISTS patient_simulations (
                 id SERIAL PRIMARY KEY,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
+                
                 -- JSON completos
                 patient_data JSONB NOT NULL,
                 prediction_result JSONB NOT NULL,
-
+                
                 -- Datos individuales para consultas rápidas
                 patient_name VARCHAR(255),
                 patient_age INTEGER,
@@ -98,33 +98,62 @@ def save_simulation():
         
         # Extraer datos importantes con manejo de errores
         try:
-            patient_name = data['form_data']['personal']['full_name']
-            patient_age = int(data['form_data']['personal']['age'])
-            risk_level = data.get('riskLevel', data['prediction'].get('risk_level', 'unknown'))
+            form_data = data['form_data']
+            prediction = data['prediction']
+            
+            patient_name = form_data['personal']['full_name']
+            patient_age = int(form_data['personal']['age'])
+            risk_level = prediction.get('risk_level', 'unknown').lower()
             
             # Validar risk_level
             if risk_level not in ['high', 'moderate', 'low', 'unknown']:
                 risk_level = 'unknown'
+                
+            # Extraer más datos para campos individuales
+            menarche_age = int(form_data['menstrual']['menarche_age']) if form_data['menstrual']['menarche_age'] else None
+            cycle_length = int(form_data['menstrual']['cycle_length']) if form_data['menstrual']['cycle_length'] else None
+            period_duration = int(form_data['menstrual']['period_duration']) if form_data['menstrual']['period_duration'] else None
+            menstrual_pain_level = int(form_data['menstrual']['pain_level']) if form_data['menstrual']['pain_level'] else None
+            dyspareunia = bool(form_data['symptoms']['pain_during_sex'])
+            family_history = bool(form_data['history']['family_endometriosis'])
+            ca125_value = float(form_data['biomarkers']['ca125']) if form_data['biomarkers']['ca125'] is not None else None
+            crp_value = float(form_data['biomarkers']['crp']) if form_data['biomarkers']['crp'] is not None else None
+            bmi = float(form_data['examination']['bmi']) if form_data['examination']['bmi'] is not None else None
+            pelvic_exam = form_data['examination']['pelvic_exam']
+            
         except (KeyError, TypeError, ValueError) as e:
             app.logger.error(f"Error extrayendo datos: {str(e)}")
-            return jsonify({'error': 'Estructura de datos incorrecta'}), 400
+            return jsonify({'error': 'Estructura de datos incorrecta', 'details': str(e)}), 400
         
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         
         query = sql.SQL("""
             INSERT INTO patient_simulations 
-            (patient_data, prediction_result, patient_name, patient_age, risk_level)
-            VALUES (%s, %s, %s, %s, %s)
+            (patient_data, prediction_result, patient_name, patient_age, risk_level, probability,
+             menarche_age, cycle_length, period_duration, menstrual_pain_level, dyspareunia,
+             family_history, ca125_value, crp_value, bmi, pelvic_exam)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """)
         
         cursor.execute(query, [
-            json.dumps(data['form_data']),
-            json.dumps(data['prediction']),
+            json.dumps(form_data),
+            json.dumps(prediction),
             patient_name,
             patient_age,
-            risk_level
+            risk_level,
+            float(prediction.get('probability', 0)),
+            menarche_age,
+            cycle_length,
+            period_duration,
+            menstrual_pain_level,
+            dyspareunia,
+            family_history,
+            ca125_value,
+            crp_value,
+            bmi,
+            pelvic_exam
         ])
         
         simulation_id = cursor.fetchone()['id']

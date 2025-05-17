@@ -721,18 +721,77 @@ function saveSimulationToDB(simulationData) {
         </div>
     `;
 
+    // Recoger todos los datos del formulario directamente
+    const formData = {
+        personal: {
+            full_name: document.getElementById('full_name').value,
+            id_number: document.getElementById('rut').value,
+            birth_date: document.getElementById('birth_date').value,
+            age: document.getElementById('age').value,
+            blood_type: document.getElementById('blood_type').value,
+            insurance: document.querySelector('input[name="insurance"]:checked')?.value
+        },
+        history: {
+            gynecological_surgery: document.getElementById('gynecological_surgery').checked,
+            pelvic_inflammatory: document.getElementById('pelvic_inflammatory').checked,
+            ovarian_cysts: document.getElementById('ovarian_cysts').checked,
+            family_endometriosis: document.getElementById('family_endometriosis').checked,
+            family_autoimmune: document.getElementById('family_autoimmune').checked,
+            family_cancer: document.getElementById('family_cancer').checked,
+            comorbidity_autoimmune: document.getElementById('comorbidity_autoimmune').checked,
+            comorbidity_thyroid: document.getElementById('comorbidity_thyroid').checked,
+            comorbidity_ibs: document.getElementById('comorbidity_ibs').checked,
+            medications: document.getElementById('medications').value
+        },
+        menstrual: {
+            menarche_age: document.getElementById('menarche_age').value,
+            cycle_length: document.getElementById('cycle_length').value,
+            period_duration: document.getElementById('period_duration').value,
+            last_period: document.getElementById('last_period').value,
+            pain_level: document.getElementById('pain_level').value,
+            pain_premenstrual: document.getElementById('pain_premenstrual').checked,
+            pain_menstrual: document.getElementById('pain_menstrual').checked,
+            pain_ovulation: document.getElementById('pain_ovulation').checked,
+            pain_chronic: document.getElementById('pain_chronic').checked
+        },
+        symptoms: {
+            pain_during_sex: document.querySelector('input[name="pain_during_sex"]:checked')?.value === '1',
+            bowel_symptoms: document.querySelector('input[name="bowel_symptoms"]:checked')?.value === '1',
+            urinary_symptoms: document.querySelector('input[name="urinary_symptoms"]:checked')?.value === '1',
+            fatigue: document.querySelector('input[name="fatigue"]:checked')?.value === '1',
+            infertility: document.querySelector('input[name="infertility"]:checked')?.value === '1',
+            other_symptoms: document.getElementById('other_symptoms').value
+        },
+        biomarkers: {
+            ca125: document.getElementById('ca125').value ? parseFloat(document.getElementById('ca125').value) : null,
+            il6: document.getElementById('il6').value ? parseFloat(document.getElementById('il6').value) : null,
+            tnf_alpha: document.getElementById('tnf_alpha').value ? parseFloat(document.getElementById('tnf_alpha').value) : null,
+            vegf: document.getElementById('vegf').value ? parseFloat(document.getElementById('vegf').value) : null,
+            amh: document.getElementById('amh').value ? parseFloat(document.getElementById('amh').value) : null,
+            crp: document.getElementById('crp').value ? parseFloat(document.getElementById('crp').value) : null,
+            imaging: document.getElementById('imaging').value,
+            imaging_details: document.getElementById('imaging_details').value
+        },
+        examination: {
+            height: document.getElementById('height').value ? parseFloat(document.getElementById('height').value) : null,
+            weight: document.getElementById('weight').value ? parseFloat(document.getElementById('weight').value) : null,
+            bmi: document.getElementById('bmi').value ? parseFloat(document.getElementById('bmi').value) : null,
+            pelvic_exam: document.getElementById('pelvic_exam').value,
+            vaginal_exam: document.getElementById('vaginal_exam').value,
+            clinical_notes: document.getElementById('clinical_notes').value
+        }
+    };
+
     // Preparamos los datos para enviar
     const dataToSend = {
-        form_data: simulationData.formData || simulationData.form_data, // Compatibilidad con ambos nombres
+        form_data: formData,
         prediction: {
             probability: simulationData.probability,
             risk_level: simulationData.riskLevel || simulationData.risk_level,
-            recommendations: simulationData.recommendations
-        },
-        riskLevel: simulationData.riskLevel || simulationData.risk_level
+            recommendations: simulationData.recommendations,
+            key_factors: simulationData.riskFactors
+        }
     };
-
-    console.log("Datos a enviar:", dataToSend); // Para depuración
 
     // Solicitud para guardar la simulación
     fetch('https://sitme.onrender.com/save_simulation', {
