@@ -721,11 +721,20 @@ function saveSimulationToDB(simulationData) {
         </div>
     `;
 
-    // Recoger todos los datos del formulario directamente
+    // Validar RUT antes de continuar
+    const rutInput = document.getElementById('rut');
+    if (rutInput.value && !validarRUT(rutInput.value)) {
+        saveButton.disabled = false;
+        saveButton.innerHTML = originalContent;
+        showError('RUT inválido. Verifique el dígito verificador.');
+        return;
+    }
+
+    // Recoger TODOS los datos del formulario
     const formData = {
         personal: {
             full_name: document.getElementById('full_name').value,
-            id_number: document.getElementById('rut').value,
+            id_number: rutInput.value,
             birth_date: document.getElementById('birth_date').value,
             age: document.getElementById('age').value,
             blood_type: document.getElementById('blood_type').value,
@@ -789,8 +798,9 @@ function saveSimulationToDB(simulationData) {
             probability: simulationData.probability,
             risk_level: simulationData.riskLevel || simulationData.risk_level,
             recommendations: simulationData.recommendations,
-            key_factors: simulationData.riskFactors
-        }
+            model_version: simulationData.model_info?.version || 'v4.1'
+        },
+        clinic_id: document.getElementById('clinicId').textContent
     };
 
     // Solicitud para guardar la simulación

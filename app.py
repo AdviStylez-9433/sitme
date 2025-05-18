@@ -41,35 +41,81 @@ def get_db_connection():
 
 # Función para crear la tabla si no existe (ejecutar al inicio)
 def init_db():
-    conn = None  # <- define conn antes del try
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS patient_simulations (
+                -- Identificación
                 id SERIAL PRIMARY KEY,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                clinic_id VARCHAR(20),
                 
-                -- JSON completos
-                patient_data JSONB NOT NULL,
-                prediction_result JSONB NOT NULL,
+                -- Datos personales
+                full_name VARCHAR(255),
+                id_number VARCHAR(12),  -- RUT
+                birth_date DATE,
+                age INTEGER,
+                blood_type VARCHAR(3),
+                insurance VARCHAR(20),
                 
-                -- Datos individuales para consultas rápidas
-                patient_name VARCHAR(255),
-                patient_age INTEGER,
-                risk_level VARCHAR(50),
-                probability NUMERIC(5,2),
+                -- Antecedentes médicos
+                gynecological_surgery BOOLEAN,
+                pelvic_inflammatory BOOLEAN,
+                ovarian_cysts BOOLEAN,
+                family_endometriosis BOOLEAN,
+                family_autoimmune BOOLEAN,
+                family_cancer BOOLEAN,
+                comorbidity_autoimmune BOOLEAN,
+                comorbidity_thyroid BOOLEAN,
+                comorbidity_ibs BOOLEAN,
+                medications TEXT,
                 
+                -- Historia menstrual
                 menarche_age INTEGER,
                 cycle_length INTEGER,
                 period_duration INTEGER,
-                menstrual_pain_level INTEGER,
-                dyspareunia BOOLEAN,
-                family_history BOOLEAN,
-                ca125_value NUMERIC,
-                crp_value NUMERIC,
+                last_period DATE,
+                pain_level INTEGER,
+                pain_premenstrual BOOLEAN,
+                pain_menstrual BOOLEAN,
+                pain_ovulation BOOLEAN,
+                pain_chronic BOOLEAN,
+                
+                -- Síntomas actuales
+                pain_during_sex BOOLEAN,
+                bowel_symptoms BOOLEAN,
+                urinary_symptoms BOOLEAN,
+                fatigue BOOLEAN,
+                infertility BOOLEAN,
+                other_symptoms TEXT,
+                
+                -- Biomarcadores
+                ca125 NUMERIC,
+                il6 NUMERIC,
+                tnf_alpha NUMERIC,
+                vegf NUMERIC,
+                amh NUMERIC,
+                crp NUMERIC,
+                imaging VARCHAR(50),
+                imaging_details TEXT,
+                
+                -- Examen físico
+                height NUMERIC,
+                weight NUMERIC,
                 bmi NUMERIC,
-                pelvic_exam VARCHAR(255)
+                pelvic_exam VARCHAR(255),
+                vaginal_exam VARCHAR(255),
+                clinical_notes TEXT,
+                
+                -- Resultados de la predicción
+                probability NUMERIC(5,2),
+                risk_level VARCHAR(20),
+                model_version VARCHAR(20),
+                
+                -- Recomendaciones (podrían normalizarse en otra tabla)
+                recommendations TEXT[]
             );
         """)
         conn.commit()
@@ -90,70 +136,115 @@ def save_simulation():
         if not data:
             return jsonify({'error': 'No se recibieron datos'}), 400
         
-        # Validación de datos requeridos
-        required_fields = ['form_data', 'prediction']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f'Campo requerido faltante: {field}'}), 400
+        # Extraer datos del formulario
+        form_data = data.get('form_data', {})
+        prediction = data.get('prediction', {})
         
-        # Extraer datos importantes con manejo de errores
-        try:
-            form_data = data['form_data']
-            prediction = data['prediction']
-            
-            patient_name = form_data['personal']['full_name']
-            patient_age = int(form_data['personal']['age'])
-            risk_level = prediction.get('risk_level', 'unknown').lower()
-            
-            # Validar risk_level
-            if risk_level not in ['high', 'moderate', 'low', 'unknown']:
-                risk_level = 'unknown'
-                
-            # Extraer más datos para campos individuales
-            menarche_age = int(form_data['menstrual']['menarche_age']) if form_data['menstrual']['menarche_age'] else None
-            cycle_length = int(form_data['menstrual']['cycle_length']) if form_data['menstrual']['cycle_length'] else None
-            period_duration = int(form_data['menstrual']['period_duration']) if form_data['menstrual']['period_duration'] else None
-            menstrual_pain_level = int(form_data['menstrual']['pain_level']) if form_data['menstrual']['pain_level'] else None
-            dyspareunia = bool(form_data['symptoms']['pain_during_sex'])
-            family_history = bool(form_data['history']['family_endometriosis'])
-            ca125_value = float(form_data['biomarkers']['ca125']) if form_data['biomarkers']['ca125'] is not None else None
-            crp_value = float(form_data['biomarkers']['crp']) if form_data['biomarkers']['crp'] is not None else None
-            bmi = float(form_data['examination']['bmi']) if form_data['examination']['bmi'] is not None else None
-            pelvic_exam = form_data['examination']['pelvic_exam']
-            
-        except (KeyError, TypeError, ValueError) as e:
-            app.logger.error(f"Error extrayendo datos: {str(e)}")
-            return jsonify({'error': 'Estructura de datos incorrecta', 'details': str(e)}), 400
+        # Validar datos requeridos
+        if not form_data or not prediction:
+            return jsonify({'error': 'Datos incompletos'}), 400
+        
+        # Datos personales
+        personal = form_data.get('personal', {})
+        history = form_data.get('history', {})
+        menstrual = form_data.get('menstrual', {})
+        symptoms = form_data.get('symptoms', {})
+        biomarkers = form_data.get('biomarkers', {})
+        examination = form_data.get('examination', {})
+        
+        # Preparar consulta SQL con todos los campos
+        query = sql.SQL("""
+            INSERT INTO patient_simulations (
+                clinic_id,
+                full_name, id_number, birth_date, age, blood_type, insurance,
+                gynecological_surgery, pelvic_inflammatory, ovarian_cysts,
+                family_endometriosis, family_autoimmune, family_cancer,
+                comorbidity_autoimmune, comorbidity_thyroid, comorbidity_ibs,
+                medications,
+                menarche_age, cycle_length, period_duration, last_period,
+                pain_level, pain_premenstrual, pain_menstrual, pain_ovulation, pain_chronic,
+                pain_during_sex, bowel_symptoms, urinary_symptoms, fatigue, infertility,
+                other_symptoms,
+                ca125, il6, tnf_alpha, vegf, amh, crp,
+                imaging, imaging_details,
+                height, weight, bmi, pelvic_exam, vaginal_exam, clinical_notes,
+                probability, risk_level, model_version, recommendations
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            ) RETURNING id
+        """)
         
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         
-        query = sql.SQL("""
-            INSERT INTO patient_simulations 
-            (patient_data, prediction_result, patient_name, patient_age, risk_level, probability,
-             menarche_age, cycle_length, period_duration, menstrual_pain_level, dyspareunia,
-             family_history, ca125_value, crp_value, bmi, pelvic_exam)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING id
-        """)
-        
         cursor.execute(query, [
-            json.dumps(form_data),
-            json.dumps(prediction),
-            patient_name,
-            patient_age,
-            risk_level,
+            # ID clínico
+            data.get('clinic_id', ''),
+            
+            # Datos personales
+            personal.get('full_name'),
+            personal.get('id_number'),
+            personal.get('birth_date'),
+            int(personal.get('age', 0)) if personal.get('age') else None,
+            personal.get('blood_type'),
+            personal.get('insurance'),
+            
+            # Antecedentes médicos
+            history.get('gynecological_surgery', False),
+            history.get('pelvic_inflammatory', False),
+            history.get('ovarian_cysts', False),
+            history.get('family_endometriosis', False),
+            history.get('family_autoimmune', False),
+            history.get('family_cancer', False),
+            history.get('comorbidity_autoimmune', False),
+            history.get('comorbidity_thyroid', False),
+            history.get('comorbidity_ibs', False),
+            history.get('medications'),
+            
+            # Historia menstrual
+            int(menstrual.get('menarche_age')) if menstrual.get('menarche_age') else None,
+            int(menstrual.get('cycle_length')) if menstrual.get('cycle_length') else None,
+            int(menstrual.get('period_duration')) if menstrual.get('period_duration') else None,
+            menstrual.get('last_period'),
+            int(menstrual.get('pain_level')) if menstrual.get('pain_level') else None,
+            menstrual.get('pain_premenstrual', False),
+            menstrual.get('pain_menstrual', False),
+            menstrual.get('pain_ovulation', False),
+            menstrual.get('pain_chronic', False),
+            
+            # Síntomas
+            symptoms.get('pain_during_sex', False),
+            symptoms.get('bowel_symptoms', False),
+            symptoms.get('urinary_symptoms', False),
+            symptoms.get('fatigue', False),
+            symptoms.get('infertility', False),
+            symptoms.get('other_symptoms'),
+            
+            # Biomarcadores
+            float(biomarkers.get('ca125')) if biomarkers.get('ca125') else None,
+            float(biomarkers.get('il6')) if biomarkers.get('il6') else None,
+            float(biomarkers.get('tnf_alpha')) if biomarkers.get('tnf_alpha') else None,
+            float(biomarkers.get('vegf')) if biomarkers.get('vegf') else None,
+            float(biomarkers.get('amh')) if biomarkers.get('amh') else None,
+            float(biomarkers.get('crp')) if biomarkers.get('crp') else None,
+            biomarkers.get('imaging'),
+            biomarkers.get('imaging_details'),
+            
+            # Examen físico
+            float(examination.get('height')) if examination.get('height') else None,
+            float(examination.get('weight')) if examination.get('weight') else None,
+            float(examination.get('bmi')) if examination.get('bmi') else None,
+            examination.get('pelvic_exam'),
+            examination.get('vaginal_exam'),
+            examination.get('clinical_notes'),
+            
+            # Resultados de la predicción
             float(prediction.get('probability', 0)),
-            menarche_age,
-            cycle_length,
-            period_duration,
-            menstrual_pain_level,
-            dyspareunia,
-            family_history,
-            ca125_value,
-            crp_value,
-            bmi,
-            pelvic_exam
+            prediction.get('risk_level', 'unknown'),
+            prediction.get('model_version', 'v4.1'),
+            
+            # Recomendaciones (como array)
+            prediction.get('recommendations', [])
         ])
         
         simulation_id = cursor.fetchone()['id']
