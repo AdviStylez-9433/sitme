@@ -721,15 +721,6 @@ function saveSimulationToDB(simulationData) {
         </div>
     `;
 
-    // Validar RUT antes de continuar
-    const rutInput = document.getElementById('rut');
-    if (rutInput.value && !validarRUT(rutInput.value)) {
-        saveButton.disabled = false;
-        saveButton.innerHTML = originalContent;
-        showError('RUT inválido. Verifique el dígito verificador.');
-        return;
-    }
-
     // Recoger TODOS los datos del formulario
     const formData = {
         personal: {
