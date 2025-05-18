@@ -636,7 +636,7 @@ def generate_clinical_record():
         elements = []
         
         # Logo
-        logo_path = "static/logo.png"
+        logo_path = "static/assets/logo.png"
         try:
             logo = Image(logo_path, width=1.5*inch, height=0.4*inch)
             logo.hAlign = 'LEFT'
