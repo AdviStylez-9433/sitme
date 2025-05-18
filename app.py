@@ -20,6 +20,7 @@ import psycopg2
 from psycopg2 import sql
 from psycopg2.extras import RealDictCursor
 import json
+import traceback
 
 # Configuración inicial
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -153,7 +154,7 @@ def save_simulation():
         examination = form_data.get('examination', {})
         
         # Preparar consulta SQL con todos los campos
-        query = sql.SQL("""
+        query = """
             INSERT INTO patient_simulations (
                 clinic_id,
                 full_name, id_number, birth_date, age, blood_type, insurance,
@@ -172,16 +173,17 @@ def save_simulation():
             ) VALUES (
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
             ) RETURNING id
-        """)
+        """
         
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         
-        cursor.execute(query, [
+        # Preparar parámetros en el orden exacto de la consulta
+        params = [
             # ID clínico
             data.get('clinic_id', ''),
             
-            # Datos personales
+            # Datos personales (6 campos)
             personal.get('full_name'),
             personal.get('id_number'),
             personal.get('birth_date'),
@@ -189,7 +191,7 @@ def save_simulation():
             personal.get('blood_type'),
             personal.get('insurance'),
             
-            # Antecedentes médicos
+            # Antecedentes médicos (10 campos)
             history.get('gynecological_surgery', False),
             history.get('pelvic_inflammatory', False),
             history.get('ovarian_cysts', False),
@@ -201,7 +203,7 @@ def save_simulation():
             history.get('comorbidity_ibs', False),
             history.get('medications'),
             
-            # Historia menstrual
+            # Historia menstrual (9 campos)
             int(menstrual.get('menarche_age')) if menstrual.get('menarche_age') else None,
             int(menstrual.get('cycle_length')) if menstrual.get('cycle_length') else None,
             int(menstrual.get('period_duration')) if menstrual.get('period_duration') else None,
@@ -212,7 +214,7 @@ def save_simulation():
             menstrual.get('pain_ovulation', False),
             menstrual.get('pain_chronic', False),
             
-            # Síntomas
+            # Síntomas (6 campos)
             symptoms.get('pain_during_sex', False),
             symptoms.get('bowel_symptoms', False),
             symptoms.get('urinary_symptoms', False),
@@ -220,7 +222,7 @@ def save_simulation():
             symptoms.get('infertility', False),
             symptoms.get('other_symptoms'),
             
-            # Biomarcadores
+            # Biomarcadores (8 campos)
             float(biomarkers.get('ca125')) if biomarkers.get('ca125') else None,
             float(biomarkers.get('il6')) if biomarkers.get('il6') else None,
             float(biomarkers.get('tnf_alpha')) if biomarkers.get('tnf_alpha') else None,
@@ -230,7 +232,7 @@ def save_simulation():
             biomarkers.get('imaging'),
             biomarkers.get('imaging_details'),
             
-            # Examen físico
+            # Examen físico (6 campos)
             float(examination.get('height')) if examination.get('height') else None,
             float(examination.get('weight')) if examination.get('weight') else None,
             float(examination.get('bmi')) if examination.get('bmi') else None,
@@ -238,15 +240,21 @@ def save_simulation():
             examination.get('vaginal_exam'),
             examination.get('clinical_notes'),
             
-            # Resultados de la predicción
+            # Resultados de la predicción (3 campos)
             float(prediction.get('probability', 0)),
             prediction.get('risk_level', 'unknown'),
             prediction.get('model_version', 'v4.1'),
             
-            # Recomendaciones (como array)
+            # Recomendaciones (1 campo)
             prediction.get('recommendations', [])
-        ])
+        ]
         
+        # Verificar que el número de parámetros coincida con los marcadores
+        expected_params = query.count('%s')
+        if len(params) != expected_params:
+            raise ValueError(f"Número incorrecto de parámetros. Esperados: {expected_params}, Obtenidos: {len(params)}")
+        
+        cursor.execute(query, params)
         simulation_id = cursor.fetchone()['id']
         conn.commit()
         
@@ -260,7 +268,8 @@ def save_simulation():
         app.logger.error(f"Error guardando simulación: {str(e)}")
         return jsonify({
             'error': 'Error al guardar la simulación',
-            'details': str(e)
+            'details': str(e),
+            'trace': traceback.format_exc()
         }), 500
     finally:
         if 'conn' in locals():

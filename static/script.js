@@ -794,6 +794,8 @@ function saveSimulationToDB(simulationData) {
         clinic_id: document.getElementById('clinicId').textContent
     };
 
+    console.log('Data enviada:', dataToSend);
+
     // Solicitud para guardar la simulación
     fetch('https://sitme.onrender.com/save_simulation', {
         method: 'POST',
