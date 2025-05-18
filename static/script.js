@@ -1538,3 +1538,61 @@ function setupModalEvents() {
         window.print();
     });
 }
+
+// Manejo del consentimiento informado
+document.addEventListener('DOMContentLoaded', function() {
+    const consentModal = document.getElementById('consentModal');
+    const consentCheckbox = document.getElementById('consentCheckbox');
+    const consentAcceptBtn = document.getElementById('consentAcceptBtn');
+    
+    // Versión actual del sistema (cambiar esto cuando haya actualizaciones importantes)
+    const CURRENT_SYSTEM_VERSION = '2.1';
+    
+    // Habilitar botón cuando se marca el checkbox
+    consentCheckbox.addEventListener('change', function() {
+        consentAcceptBtn.disabled = !this.checked;
+    });
+    
+    // Cerrar modal al aceptar
+    consentAcceptBtn.addEventListener('click', function() {
+        consentModal.style.display = 'none';
+        // Guardar en localStorage que el consentimiento fue aceptado
+        localStorage.setItem('consentAccepted', 'true');
+        localStorage.setItem('consentDate', new Date().toISOString());
+        localStorage.setItem('acceptedVersion', CURRENT_SYSTEM_VERSION);
+    });
+    
+    // Verificar si debe mostrarse el modal
+    function shouldShowConsentModal() {
+        // 1. Si nunca ha aceptado, mostrar
+        if (localStorage.getItem('consentAccepted') !== 'true') {
+            return true;
+        }
+        
+        // 2. Verificar expiración (6 meses)
+        const consentDate = localStorage.getItem('consentDate');
+        if (consentDate) {
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            if (new Date(consentDate) < sixMonthsAgo) {
+                return true;
+            }
+        }
+        
+        // 3. Verificar si la versión aceptada es diferente a la actual
+        const acceptedVersion = localStorage.getItem('acceptedVersion');
+        if (acceptedVersion !== CURRENT_SYSTEM_VERSION) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // Mostrar modal si es necesario
+    if (shouldShowConsentModal()) {
+        consentModal.style.display = 'block';
+    } else {
+        consentModal.style.display = 'none';
+    }
+});

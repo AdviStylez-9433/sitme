@@ -739,7 +739,7 @@
             <p>&copy; 2025 SITME - Sistema Integral de Tamizaje Multimodal para Endometriosis.</p>
             <p>Este sistema no sustituye el juicio clínico profesional. Consulte siempre a un especialista.</p>
             <div class="footer-links">
-                <a href="../privacy.html"><i class="fas fa-eye-slash text-success"></i> Privacidad</a>            
+                <!-- <a href="../privacy.html"><i class="fas fa-eye-slash text-success"></i> Privacidad</a> -->
             </div>
         </footer>
     </div>
@@ -802,6 +802,58 @@
             <div class="modal-footer">
                 <button class="modal-btn print-btn"><i class="fas fa-print"></i> Imprimir</button>
                 <button class="modal-btn close-btn"><i class="fas fa-times"></i> Cerrar</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal de Consentimiento Informado -->
+    <div id="consentModal" class="modal" style="display: block;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Consentimiento Informado y Advertencia</h3>
+            </div>
+            <div class="modal-body">
+                <div class="consent-content">
+                    <div class="consent-section">
+                        <h4><i class="fas fa-brain"></i> Uso de Inteligencia Artificial</h4>
+                        <p>Este sistema utiliza algoritmos de inteligencia artificial para analizar datos clínicos y
+                            predecir probabilidades de endometriosis basadas en patrones estadísticos. <strong>Los
+                                resultados son estimaciones predictivas</strong> y no constituyen un diagnóstico
+                            definitivo.</p>
+                    </div>
+
+                    <div class="consent-section">
+                        <h4><i class="fas fa-user-md"></i> Limitaciones de Uso</h4>
+                        <p>Este sistema está diseñado <strong>exclusivamente para uso de profesionales médicos
+                                calificados</strong>. No sustituye el juicio clínico, la evaluación física ni los
+                            exámenes complementarios necesarios para un diagnóstico certero.</p>
+                    </div>
+
+                    <div class="consent-section">
+                        <h4><i class="fas fa-shield-alt"></i> Responsabilidad Profesional</h4>
+                        <p>El médico tratante es responsable de interpretar los resultados en el contexto clínico
+                            completo del paciente, considerando historia médica, examen físico y cualquier estudio
+                            adicional que sea necesario.</p>
+                    </div>
+
+                    <div class="consent-section">
+                        <h4><i class="fas fa-database"></i> Protección de Datos</h4>
+                        <p>Toda la información ingresada en este sistema está protegida según las normativas de
+                            confidencialidad médica. Los datos se almacenan de forma segura y anonimizada para fines
+                            estadísticos y mejora del algoritmo.</p>
+                    </div>
+
+                    <div class="consent-checkbox">
+                        <input type="checkbox" id="consentCheckbox">
+                        <label for="consentCheckbox">Confirmo que soy un profesional de la salud calificado y entiendo
+                            que este sistema es solo una herramienta de apoyo al juicio clínico, no un sustituto del
+                            mismo.</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="consentAcceptBtn" class="modal-btn" disabled>
+                    <i class="fas fa-check-circle"></i> Aceptar y Continuar
+                </button>
             </div>
         </div>
     </div>

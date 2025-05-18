@@ -1788,3 +1788,72 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+/* Modal de consentimiento */
+#consentModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    overflow-y: auto;
+}
+
+.consent-content {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.consent-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #6c757d;
+}
+
+.consent-section h4 {
+    color: #495057;
+    margin-top: 0;
+}
+
+.consent-checkbox {
+    margin: 25px 0;
+    padding: 15px;
+    background-color: #e9ecef;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.consent-checkbox input {
+    margin-right: 10px;
+    min-width: 20px;
+    min-height: 20px;
+}
+
+#consentAcceptBtn {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#consentAcceptBtn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+#consentAcceptBtn:hover:not(:disabled) {
+    background-color: #218838;
+}
