@@ -799,51 +799,51 @@ function saveSimulationToDB(simulationData) {
     // Solicitud para guardar la simulación
     fetch('https://sitme.onrender.com/save_simulation', {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
         body: JSON.stringify(dataToSend)
     })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(errData => {
-                throw new Error(`Error ${response.status}: ${errData.error || response.statusText}`);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.error) throw new Error(data.error);
-        
-        // Mostrar notificación de éxito
-        showSuccessNotification('Simulación guardada exitosamente en la base de datos');
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showError(`Error al guardar: ${error.message}`);
-    })
-    .finally(() => {
-        // Restaurar estado normal
-        saveButton.disabled = false;
-        saveButton.innerHTML = originalContent;
-    });
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errData => {
+                    throw new Error(`Error ${response.status}: ${errData.error || response.statusText}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+
+            // Mostrar notificación de éxito
+            showSuccessNotification('Simulación guardada exitosamente en la base de datos');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError(`Error al guardar: ${error.message}`);
+        })
+        .finally(() => {
+            // Restaurar estado normal
+            saveButton.disabled = false;
+            saveButton.innerHTML = originalContent;
+        });
 }
 
 // Agrega esta función al script.js para cargar el historial
 function loadHistoryData(searchTerm = '') {
     const historyTableBody = document.getElementById('historyTableBody');
     const noHistoryMsg = document.getElementById('noHistoryMessage');
-    
+
     // Mostrar estado de carga
     historyTableBody.innerHTML = '<tr><td colspan="7" class="loading-row"><div class="spinner-container"><div class="loading-spinner"></div><span>Cargando historial...</span></div></td></tr>';
-    
+
     // Construir URL con parámetro de búsqueda si existe
     let url = 'https://sitme.onrender.com/get_history';
     if (searchTerm) {
         url += `?search=${encodeURIComponent(searchTerm)}`;
     }
-    
+
     fetch(url)
         .then(response => {
             if (!response.ok) throw new Error('Error al cargar el historial');
@@ -855,18 +855,18 @@ function loadHistoryData(searchTerm = '') {
                 noHistoryMsg.style.display = 'block';
                 return;
             }
-            
+
             historyTableBody.innerHTML = '';
             noHistoryMsg.style.display = 'none';
-            
+
             data.records.forEach(record => {
                 const row = document.createElement('tr');
-                
+
                 // Determinar clase de riesgo basada en la probabilidad
                 const probability = Math.round((record.probability || 0) * 100);
                 let riskClass = '';
                 let riskText = '';
-                
+
                 if (probability >= 70) {
                     riskClass = 'high-risk';
                     riskText = 'Alto';
@@ -877,7 +877,7 @@ function loadHistoryData(searchTerm = '') {
                     riskClass = 'low-risk';
                     riskText = 'Bajo';
                 }
-                
+
                 row.innerHTML = `
                     <td>${record.clinic_id || 'ENDO-' + record.id.toString().padStart(4, '0')}</td>
                     <td>${record.full_name || 'No registrado'}</td>
@@ -894,10 +894,10 @@ function loadHistoryData(searchTerm = '') {
                         </button>
                     </td>
                 `;
-                
+
                 historyTableBody.appendChild(row);
             });
-            
+
             // Agregar eventos a los botones
             addHistoryButtonEvents();
         })
@@ -910,14 +910,14 @@ function loadHistoryData(searchTerm = '') {
 // Función para agregar eventos a los botones de la tabla
 function addHistoryButtonEvents() {
     document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const recordId = this.getAttribute('data-id');
             viewRecordDetails(recordId);
         });
     });
-    
+
     document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const recordId = this.getAttribute('data-id');
             deleteRecord(recordId);
         });
@@ -947,47 +947,47 @@ function deleteRecord(recordId) {
         fetch(`https://sitme.onrender.com/delete_record/${recordId}`, {
             method: 'DELETE'
         })
-        .then(response => {
-            if (!response.ok) throw new Error('Error al eliminar registro');
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                showSuccessNotification('Registro eliminado correctamente');
-                loadHistoryData(); // Recargar la tabla
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showError('No se pudo eliminar el registro');
-        });
+            .then(response => {
+                if (!response.ok) throw new Error('Error al eliminar registro');
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showSuccessNotification('Registro eliminado correctamente');
+                    loadHistoryData(); // Recargar la tabla
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('No se pudo eliminar el registro');
+            });
     }
 }
 
 // Evento para el botón de búsqueda
-document.getElementById('searchHistoryBtn').addEventListener('click', function() {
+document.getElementById('searchHistoryBtn').addEventListener('click', function () {
     const searchTerm = document.getElementById('historySearch').value;
     loadHistoryData(searchTerm);
 });
 
 // Evento para buscar al presionar Enter
-document.getElementById('historySearch').addEventListener('keypress', function(e) {
+document.getElementById('historySearch').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
         loadHistoryData(this.value);
     }
 });
 
 // Cargar datos cuando se muestra la pestaña
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Cargar historial si estamos en esa pestaña
     if (document.querySelector('#main-tab-history').classList.contains('active')) {
         loadHistoryData();
     }
-    
+
     // Evento para cambiar entre pestañas
     document.querySelectorAll('.main-tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (this.getAttribute('data-tab') === 'main-tab-history' && 
+        btn.addEventListener('click', function () {
+            if (this.getAttribute('data-tab') === 'main-tab-history' &&
                 !this.classList.contains('active')) {
                 loadHistoryData();
             }
@@ -996,16 +996,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Agrega esto al final del DOMContentLoaded en script.js
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // ... código existente ...
-    
+
     // Cargar historial cuando se muestre la pestaña
-    document.querySelector('.main-tab-btn[data-tab="main-tab-history"]').addEventListener('click', function() {
+    document.querySelector('.main-tab-btn[data-tab="main-tab-history"]').addEventListener('click', function () {
         if (!this.classList.contains('active')) {
             loadHistoryData();
         }
     });
-    
+
     // También cargar al inicio si estamos en la pestaña de historial
     if (document.querySelector('#main-tab-history').classList.contains('active')) {
         loadHistoryData();
@@ -1043,3 +1043,249 @@ function showSuccessNotification(message) {
     }, 5000);
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    // Manejar pestañas principales
+    const mainTabButtons = document.querySelectorAll('.main-tab-btn');
+    const mainTabContents = document.querySelectorAll('.main-tab-content');
+
+    mainTabButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const tabId = this.getAttribute('data-tab');
+
+            // Ocultar todos los contenidos de pestaña principal
+            mainTabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Mostrar el contenido de la pestaña principal seleccionada
+            document.getElementById(tabId).classList.add('active');
+
+            // Actualizar botones activos
+            mainTabButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+        });
+    });
+
+    // Manejar pestañas del formulario
+    const formTabButtons = document.querySelectorAll('.form-tab-btn');
+    const formTabContents = document.querySelectorAll('.form-tab-content');
+    const nextButtons = document.querySelectorAll('.nav-btn.next');
+    const prevButtons = document.querySelectorAll('.nav-btn.prev');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+
+    // Manejar clic en las pestañas del formulario
+    formTabButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const tabId = this.getAttribute('data-tab');
+
+            // Ocultar todos los contenidos de pestaña
+            formTabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Mostrar el contenido de la pestaña seleccionada
+            document.getElementById(tabId).classList.add('active');
+
+            // Actualizar botones activos
+            formTabButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+
+            // Actualizar barra de progreso
+            updateProgressBar(tabId);
+        });
+    });
+
+    // Manejar botones de siguiente
+    nextButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            if (this.classList.contains('submit-btn')) return;
+
+            const nextTabId = this.getAttribute('data-next');
+            const currentTab = this.closest('.form-tab-content').id;
+
+            // Validar campos requeridos antes de avanzar
+            if (!validateTab(currentTab)) {
+                return;
+            }
+
+            // Cambiar a la siguiente pestaña
+            document.querySelector(`.form-tab-btn[data-tab="${nextTabId}"]`).click();
+
+            // Desplazar hacia arriba para mejor experiencia de usuario
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+
+    // Manejar botones de anterior
+    prevButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            if (this.disabled) return;
+
+            const prevTabId = this.getAttribute('data-prev');
+
+            // Cambiar a la pestaña anterior
+            document.querySelector(`.form-tab-btn[data-tab="${prevTabId}"]`).click();
+
+            // Desplazar hacia arriba para mejor experiencia de usuario
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+
+    // Función para validar campos requeridos en la pestaña actual
+    function validateTab(tabId) {
+        const tab = document.getElementById(tabId);
+        const requiredInputs = tab.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredInputs.forEach(input => {
+            if (!input.value) {
+                input.classList.add('error');
+                isValid = false;
+
+                // Mostrar mensaje de error
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'error-message';
+                errorMsg.textContent = 'Este campo es obligatorio';
+                errorMsg.style.color = 'red';
+                errorMsg.style.fontSize = '0.8em';
+
+                // Insertar después del campo si no existe ya
+                if (!input.nextElementSibling || !input.nextElementSibling.classList.contains('error-message')) {
+                    input.insertAdjacentElement('afterend', errorMsg);
+                }
+            } else {
+                input.classList.remove('error');
+                if (input.nextElementSibling && input.nextElementSibling.classList.contains('error-message')) {
+                    input.nextElementSibling.remove();
+                }
+            }
+        });
+
+        if (!isValid) {
+            // Desplazar al primer error
+            const firstError = tab.querySelector('.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        return isValid;
+    }
+
+    // Función para actualizar la barra de progreso
+    function updateProgressBar(tabId) {
+        const tabIndex = Array.from(formTabContents).findIndex(tab => tab.id === tabId);
+        const progress = ((tabIndex + 1) / formTabContents.length) * 100;
+
+        progressBar.style.width = `${progress}%`;
+        progressText.textContent = `Paso ${tabIndex + 1} de ${formTabContents.length}`;
+    }
+
+    // Inicializar barra de progreso
+    updateProgressBar('tab1');
+
+    // Manejar búsqueda en historial
+    const searchInput = document.querySelector('.search-input');
+    const searchBtn = document.querySelector('.search-btn');
+    const historyTable = document.querySelector('.history-table');
+    const noHistoryMsg = document.querySelector('.no-history');
+
+    searchBtn.addEventListener('click', function () {
+        const searchTerm = searchInput.value.toLowerCase();
+        const rows = historyTable.querySelectorAll('tbody tr');
+        let hasResults = false;
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            let rowMatches = false;
+
+            cells.forEach(cell => {
+                if (cell.textContent.toLowerCase().includes(searchTerm)) {
+                    rowMatches = true;
+                }
+            });
+
+            if (rowMatches) {
+                row.style.display = '';
+                hasResults = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Mostrar mensaje si no hay resultados
+        if (!hasResults) {
+            historyTable.style.display = 'none';
+            noHistoryMsg.style.display = 'block';
+        } else {
+            historyTable.style.display = 'table';
+            noHistoryMsg.style.display = 'none';
+        }
+    });
+
+    // Manejar botones de acciones en historial
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            alert('Visualizando registro del paciente');
+            // Aquí iría la lógica para mostrar los detalles completos del paciente
+        });
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            if (confirm('¿Está seguro que desea eliminar este registro?')) {
+                const row = this.closest('tr');
+                row.remove();
+
+                // Verificar si quedan registros
+                const remainingRows = historyTable.querySelectorAll('tbody tr');
+                if (remainingRows.length === 0) {
+                    historyTable.style.display = 'none';
+                    noHistoryMsg.style.display = 'block';
+                }
+            }
+        });
+    });
+});
+
+// Función para limpiar solo la pestaña actual
+function clearCurrentTab() {
+    const currentTab = document.querySelector('.form-tab-content.active');
+
+    if (currentTab && confirm('¿Estás seguro que deseas limpiar todos los campos de esta pestaña?')) {
+        const formElements = currentTab.querySelectorAll('input, select, textarea');
+
+        formElements.forEach(element => {
+            // No limpiar botones
+            if (element.type !== 'button' && element.type !== 'submit') {
+                element.value = '';
+
+                // Para checkboxes y radios
+                if (element.type === 'checkbox' || element.type === 'radio') {
+                    element.checked = false;
+                }
+
+                // Para selects
+                if (element.tagName === 'SELECT') {
+                    element.selectedIndex = 0;
+                }
+            }
+        });
+
+        console.log(`Pestaña ${currentTab.id} limpiada`);
+    }
+}
+
+// Asignar evento a los botones de limpiar
+document.addEventListener('DOMContentLoaded', function () {
+    const clearButtons = document.querySelectorAll('.clear-tab-btn');
+
+    clearButtons.forEach(button => {
+        button.addEventListener('click', clearCurrentTab);
+    });
+});
