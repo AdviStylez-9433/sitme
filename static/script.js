@@ -425,7 +425,7 @@ function displayResults(data) {
         document.getElementById('asrmGuideline').textContent = data.guidelines.asrm;
         document.getElementById('eshreGuideline').textContent = data.guidelines.eshre;
         document.getElementById('niceGuideline').textContent = data.guidelines.nice;
-        document.getElementById('')
+        document.getElementById('minsalGuideline').textContent = data.guidelines.minsal;
     }
 
     // Mostrar el contenedor de resultados con la clase de riesgo adecuada
