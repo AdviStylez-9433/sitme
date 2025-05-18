@@ -725,7 +725,7 @@ function saveSimulationToDB(simulationData) {
     const formData = {
         personal: {
             full_name: document.getElementById('full_name').value,
-            id_number: rutInput.value,
+            id_number: document.getElementById('rut').value,
             birth_date: document.getElementById('birth_date').value,
             age: document.getElementById('age').value,
             blood_type: document.getElementById('blood_type').value,
