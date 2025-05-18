@@ -337,6 +337,37 @@ def delete_record(record_id):
         if 'conn' in locals():
             conn.close()
             
+@app.route('/get_record_details/<int:record_id>')
+def get_record_details(record_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cursor.execute("""
+            SELECT * FROM patient_simulations 
+            WHERE id = %s
+        """, (record_id,))
+        
+        record = cursor.fetchone()
+        
+        if not record:
+            return jsonify({'error': 'Registro no encontrado'}), 404
+            
+        return jsonify({
+            'success': True,
+            'record': record
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error obteniendo detalles: {str(e)}")
+        return jsonify({
+            'error': 'Error al obtener detalles',
+            'details': str(e)
+        }), 500
+    finally:
+        if 'conn' in locals():
+            conn.close()
+            
 # Variables globales para monitoreo
 SERVICE_START_TIME = time.time()
 REQUEST_COUNTER = 0

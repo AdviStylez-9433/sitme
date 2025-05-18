@@ -743,6 +743,68 @@
             </div>
         </footer>
     </div>
+    
+    <!-- Modal para ver detalles del paciente -->
+    <div id="patientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalPatientName"></h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tabs">
+                    <button class="modal-tab-btn active" data-tab="modal-tab-info">Información Básica</button>
+                    <button class="modal-tab-btn" data-tab="modal-tab-history">Historial Médico</button>
+                    <button class="modal-tab-btn" data-tab="modal-tab-results">Resultados</button>
+                </div>
+
+                <div id="modal-tab-info" class="modal-tab-content active">
+                    <div class="modal-section">
+                        <h4><i class="fas fa-id-card"></i> Datos Personales</h4>
+                        <div class="modal-grid" id="personalInfo"></div>
+                    </div>
+
+                    <div class="modal-section">
+                        <h4><i class="fas fa-calendar-alt"></i> Historial Menstrual</h4>
+                        <div class="modal-grid" id="menstrualInfo"></div>
+                    </div>
+                </div>
+
+                <div id="modal-tab-history" class="modal-tab-content">
+                    <div class="modal-section">
+                        <h4><i class="fas fa-clipboard-list"></i> Antecedentes Médicos</h4>
+                        <div class="modal-grid" id="medicalHistory"></div>
+                    </div>
+
+                    <div class="modal-section">
+                        <h4><i class="fas fa-pills"></i> Medicamentos</h4>
+                        <div id="medicationsInfo"></div>
+                    </div>
+                </div>
+
+                <div id="modal-tab-results" class="modal-tab-content">
+                    <div class="modal-section">
+                        <h4><i class="fas fa-heartbeat"></i> Evaluación</h4>
+                        <div class="modal-grid" id="examResults"></div>
+                    </div>
+
+                    <div class="modal-section">
+                        <h4><i class="fas fa-chart-pie"></i> Biomarcadores</h4>
+                        <div class="modal-grid" id="biomarkersInfo"></div>
+                    </div>
+
+                    <div class="modal-section">
+                        <h4><i class="fas fa-procedures"></i> Imágenes</h4>
+                        <div id="imagingInfo"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn print-btn"><i class="fas fa-print"></i> Imprimir</button>
+                <button class="modal-btn close-btn"><i class="fas fa-times"></i> Cerrar</button>
+            </div>
+        </div>
+    </div>
     <script src="../static/script.js"></script>
 </body>
 

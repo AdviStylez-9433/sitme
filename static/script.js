@@ -925,21 +925,28 @@ function addHistoryButtonEvents() {
 }
 
 // Función para ver detalles de un registro
+// Actualizar la función viewRecordDetails
 function viewRecordDetails(recordId) {
-    // Aquí puedes implementar la lógica para ver detalles completos
-    // Por ejemplo, abrir un modal o redirigir a otra página
     fetch(`https://sitme.onrender.com/get_record_details/${recordId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Error al cargar detalles');
+            return response.json();
+        })
         .then(data => {
-            // Mostrar los detalles en un modal o consola
-            console.log('Detalles del registro:', data);
-            alert(`Detalles del paciente: ${data.full_name}\nRUT: ${data.rut}\nEdad: ${data.age}\nRiesgo: ${data.risk_level}`);
+            if (data.success) {
+                showPatientModal(data.record);
+            } else {
+                throw new Error(data.error || 'Error desconocido');
+            }
         })
         .catch(error => {
             console.error('Error:', error);
-            showError('No se pudieron cargar los detalles del registro');
+            showError('No se pudieron cargar los detalles del paciente');
         });
 }
+
+// Inicializar eventos del modal cuando se cargue el DOM
+document.addEventListener('DOMContentLoaded', setupModalEvents);
 
 // Función para eliminar un registro
 function deleteRecord(recordId) {
@@ -1289,3 +1296,245 @@ document.addEventListener('DOMContentLoaded', function () {
         button.addEventListener('click', clearCurrentTab);
     });
 });
+
+// Función para mostrar el modal con los detalles del paciente
+function showPatientModal(patientData) {
+    const modal = document.getElementById('patientModal');
+    const modalPatientName = document.getElementById('modalPatientName');
+    
+    // Establecer nombre del paciente
+    modalPatientName.textContent = patientData.full_name || 'Paciente sin nombre';
+    
+    // Llenar información básica
+    fillPersonalInfo(patientData);
+    fillMenstrualInfo(patientData);
+    
+    // Llenar historial médico
+    fillMedicalHistory(patientData);
+    fillMedicationsInfo(patientData);
+    
+    // Llenar resultados
+    fillExamResults(patientData);
+    fillBiomarkersInfo(patientData);
+    fillImagingInfo(patientData);
+    
+    // Mostrar modal
+    modal.style.display = 'block';
+    
+    // Configurar eventos de las pestañas
+    setupModalTabs();
+}
+
+// Funciones para llenar las secciones del modal
+function fillPersonalInfo(data) {
+    const container = document.getElementById('personalInfo');
+    container.innerHTML = '';
+    
+    const personalData = [
+        { label: 'RUT', value: data.id_number, icon: 'fa-id-card' },
+        { label: 'Fecha de Nacimiento', value: data.birth_date, icon: 'fa-birthday-cake' },
+        { label: 'Edad', value: data.age ? `${data.age} años` : null, icon: 'fa-user' },
+        { label: 'Tipo de Sangre', value: data.blood_type, icon: 'fa-tint' },
+        { label: 'Previsión', value: data.insurance, icon: 'fa-hospital' },
+        { label: 'ID Clínico', value: data.clinic_id, icon: 'fa-clipboard-list' }
+    ];
+    
+    personalData.forEach(item => {
+        const itemElement = createModalItem(item.label, item.value, item.icon);
+        container.appendChild(itemElement);
+    });
+}
+
+function fillMenstrualInfo(data) {
+    const container = document.getElementById('menstrualInfo');
+    container.innerHTML = '';
+    
+    const menstrualData = [
+        { label: 'Edad de Menarquia', value: data.menarche_age ? `${data.menarche_age} años` : null, icon: 'fa-calendar' },
+        { label: 'Duración del Ciclo', value: data.cycle_length ? `${data.cycle_length} días` : null, icon: 'fa-calendar-week' },
+        { label: 'Duración del Período', value: data.period_duration ? `${data.period_duration} días` : null, icon: 'fa-calendar-day' },
+        { label: 'Última Menstruación', value: data.last_period, icon: 'fa-calendar-check' },
+        { label: 'Dolor Menstrual', value: data.pain_level ? `${data.pain_level}/10` : null, icon: 'fa-pain' },
+        { label: 'Dolor Crónico', value: data.pain_chronic, icon: 'fa-head-side-mask', isBoolean: true }
+    ];
+    
+    menstrualData.forEach(item => {
+        const itemElement = createModalItem(item.label, item.value, item.icon, item.isBoolean);
+        container.appendChild(itemElement);
+    });
+}
+
+function fillMedicalHistory(data) {
+    const container = document.getElementById('medicalHistory');
+    container.innerHTML = '';
+    
+    const medicalData = [
+        { label: 'Cirugías Ginecológicas', value: data.gynecological_surgery, icon: 'fa-procedures', isBoolean: true },
+        { label: 'Enf. Inflamatoria Pélvica', value: data.pelvic_inflammatory, icon: 'fa-virus', isBoolean: true },
+        { label: 'Quistes Ováricos', value: data.ovarian_cysts, icon: 'fa-egg', isBoolean: true },
+        { label: 'Endometriosis Familiar', value: data.family_endometriosis, icon: 'fa-dna', isBoolean: true },
+        { label: 'Enf. Autoinmunes Familiar', value: data.family_autoimmune, icon: 'fa-allergies', isBoolean: true },
+        { label: 'Cáncer Familiar', value: data.family_cancer, icon: 'fa-ribbon', isBoolean: true },
+        { label: 'Enf. Autoinmune', value: data.comorbidity_autoimmune, icon: 'fa-allergy', isBoolean: true },
+        { label: 'Trastorno Tiroideo', value: data.comorbidity_thyroid, icon: 'fa-butterfly', isBoolean: true },
+        { label: 'Síndrome Intestino Irritable', value: data.comorbidity_ibs, icon: 'fa-stomach', isBoolean: true }
+    ];
+    
+    medicalData.forEach(item => {
+        const itemElement = createModalItem(item.label, item.value, item.icon, item.isBoolean);
+        container.appendChild(itemElement);
+    });
+}
+
+function fillMedicationsInfo(data) {
+    const container = document.getElementById('medicationsInfo');
+    
+    if (data.medications) {
+        container.innerHTML = `
+            <div class="modal-value">
+                ${data.medications.replace(/\n/g, '<br>')}
+            </div>
+        `;
+    } else {
+        container.innerHTML = '<div class="modal-value empty">No se registraron medicamentos</div>';
+    }
+}
+
+function fillExamResults(data) {
+    const container = document.getElementById('examResults');
+    container.innerHTML = '';
+    
+    const examData = [
+        { label: 'Estatura', value: data.height ? `${data.height} cm` : null, icon: 'fa-ruler-vertical' },
+        { label: 'Peso', value: data.weight ? `${data.weight} kg` : null, icon: 'fa-weight' },
+        { label: 'IMC', value: data.bmi, icon: 'fa-calculator' },
+        { label: 'Examen Pélvico', value: data.pelvic_exam, icon: 'fa-procedures' },
+        { label: 'Examen Vaginal', value: data.vaginal_exam, icon: 'fa-female' },
+        { label: 'Notas Clínicas', value: data.clinical_notes, icon: 'fa-notes-medical' }
+    ];
+    
+    examData.forEach(item => {
+        const itemElement = createModalItem(item.label, item.value, item.icon);
+        container.appendChild(itemElement);
+    });
+}
+
+function fillBiomarkersInfo(data) {
+    const container = document.getElementById('biomarkersInfo');
+    container.innerHTML = '';
+    
+    const biomarkersData = [
+        { label: 'CA-125', value: data.ca125 ? `${data.ca125} U/mL` : null, icon: 'fa-flask' },
+        { label: 'IL-6', value: data.il6 ? `${data.il6} pg/mL` : null, icon: 'fa-flask' },
+        { label: 'TNF-α', value: data.tnf_alpha ? `${data.tnf_alpha} pg/mL` : null, icon: 'fa-flask' },
+        { label: 'VEGF', value: data.vegf ? `${data.vegf} pg/mL` : null, icon: 'fa-flask' },
+        { label: 'AMH', value: data.amh ? `${data.amh} ng/mL` : null, icon: 'fa-flask' },
+        { label: 'PCR', value: data.crp ? `${data.crp} mg/L` : null, icon: 'fa-flask' }
+    ];
+    
+    biomarkersData.forEach(item => {
+        const itemElement = createModalItem(item.label, item.value, item.icon);
+        container.appendChild(itemElement);
+    });
+}
+
+function fillImagingInfo(data) {
+    const container = document.getElementById('imagingInfo');
+    
+    let content = '';
+    if (data.imaging) {
+        content += `<div class="modal-value"><strong>Resultado:</strong> ${data.imaging}</div>`;
+    }
+    
+    if (data.imaging_details) {
+        content += `<div class="modal-value" style="margin-top: 10px;">${data.imaging_details.replace(/\n/g, '<br>')}</div>`;
+    }
+    
+    if (content) {
+        container.innerHTML = content;
+    } else {
+        container.innerHTML = '<div class="modal-value empty">No se registraron resultados de imágenes</div>';
+    }
+}
+
+// Función auxiliar para crear items del modal
+function createModalItem(label, value, icon, isBoolean = false) {
+    const item = document.createElement('div');
+    item.className = 'modal-item';
+    
+    if (isBoolean) {
+        const booleanValue = value ? 'Sí' : 'No';
+        const booleanClass = value ? 'boolean-true' : 'boolean-false';
+        item.innerHTML = `
+            <div class="modal-label">
+                <i class="fas ${icon}"></i>
+                <span>${label}</span>
+            </div>
+            <div class="boolean-value ${booleanClass}">
+                <i class="fas ${value ? 'fa-check' : 'fa-times'}"></i>
+                ${booleanValue}
+            </div>
+        `;
+    } else {
+        item.innerHTML = `
+            <div class="modal-label">
+                <i class="fas ${icon}"></i>
+                <span>${label}</span>
+            </div>
+            <div class="modal-value">
+                ${value || '<span class="empty">No registrado</span>'}
+            </div>
+        `;
+    }
+    
+    return item;
+}
+
+// Configurar pestañas del modal
+function setupModalTabs() {
+    const tabButtons = document.querySelectorAll('.modal-tab-btn');
+    const tabContents = document.querySelectorAll('.modal-tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.getAttribute('data-tab');
+            
+            // Remover clase active de todos los botones y contenidos
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Agregar clase active al botón y contenido seleccionado
+            button.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+}
+
+// Configurar eventos del modal
+function setupModalEvents() {
+    const modal = document.getElementById('patientModal');
+    const closeModal = document.querySelector('.close-modal');
+    const closeBtn = document.querySelector('.modal-btn.close-btn');
+    
+    // Cerrar modal al hacer clic en la X
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+    
+    // Cerrar modal al hacer clic en el botón Cerrar
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+    
+    // Cerrar modal al hacer clic fuera del contenido
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+    
+    // Configurar botón de imprimir
+    document.querySelector('.modal-btn.print-btn').addEventListener('click', () => {
+        window.print();
+    });
+}
