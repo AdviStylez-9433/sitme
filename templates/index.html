@@ -172,7 +172,7 @@
             padding: 20px;
             background-color: #f8f9fa;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .history-table {
@@ -214,7 +214,8 @@
             padding: 5px 8px;
         }
 
-        .history-table th, .history-table td {
+        .history-table th,
+        .history-table td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #ddd;
@@ -307,6 +308,29 @@
         .search-btn:hover {
             background-color: var(--primary-dark);
         }
+
+        /* Ajustes responsivos */
+        @media (max-width: 768px) {
+            .history-table {
+                font-size: 0.8rem;
+            }
+
+            .history-table th,
+            .history-table td {
+                padding: 8px 10px;
+            }
+
+            .history-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .history-btn {
+                padding: 3px 6px;
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 
@@ -365,8 +389,10 @@
                             <!-- Pestaña 1: Identificación del Paciente -->
                             <div id="tab1" class="form-tab-content active">
                                 <div class="form-section">
-                                    <h2 class="section-title"><i class="fas fa-user-circle"></i> Datos de Identificación</h2>
-                                    <p class="section-subtitle">Complete la información básica del paciente según registro
+                                    <h2 class="section-title"><i class="fas fa-user-circle"></i> Datos de Identificación
+                                    </h2>
+                                    <p class="section-subtitle">Complete la información básica del paciente según
+                                        registro
                                         clínico</p>
 
                                     <div class="form-grid">
@@ -411,7 +437,8 @@
                                             <label class="required">Previsión</label>
                                             <div class="radio-group">
                                                 <div class="radio-option">
-                                                    <input type="radio" id="insurance" name="insurance" value="fonasa" required>
+                                                    <input type="radio" id="insurance" name="insurance" value="fonasa"
+                                                        required>
                                                     <label for="insurance_fonasa">Fonasa</label>
                                                 </div>
                                                 <div class="radio-option">
@@ -436,8 +463,10 @@
                             <!-- Pestaña 2: Antecedentes Médicos -->
                             <div id="tab2" class="form-tab-content">
                                 <div class="form-section">
-                                    <h2 class="section-title"><i class="fas fa-clipboard-list"></i> Antecedentes Médicos</h2>
-                                    <p class="section-subtitle">Historial clínico relevante para la evaluación de endometriosis
+                                    <h2 class="section-title"><i class="fas fa-clipboard-list"></i> Antecedentes Médicos
+                                    </h2>
+                                    <p class="section-subtitle">Historial clínico relevante para la evaluación de
+                                        endometriosis
                                     </p>
 
                                     <div class="form-grid">
@@ -450,8 +479,10 @@
                                                     <label for="gynecological_surgery">Cirugías ginecológicas</label>
                                                 </div>
                                                 <div class="checkbox-option">
-                                                    <input type="checkbox" id="pelvic_inflammatory" name="pelvic_inflammatory">
-                                                    <label for="pelvic_inflammatory">Enfermedad inflamatoria pélvica</label>
+                                                    <input type="checkbox" id="pelvic_inflammatory"
+                                                        name="pelvic_inflammatory">
+                                                    <label for="pelvic_inflammatory">Enfermedad inflamatoria
+                                                        pélvica</label>
                                                 </div>
                                                 <div class="checkbox-option">
                                                     <input type="checkbox" id="ovarian_cysts" name="ovarian_cysts">
@@ -469,7 +500,8 @@
                                                     <label for="family_endometriosis">Endometriosis</label>
                                                 </div>
                                                 <div class="checkbox-option">
-                                                    <input type="checkbox" id="family_autoimmune" name="family_autoimmune">
+                                                    <input type="checkbox" id="family_autoimmune"
+                                                        name="family_autoimmune">
                                                     <label for="family_autoimmune">Enfermedades autoinmunes</label>
                                                 </div>
                                                 <div class="checkbox-option">
@@ -488,7 +520,8 @@
                                                     <label for="comorbidity_autoimmune">Enfermedad autoinmune</label>
                                                 </div>
                                                 <div class="checkbox-option">
-                                                    <input type="checkbox" id="comorbidity_thyroid" name="comorbidity_thyroid">
+                                                    <input type="checkbox" id="comorbidity_thyroid"
+                                                        name="comorbidity_thyroid">
                                                     <label for="comorbidity_thyroid">Trastorno tiroideo</label>
                                                 </div>
                                                 <div class="checkbox-option">
@@ -519,8 +552,10 @@
                             <!-- Pestaña 3: Historia Menstrual -->
                             <div id="tab3" class="form-tab-content">
                                 <div class="form-section">
-                                    <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Historial Menstrual</h2>
-                                    <p class="section-subtitle">Características del ciclo menstrual y síntomas asociados</p>
+                                    <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Historial Menstrual
+                                    </h2>
+                                    <p class="section-subtitle">Características del ciclo menstrual y síntomas asociados
+                                    </p>
 
                                     <div class="form-grid">
                                         <div class="form-group">
@@ -538,9 +573,10 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="period_duration" class="required">Duración del sangrado (días)</label>
-                                            <input type="number" id="period_duration" name="period_duration" min="1" max="15"
-                                                required>
+                                            <label for="period_duration" class="required">Duración del sangrado
+                                                (días)</label>
+                                            <input type="number" id="period_duration" name="period_duration" min="1"
+                                                max="15" required>
                                             <div class="normal-range">Rango normal: 3-7 días</div>
                                         </div>
 
@@ -551,8 +587,8 @@
 
                                         <div class="form-group">
                                             <label for="pain_level" class="required">Dolor menstrual (1-10)</label>
-                                            <input type="range" id="pain_level" name="pain_level" min="1" max="10" value="1"
-                                                required>
+                                            <input type="range" id="pain_level" name="pain_level" min="1" max="10"
+                                                value="1" required>
                                             <div class="pain-scale">
                                                 <span class="pain-scale-label">1</span>
                                                 <span class="pain-scale-label">2</span>
@@ -571,7 +607,8 @@
                                             <label>Características del dolor</label>
                                             <div class="checkbox-group">
                                                 <div class="checkbox-option">
-                                                    <input type="checkbox" id="pain_premenstrual" name="pain_premenstrual">
+                                                    <input type="checkbox" id="pain_premenstrual"
+                                                        name="pain_premenstrual">
                                                     <label for="pain_premenstrual">Premenstrual</label>
                                                 </div>
                                                 <div class="checkbox-option">
@@ -605,7 +642,8 @@
                             <div id="tab4" class="form-tab-content">
                                 <div class="form-section">
                                     <h2 class="section-title"><i class="fas fa-heartbeat"></i> Síntomas Actuales</h2>
-                                    <p class="section-subtitle">Síntomas característicos de endometriosis según guías clínicas
+                                    <p class="section-subtitle">Síntomas característicos de endometriosis según guías
+                                        clínicas
                                     </p>
 
                                     <div class="form-grid">
@@ -629,12 +667,13 @@
                                             <label class="required">Síntomas intestinales cíclicos</label>
                                             <div class="radio-group">
                                                 <div class="radio-option">
-                                                    <input type="radio" id="bowel_symptoms_yes" name="bowel_symptoms" value="1"
-                                                        required>
+                                                    <input type="radio" id="bowel_symptoms_yes" name="bowel_symptoms"
+                                                        value="1" required>
                                                     <label for="bowel_symptoms_yes">Sí</label>
                                                 </div>
                                                 <div class="radio-option">
-                                                    <input type="radio" id="bowel_symptoms_no" name="bowel_symptoms" value="0">
+                                                    <input type="radio" id="bowel_symptoms_no" name="bowel_symptoms"
+                                                        value="0">
                                                     <label for="bowel_symptoms_no">No</label>
                                                 </div>
                                             </div>
@@ -644,8 +683,8 @@
                                             <label class="required">Síntomas urinarios cíclicos</label>
                                             <div class="radio-group">
                                                 <div class="radio-option">
-                                                    <input type="radio" id="urinary_symptoms_yes" name="urinary_symptoms"
-                                                        value="1" required>
+                                                    <input type="radio" id="urinary_symptoms_yes"
+                                                        name="urinary_symptoms" value="1" required>
                                                     <label for="urinary_symptoms_yes">Sí</label>
                                                 </div>
                                                 <div class="radio-option">
@@ -660,7 +699,8 @@
                                             <label class="required">Fatiga crónica</label>
                                             <div class="radio-group">
                                                 <div class="radio-option">
-                                                    <input type="radio" id="fatigue_yes" name="fatigue" value="1" required>
+                                                    <input type="radio" id="fatigue_yes" name="fatigue" value="1"
+                                                        required>
                                                     <label for="fatigue_yes">Sí</label>
                                                 </div>
                                                 <div class="radio-option">
@@ -674,15 +714,18 @@
                                             <label>Dificultades para concebir</label>
                                             <div class="radio-group">
                                                 <div class="radio-option">
-                                                    <input type="radio" id="infertility_yes" name="infertility" value="1">
+                                                    <input type="radio" id="infertility_yes" name="infertility"
+                                                        value="1">
                                                     <label for="infertility_yes">Sí</label>
                                                 </div>
                                                 <div class="radio-option">
-                                                    <input type="radio" id="infertility_no" name="infertility" value="0">
+                                                    <input type="radio" id="infertility_no" name="infertility"
+                                                        value="0">
                                                     <label for="infertility_no">No</label>
                                                 </div>
                                                 <div class="radio-option">
-                                                    <input type="radio" id="infertility_na" name="infertility" value="0">
+                                                    <input type="radio" id="infertility_na" name="infertility"
+                                                        value="0">
                                                     <label for="infertility_na">No aplica</label>
                                                 </div>
                                             </div>
@@ -710,7 +753,8 @@
                             <div id="tab5" class="form-tab-content">
                                 <div class="form-section">
                                     <h2 class="section-title"><i class="fas fa-flask"></i> Biomarcadores y Exámenes</h2>
-                                    <p class="section-subtitle">Resultados de laboratorio relevantes para el diagnóstico de
+                                    <p class="section-subtitle">Resultados de laboratorio relevantes para el diagnóstico
+                                        de
                                         endometriosis</p>
 
                                     <div class="form-group">
@@ -721,8 +765,9 @@
                                                     <input type="number" id="ca125" name="ca125" step="0.1" min="0">
                                                     <span class="biomarker-unit">U/mL</span>
                                                 </div>
-                                                <div class="normal-range">Normal: &lt;35 U/mL <span class="info-tooltip"><i
-                                                            class="fas fa-info-circle"></i><span class="tooltip-text">Puede
+                                                <div class="normal-range">Normal: &lt;35 U/mL <span
+                                                        class="info-tooltip"><i class="fas fa-info-circle"></i><span
+                                                            class="tooltip-text">Puede
                                                             estar
                                                             elevado en endometriosis, pero también en otras condiciones
                                                             ginecológicas</span></span></div>
@@ -740,7 +785,8 @@
                                             <div class="form-group">
                                                 <label for="tnf_alpha">TNF-α</label>
                                                 <div class="biomarker-value">
-                                                    <input type="number" id="tnf_alpha" name="tnf_alpha" step="0.1" min="0">
+                                                    <input type="number" id="tnf_alpha" name="tnf_alpha" step="0.1"
+                                                        min="0">
                                                     <span class="biomarker-unit">pg/mL</span>
                                                 </div>
                                                 <div class="normal-range">Normal: &lt;15 pg/mL</div>
@@ -810,7 +856,8 @@
                             <div id="tab6" class="form-tab-content">
                                 <div class="form-section">
                                     <h2 class="section-title"><i class="fas fa-stethoscope"></i> Evaluación Clínica</h2>
-                                    <p class="section-subtitle">Hallazgos del examen físico y evaluación ginecológica</p>
+                                    <p class="section-subtitle">Hallazgos del examen físico y evaluación ginecológica
+                                    </p>
 
                                     <div class="form-grid">
                                         <div class="form-group">
@@ -825,8 +872,8 @@
                                         <div class="form-group">
                                             <label for="weight">Peso</label>
                                             <div class="biomarker-value">
-                                                <input type="number" id="weight" name="weight" min="30" max="200" step="0.1"
-                                                    placeholder="Ej. 65.5">
+                                                <input type="number" id="weight" name="weight" min="30" max="200"
+                                                    step="0.1" placeholder="Ej. 65.5">
                                                 <span class="biomarker-unit">kg</span>
                                             </div>
                                         </div>
@@ -834,7 +881,8 @@
                                         <div class="form-group">
                                             <label for="bmi">IMC (Índice de Masa Corporal)</label>
                                             <div class="biomarker-value">
-                                                <input type="number" id="bmi" name="bmi" step="0.1" min="10" max="50" readonly>
+                                                <input type="number" id="bmi" name="bmi" step="0.1" min="10" max="50"
+                                                    readonly>
                                             </div>
                                             <div class="normal-range">Normal: &lt;18.5, &gt;24.9</div>
                                         </div>
@@ -932,7 +980,8 @@
 
                             <div class="guideline">
                                 <div class="guideline-title">
-                                    <i class="fas fa-check-circle"></i> ASRM (American Society for Reproductive Medicine)
+                                    <i class="fas fa-check-circle"></i> ASRM (American Society for Reproductive
+                                    Medicine)
                                 </div>
                                 <div class="guideline-content" id="asrmGuideline">
                                     Criterios de clasificación de endometriosis basados en hallazgos quirúrgicos.
@@ -941,7 +990,8 @@
 
                             <div class="guideline">
                                 <div class="guideline-title">
-                                    <i class="fas fa-check-circle"></i> ESHRE (European Society of Human Reproduction and
+                                    <i class="fas fa-check-circle"></i> ESHRE (European Society of Human Reproduction
+                                    and
                                     Embryology)
                                 </div>
                                 <div class="guideline-content" id="eshreGuideline">
@@ -951,7 +1001,8 @@
 
                             <div class="guideline">
                                 <div class="guideline-title">
-                                    <i class="fas fa-check-circle"></i> NICE (National Institute for Health and Care Excellence)
+                                    <i class="fas fa-check-circle"></i> NICE (National Institute for Health and Care
+                                    Excellence)
                                 </div>
                                 <div class="guideline-content" id="niceGuideline">
                                     Recomendaciones para el diagnóstico y tratamiento de endometriosis.
@@ -962,7 +1013,8 @@
                                     <i class="fas fa-check-circle"></i> MINSAL/GES 12 (Chile)
                                 </div>
                                 <div class="guideline-content" id="minsalGuideline">
-                                    Protocolo AUGE para diagnóstico oportuno, tratamiento hormonal inicial y derivación a especialista.
+                                    Protocolo AUGE para diagnóstico oportuno, tratamiento hormonal inicial y derivación
+                                    a especialista.
                                 </div>
                             </div>
                         </div>
@@ -974,8 +1026,9 @@
             <div id="main-tab-history" class="main-tab-content">
                 <div class="history-container">
                     <div class="search-container">
-                        <input type="text" class="search-input" placeholder="Buscar paciente por nombre, RUT o ID...">
-                        <button class="search-btn"><i class="fas fa-search"></i> Buscar</button>
+                        <input type="text" class="search-input" placeholder="Buscar paciente por nombre, RUT o ID..."
+                            id="historySearch">
+                        <button class="search-btn" id="searchHistoryBtn"><i class="fas fa-search"></i> Buscar</button>
                     </div>
 
                     <table class="history-table">
@@ -990,48 +1043,13 @@
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>ENDO-0001</td>
-                                <td>María González Pérez</td>
-                                <td>12.345.678-9</td>
-                                <td>32</td>
-                                <td>15/05/2025</td>
-                                <td>Alto</td>
-                                <td class="history-actions">
-                                    <button class="history-btn view-btn"><i class="fas fa-eye"></i> Ver</button>
-                                    <button class="history-btn delete-btn"><i class="fas fa-trash"></i> Eliminar</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>ENDO-0002</td>
-                                <td>Ana López Contreras</td>
-                                <td>9.876.543-2</td>
-                                <td>28</td>
-                                <td>10/05/2025</td>
-                                <td>Moderado</td>
-                                <td class="history-actions">
-                                    <button class="history-btn view-btn"><i class="fas fa-eye"></i> Ver</button>
-                                    <button class="history-btn delete-btn"><i class="fas fa-trash"></i> Eliminar</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>ENDO-0003</td>
-                                <td>Camila Sánchez Rojas</td>
-                                <td>15.678.234-5</td>
-                                <td>35</td>
-                                <td>05/05/2025</td>
-                                <td>Bajo</td>
-                                <td class="history-actions">
-                                    <button class="history-btn view-btn"><i class="fas fa-eye"></i> Ver</button>
-                                    <button class="history-btn delete-btn"><i class="fas fa-trash"></i> Eliminar</button>
-                                </td>
-                            </tr>
+                        <tbody id="historyTableBody">
+                            <!-- Los registros se cargarán aquí dinámicamente -->
                         </tbody>
                     </table>
 
-                    <div class="no-history" style="display: none;">
-                        <i class="fas fa-info-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                    <div class="no-history" id="noHistoryMessage" style="display: none;">
+                        <i class="fas fa-info-circle"></i>
                         <p>No se encontraron registros históricos</p>
                     </div>
                 </div>
@@ -1200,7 +1218,7 @@
             const historyTable = document.querySelector('.history-table');
             const noHistoryMsg = document.querySelector('.no-history');
 
-            searchBtn.addEventListener('click', function() {
+            searchBtn.addEventListener('click', function () {
                 const searchTerm = searchInput.value.toLowerCase();
                 const rows = historyTable.querySelectorAll('tbody tr');
                 let hasResults = false;
@@ -1235,18 +1253,18 @@
 
             // Manejar botones de acciones en historial
             document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     alert('Visualizando registro del paciente');
                     // Aquí iría la lógica para mostrar los detalles completos del paciente
                 });
             });
 
             document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     if (confirm('¿Está seguro que desea eliminar este registro?')) {
                         const row = this.closest('tr');
                         row.remove();
-                        
+
                         // Verificar si quedan registros
                         const remainingRows = historyTable.querySelectorAll('tbody tr');
                         if (remainingRows.length === 0) {

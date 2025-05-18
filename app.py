@@ -274,7 +274,69 @@ def save_simulation():
     finally:
         if 'conn' in locals():
             conn.close()
-
+            
+# Añade esta ruta al app.py, antes del if __name__ == '__main__':
+@app.route('/get_history', methods=['GET'])
+def get_history():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Consulta para obtener los últimos 100 registros
+        cursor.execute("""
+            SELECT 
+                id, clinic_id, full_name, id_number as rut, age, 
+                to_char(created_at, 'DD/MM/YYYY') as evaluation_date,
+                risk_level as risk,
+                probability
+            FROM patient_simulations
+            ORDER BY created_at DESC
+            LIMIT 100
+        """)
+        
+        records = cursor.fetchall()
+        
+        return jsonify({
+            'success': True,
+            'records': records,
+            'count': len(records)
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error obteniendo historial: {str(e)}")
+        return jsonify({
+            'error': 'Error al obtener historial',
+            'details': str(e)
+        }), 500
+    finally:
+        if 'conn' in locals():
+            conn.close()
+            
+# Añade esta ruta al app.py
+@app.route('/delete_record/<int:record_id>', methods=['DELETE'])
+def delete_record(record_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("DELETE FROM patient_simulations WHERE id = %s", (record_id,))
+        conn.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Registro eliminado correctamente'
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error eliminando registro: {str(e)}")
+        return jsonify({
+            'error': 'Error al eliminar registro',
+            'details': str(e)
+        }), 500
+    finally:
+        if 'conn' in locals():
+            conn.close()
+            
 # Variables globales para monitoreo
 SERVICE_START_TIME = time.time()
 REQUEST_COUNTER = 0

@@ -830,6 +830,188 @@ function saveSimulationToDB(simulationData) {
     });
 }
 
+// Agrega esta función al script.js para cargar el historial
+function loadHistoryData(searchTerm = '') {
+    const historyTableBody = document.getElementById('historyTableBody');
+    const noHistoryMsg = document.getElementById('noHistoryMessage');
+    
+    // Mostrar estado de carga
+    historyTableBody.innerHTML = '<tr><td colspan="7" class="loading-row"><div class="spinner-container"><div class="loading-spinner"></div><span>Cargando historial...</span></div></td></tr>';
+    
+    // Construir URL con parámetro de búsqueda si existe
+    let url = 'https://sitme.onrender.com/get_history';
+    if (searchTerm) {
+        url += `?search=${encodeURIComponent(searchTerm)}`;
+    }
+    
+    fetch(url)
+        .then(response => {
+            if (!response.ok) throw new Error('Error al cargar el historial');
+            return response.json();
+        })
+        .then(data => {
+            if (!data.records || data.records.length === 0) {
+                historyTableBody.innerHTML = '';
+                noHistoryMsg.style.display = 'block';
+                return;
+            }
+            
+            historyTableBody.innerHTML = '';
+            noHistoryMsg.style.display = 'none';
+            
+            data.records.forEach(record => {
+                const row = document.createElement('tr');
+                
+                // Determinar clase de riesgo basada en la probabilidad
+                const probability = Math.round((record.probability || 0) * 100);
+                let riskClass = '';
+                let riskText = '';
+                
+                if (probability >= 70) {
+                    riskClass = 'high-risk';
+                    riskText = 'Alto';
+                } else if (probability >= 40) {
+                    riskClass = 'moderate-risk';
+                    riskText = 'Moderado';
+                } else {
+                    riskClass = 'low-risk';
+                    riskText = 'Bajo';
+                }
+                
+                row.innerHTML = `
+                    <td>${record.clinic_id || 'ENDO-' + record.id.toString().padStart(4, '0')}</td>
+                    <td>${record.full_name || 'No registrado'}</td>
+                    <td>${record.rut || 'No registrado'}</td>
+                    <td>${record.age || 'N/A'}</td>
+                    <td>${record.evaluation_date || 'N/A'}</td>
+                    <td class="${riskClass}">${riskText}</td>
+                    <td class="history-actions">
+                        <button class="history-btn view-btn" data-id="${record.id}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="history-btn delete-btn" data-id="${record.id}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                `;
+                
+                historyTableBody.appendChild(row);
+            });
+            
+            // Agregar eventos a los botones
+            addHistoryButtonEvents();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            historyTableBody.innerHTML = '<tr><td colspan="7" class="error-row">Error al cargar el historial</td></tr>';
+        });
+}
+
+// Función para agregar eventos a los botones de la tabla
+function addHistoryButtonEvents() {
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const recordId = this.getAttribute('data-id');
+            viewRecordDetails(recordId);
+        });
+    });
+    
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const recordId = this.getAttribute('data-id');
+            deleteRecord(recordId);
+        });
+    });
+}
+
+// Función para ver detalles de un registro
+function viewRecordDetails(recordId) {
+    // Aquí puedes implementar la lógica para ver detalles completos
+    // Por ejemplo, abrir un modal o redirigir a otra página
+    fetch(`https://sitme.onrender.com/get_record_details/${recordId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Mostrar los detalles en un modal o consola
+            console.log('Detalles del registro:', data);
+            alert(`Detalles del paciente: ${data.full_name}\nRUT: ${data.rut}\nEdad: ${data.age}\nRiesgo: ${data.risk_level}`);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('No se pudieron cargar los detalles del registro');
+        });
+}
+
+// Función para eliminar un registro
+function deleteRecord(recordId) {
+    if (confirm('¿Está seguro que desea eliminar este registro permanentemente?')) {
+        fetch(`https://sitme.onrender.com/delete_record/${recordId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Error al eliminar registro');
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showSuccessNotification('Registro eliminado correctamente');
+                loadHistoryData(); // Recargar la tabla
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('No se pudo eliminar el registro');
+        });
+    }
+}
+
+// Evento para el botón de búsqueda
+document.getElementById('searchHistoryBtn').addEventListener('click', function() {
+    const searchTerm = document.getElementById('historySearch').value;
+    loadHistoryData(searchTerm);
+});
+
+// Evento para buscar al presionar Enter
+document.getElementById('historySearch').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        loadHistoryData(this.value);
+    }
+});
+
+// Cargar datos cuando se muestra la pestaña
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar historial si estamos en esa pestaña
+    if (document.querySelector('#main-tab-history').classList.contains('active')) {
+        loadHistoryData();
+    }
+    
+    // Evento para cambiar entre pestañas
+    document.querySelectorAll('.main-tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (this.getAttribute('data-tab') === 'main-tab-history' && 
+                !this.classList.contains('active')) {
+                loadHistoryData();
+            }
+        });
+    });
+});
+
+// Agrega esto al final del DOMContentLoaded en script.js
+document.addEventListener('DOMContentLoaded', function() {
+    // ... código existente ...
+    
+    // Cargar historial cuando se muestre la pestaña
+    document.querySelector('.main-tab-btn[data-tab="main-tab-history"]').addEventListener('click', function() {
+        if (!this.classList.contains('active')) {
+            loadHistoryData();
+        }
+    });
+    
+    // También cargar al inicio si estamos en la pestaña de historial
+    if (document.querySelector('#main-tab-history').classList.contains('active')) {
+        loadHistoryData();
+    }
+});
+
 // Función para mostrar notificación de éxito
 function showSuccessNotification(message) {
     const notification = document.createElement('div');
