@@ -28,10 +28,10 @@ CORS(app)
 
 # Configuración de PostgreSQL (añade esto después de las otras configuraciones)
 POSTGRES_CONFIG = {
-    'host': 'db.vsivmttzpipxffpywdfg-pooler.supabase.co',
+    'host': 'db.vsivmttzpipxffpywdfg',
     'database': 'postgres',  # ¡La DB por defecto es 'postgres'!
     'user': 'postgres',
-    'password': os.getenv('DB_PASSWORD', '1b7imIkp2QEnX2Wv'),  # Usa variables de entorno
+    'password': '1b7imIkp2QEnX2Wv',  # Usa variables de entorno
     'port': '6543',
     'sslmode': 'require'
 }
