@@ -27,10 +27,9 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
 #Conexión a la base de datos PostgreSQL
-DATABASE_URL="postgresql://postgres.vsivmttzpipxffpywdfg:lbejTpKfjUu6Xrbl@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DATABASE_URL = "postgresql://postgres.vsivmttzpipxffpywdfg:lbejTpKfjUu6Xrbl@aws-0-us-east-2.pooler.supabase.com:6543/postgres?sslmode=require"
 
 # Configuración de PostgreSQL (añade esto después de las otras configuraciones)
-# Configuración CORRECTA para Flask
 POSTGRES_CONFIG = {
     'host': 'db.vsivmttzpipxffpywdfg.supabase.co',
     'port':'5432',
