@@ -1839,7 +1839,7 @@ footer {
 }
 
 #consentAcceptBtn {
-    background-color: #28a745;
+    background-color: var(--success);
     color: white;
     padding: 10px 20px;
     border: none;
@@ -1850,10 +1850,25 @@ footer {
 }
 
 #consentAcceptBtn:disabled {
-    background-color: #6c757d;
+    background-color: var(--gray);
     cursor: not-allowed;
 }
 
 #consentAcceptBtn:hover:not(:disabled) {
-    background-color: #218838;
+    background-color: var(--success-dark);
+}
+
+/* Botones de descarga */
+.modal-btn.download-btn {
+    background-color: var(--primary);
+    color: white;
+    margin-right: 10px;
+}
+
+.modal-btn.download-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.modal-btn.download-btn i {
+    margin-right: 5px;
 }

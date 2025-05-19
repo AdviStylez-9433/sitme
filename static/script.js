@@ -925,7 +925,6 @@ function addHistoryButtonEvents() {
 }
 
 // Función para ver detalles de un registro
-// Actualizar la función viewRecordDetails
 function viewRecordDetails(recordId) {
     fetch(`https://sitme-api.onrender.com/get_record_details/${recordId}`)
         .then(response => {
@@ -1330,11 +1329,304 @@ function showPatientModal(patientData) {
     fillBiomarkersInfo(patientData);
     fillImagingInfo(patientData);
 
+    // Manejar el botón de descarga
+    const downloadBtn = document.getElementById('downloadPdfBtn');
+    if (downloadBtn) {
+        // Si el botón ya existe, solo actualizamos su manejador de eventos
+        downloadBtn.onclick = null; // Eliminar manejador anterior
+        downloadBtn.onclick = () => generatePatientPDF(patientData);
+    } else {
+        // Si no existe, lo creamos
+        const newDownloadBtn = document.createElement('button');
+        newDownloadBtn.id = 'downloadPdfBtn';
+        newDownloadBtn.className = 'modal-btn download-btn';
+        newDownloadBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar PDF';
+        newDownloadBtn.onclick = () => generatePatientPDF(patientData);
+        
+        const modalFooter = document.querySelector('.modal-footer');
+        modalFooter.insertBefore(newDownloadBtn, modalFooter.querySelector('.close-btn'));
+    }
+
     // Mostrar modal
     modal.style.display = 'block';
 
     // Configurar eventos de las pestañas
     setupModalTabs();
+}
+
+function generatePatientPDF(patientData) {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        let yPosition = 20; // Posición vertical inicial
+
+        // Configuración inicial
+        doc.setFont('helvetica');
+        doc.setFontSize(10);
+
+        // ========== ENCABEZADO ==========
+        doc.setFontSize(18);
+        doc.setTextColor(33, 150, 243); // Azul
+        doc.text('FICHA CLÍNICA - ENDOMETRIOSIS', 105, yPosition, { align: 'center' });
+        yPosition += 10;
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`ID Clínico: ${patientData.clinic_id || 'N/A'} | Generado: ${new Date().toLocaleDateString('es-CL')}`, 105, yPosition, { align: 'center' });
+        yPosition += 15;
+
+        // Línea divisoria
+        doc.setDrawColor(200);
+        doc.line(15, yPosition, 195, yPosition);
+        yPosition += 10;
+
+        // ========== 1. DATOS PERSONALES ==========
+        doc.setFontSize(14);
+        doc.setTextColor(33, 150, 243);
+        doc.text('1. DATOS PERSONALES', 20, yPosition);
+        yPosition += 8;
+
+        const personalData = [
+            ['Nombre completo:', patientData.full_name || 'No registrado'],
+            ['RUT:', patientData.id_number || 'No registrado'],
+            ['Fecha nacimiento:', patientData.birth_date || 'No registrado'],
+            ['Edad:', patientData.age ? `${patientData.age} años` : 'N/A'],
+            ['Tipo sangre:', patientData.blood_type || 'No registrado'],
+            ['Previsión:', patientData.insurance || 'No registrado']
+        ];
+
+        doc.autoTable({
+            startY: yPosition,
+            head: false,
+            body: personalData,
+            columnStyles: {
+                0: { fontStyle: 'bold', cellWidth: 50, textColor: [40, 40, 40] },
+                1: { cellWidth: 'auto', textColor: [80, 80, 80] }
+            },
+            margin: { left: 20 },
+            tableWidth: 170,
+            styles: { fontSize: 10, cellPadding: 3 }
+        });
+        yPosition = doc.autoTable.previous.finalY + 10;
+
+        // ========== 2. HISTORIAL MENSTRUAL ==========
+        doc.setFontSize(14);
+        doc.text('2. HISTORIAL MENSTRUAL', 20, yPosition);
+        yPosition += 8;
+
+        const menstrualData = [
+            ['Edad menarquia:', patientData.menarche_age ? `${patientData.menarche_age} años` : 'N/A'],
+            ['Duración ciclo:', patientData.cycle_length ? `${patientData.cycle_length} días` : 'N/A'],
+            ['Duración período:', patientData.period_duration ? `${patientData.period_duration} días` : 'N/A'],
+            ['Última menstruación:', patientData.last_period || 'N/A'],
+            ['Nivel dolor:', patientData.pain_level ? `${patientData.pain_level}/10` : 'N/A'],
+            ['Dolor premenstrual:', patientData.pain_premenstrual ? 'Sí' : 'No'],
+            ['Dolor menstrual:', patientData.pain_menstrual ? 'Sí' : 'No'],
+            ['Dolor ovulación:', patientData.pain_ovulation ? 'Sí' : 'No'],
+            ['Dolor crónico:', patientData.pain_chronic ? 'Sí' : 'No']
+        ];
+
+        doc.autoTable({
+            startY: yPosition,
+            head: false,
+            body: menstrualData,
+            columnStyles: {
+                0: { fontStyle: 'bold', cellWidth: 55 },
+                1: { cellWidth: 'auto' }
+            },
+            margin: { left: 20 },
+            tableWidth: 170
+        });
+        yPosition = doc.autoTable.previous.finalY + 10;
+
+        // ========== 3. HISTORIAL MÉDICO ==========
+        doc.setFontSize(14);
+        doc.text('3. HISTORIAL MÉDICO', 20, yPosition);
+        yPosition += 8;
+
+        const medicalHistory = [
+            ['Cirugías ginecológicas:', patientData.gynecological_surgery ? 'Sí' : 'No'],
+            ['Enf. inflamatoria pélvica:', patientData.pelvic_inflammatory ? 'Sí' : 'No'],
+            ['Quistes ováricos:', patientData.ovarian_cysts ? 'Sí' : 'No'],
+            ['Endometriosis familiar:', patientData.family_endometriosis ? 'Sí' : 'No'],
+            ['Enf. autoinmunes familiar:', patientData.family_autoimmune ? 'Sí' : 'No'],
+            ['Cáncer familiar:', patientData.family_cancer ? 'Sí' : 'No'],
+            ['Enf. autoinmune:', patientData.comorbidity_autoimmune ? 'Sí' : 'No'],
+            ['Trastorno tiroideo:', patientData.comorbidity_thyroid ? 'Sí' : 'No'],
+            ['Síndrome intestino irritable:', patientData.comorbidity_ibs ? 'Sí' : 'No']
+        ];
+
+        doc.autoTable({
+            startY: yPosition,
+            head: false,
+            body: medicalHistory,
+            columnStyles: {
+                0: { fontStyle: 'bold', cellWidth: 70 },
+                1: { cellWidth: 'auto' }
+            },
+            margin: { left: 20 },
+            tableWidth: 170
+        });
+        yPosition = doc.autoTable.previous.finalY + 10;
+
+        // ========== 4. SÍNTOMAS ==========
+        doc.setFontSize(14);
+        doc.text('4. SÍNTOMAS', 20, yPosition);
+        yPosition += 8;
+
+        const symptomsData = [
+            ['Dolor durante relaciones:', patientData.symptoms?.pain_during_sex ? 'Sí' : 'No'],
+            ['Síntomas intestinales:', patientData.symptoms?.bowel_symptoms ? 'Sí' : 'No'],
+            ['Síntomas urinarios:', patientData.symptoms?.urinary_symptoms ? 'Sí' : 'No'],
+            ['Fatiga crónica:', patientData.symptoms?.fatigue ? 'Sí' : 'No'],
+            ['Problemas fertilidad:', patientData.symptoms?.infertility ? 'Sí' : 'No'],
+            ['Otros síntomas:', patientData.symptoms?.other_symptoms || 'Ninguno']
+        ];
+
+        doc.autoTable({
+            startY: yPosition,
+            head: false,
+            body: symptomsData,
+            columnStyles: {
+                0: { fontStyle: 'bold', cellWidth: 60 },
+                1: { cellWidth: 'auto' }
+            },
+            margin: { left: 20 },
+            tableWidth: 170
+        });
+        yPosition = doc.autoTable.previous.finalY + 10;
+
+        console.log("Biomarcadores directos:", patientData.biomarkers);
+        // ========== 5. BIOMARCADORES ==========
+        doc.setFontSize(14);
+        doc.text('5. BIOMARCADORES', 20, yPosition);
+        yPosition += 8;
+
+        // Acceder a los biomarcadores correctamente
+        const biomarkers = patientData.biomarkers || {};
+        
+        // Función para formatear valores de biomarcadores
+        const formatBiomarker = (value, unit) => {
+            if (value === null || value === undefined || value === '') return 'No medido';
+            return `${value} ${unit}`;
+        };
+
+        // Versión resiliente que busca en múltiples ubicaciones
+        const getBiomarkerValue = (field) => {
+            return patientData.biomarkers?.[field] || 
+                patientData.formData?.biomarkers?.[field] || 
+                patientData[field] || 
+                null;
+        };
+
+        const biomarkersData = [
+            ['CA-125:', formatBiomarker(getBiomarkerValue('ca125'), 'U/mL')],
+            ['IL-6:', formatBiomarker(getBiomarkerValue('il6'), 'pg/mL')],
+            ['TNF-α:', formatBiomarker(getBiomarkerValue('tnf_alpha'), 'pg/mL')],
+            ['VEGF:', formatBiomarker(getBiomarkerValue('vegf'), 'pg/mL')],
+            ['AMH:', formatBiomarker(getBiomarkerValue('amh'), 'ng/mL')],
+            ['PCR:', formatBiomarker(getBiomarkerValue('crp'), 'mg/L')]
+        ];
+
+        doc.autoTable({
+            startY: yPosition,
+            head: false,
+            body: biomarkersData,
+            columnStyles: { 
+                0: { fontStyle: 'bold', cellWidth: 40 },
+                1: { cellWidth: 'auto' } 
+            },
+            margin: { left: 20 },
+            tableWidth: 170
+        });
+        yPosition = doc.autoTable.previous.finalY + 10;
+
+        // ========== 6. EXAMEN FÍSICO ==========
+        doc.setFontSize(14);
+        doc.text('6. EXAMEN FÍSICO', 20, yPosition);
+        yPosition += 8;
+
+        const examData = [
+            ['Estatura:', patientData.height ? `${patientData.height} cm` : 'No registrado'],
+            ['Peso:', patientData.weight ? `${patientData.weight} kg` : 'No registrado'],
+            ['IMC:', patientData.bmi || 'No calculado'],
+            ['Examen pélvico:', patientData.pelvic_exam || 'No realizado'],
+            ['Examen vaginal:', patientData.vaginal_exam || 'No realizado'],
+            ['Notas clínicas:', patientData.clinical_notes || 'Sin notas']
+        ];
+
+        doc.autoTable({
+            startY: yPosition,
+            head: false,
+            body: examData,
+            columnStyles: {
+                0: { fontStyle: 'bold', cellWidth: 45 },
+                1: { cellWidth: 'auto' }
+            },
+            margin: { left: 20 },
+            tableWidth: 170
+        });
+        yPosition = doc.autoTable.previous.finalY + 10;
+
+        // ========== 7. IMAGENOLOGÍA ==========
+        if (patientData.imaging || patientData.imaging_details) {
+            doc.setFontSize(14);
+            doc.text('7. IMAGENOLOGÍA', 20, yPosition);
+            yPosition += 8;
+
+            const imagingData = [
+                ['Resultados:', patientData.imaging || 'No realizado'],
+                ['Detalles:', patientData.imaging_details || 'Sin detalles']
+            ];
+
+            doc.autoTable({
+                startY: yPosition,
+                head: false,
+                body: imagingData,
+                columnStyles: {
+                    0: { fontStyle: 'bold', cellWidth: 40 },
+                    1: { cellWidth: 'auto' }
+                },
+                margin: { left: 20 },
+                tableWidth: 170
+            });
+            yPosition = doc.autoTable.previous.finalY + 10;
+        }
+
+        // ========== 8. MEDICAMENTOS ==========
+        if (patientData.medications) {
+            doc.setFontSize(14);
+            doc.text('8. MEDICAMENTOS', 20, yPosition);
+            yPosition += 8;
+
+            // Dividir el texto en líneas para que no se salga del PDF
+            const splitText = doc.splitTextToSize(patientData.medications, 170);
+
+            doc.autoTable({
+                startY: yPosition,
+                head: false,
+                body: [[splitText]],
+                margin: { left: 20 },
+                tableWidth: 170,
+                styles: { cellPadding: 4 }
+            });
+            yPosition = doc.autoTable.previous.finalY + 10;
+        }
+
+        // ========== PIE DE PÁGINA ==========
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text('Documento generado automáticamente por el sistema SITME - Endometriosis Toolkit', 105, 285, { align: 'center' });
+        doc.text('www.sitme.cl - © ' + new Date().getFullYear(), 105, 290, { align: 'center' });
+
+        // Guardar el PDF
+        const fileName = `Ficha_Endometriosis_${(patientData.full_name || 'Paciente').replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
+        doc.save(fileName);
+
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        showError(`Error al generar PDF: ${error.message}`);
+    }
 }
 
 // Funciones para llenar las secciones del modal
@@ -1545,314 +1837,10 @@ function setupModalEvents() {
         }
     });
 
-    // Función mejorada para generar PDF desde el modal
-document.querySelector('.modal-btn.print-btn').addEventListener('click', async () => {
-    const modal = document.getElementById('patientModal');
-    const printBtn = document.querySelector('.modal-btn.print-btn');
-    
-    // Guardar el contenido original del botón
-    const originalContent = printBtn.innerHTML;
-    
-    // Estado de carga
-    printBtn.disabled = true;
-    printBtn.innerHTML = `
-        <div class="spinner-container">
-            <div class="loading-spinner"></div>
-            <span>Generando PDF...</span>
-        </div>
-    `;
-    
-    try {
-        // Obtener todos los datos del modal
-        const patientData = gatherModalData();
-        
-        // Solicitud de generación del PDF
-        const response = await fetch('https://sitme-api.onrender.com/generate_patient_report', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(patientData)
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-        
-        const blob = await response.blob();
-        
-        // Generar nombre de archivo
-        const today = new Date().toLocaleDateString('es-CL', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        }).replace(/\//g, '-');
-        
-        const patientName = patientData.personal.full_name
-            .trim()
-            .toLowerCase()
-            .replace(/\s+/g, '_')
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^a-z0-9_]/g, '');
-        
-        const fileName = `informe_${patientName}_${today}.pdf`;
-        
-        // Descarga del archivo
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        
-        // Limpieza
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 100);
-        
-    } catch (error) {
-        console.error('Error al generar PDF:', error);
-        showError(`Error al generar el PDF: ${error.message}`);
-    } finally {
-        // Restaurar estado normal del botón
-        printBtn.disabled = false;
-        printBtn.innerHTML = originalContent;
-    }
-});
-
-    // Función para recolectar todos los datos del modal
-    function gatherModalData() {
-        const modal = document.getElementById('patientModal');
-
-        // Obtener datos básicos
-        const patientName = document.getElementById('modalPatientName').textContent;
-        const clinicId = document.querySelector('.modal-item:nth-child(6) .modal-value').textContent.trim();
-
-        // Obtener datos de cada sección
-        const personalInfo = extractPersonalInfo();
-        const menstrualInfo = extractMenstrualInfo();
-        const medicalHistory = extractMedicalHistory();
-        const medications = extractMedications();
-        const examResults = extractExamResults();
-        const biomarkers = extractBiomarkers();
-        const imagingInfo = extractImagingInfo();
-
-        return {
-            personal: {
-                full_name: patientName,
-                clinic_id: clinicId,
-                ...personalInfo
-            },
-            menstrual: menstrualInfo,
-            history: medicalHistory,
-            medications: medications,
-            examination: examResults,
-            biomarkers: biomarkers,
-            imaging: imagingInfo
-        };
-    }
-
-    // Funciones auxiliares para extraer datos de cada sección
-    function extractPersonalInfo() {
-        const items = document.querySelectorAll('#personalInfo .modal-item');
-        const data = {};
-
-        items.forEach(item => {
-            const label = item.querySelector('.modal-label span').textContent;
-            const value = item.querySelector('.modal-value').textContent.replace('No registrado', '').trim();
-
-            switch (label) {
-                case 'RUT':
-                    data.id_number = value;
-                    break;
-                case 'Fecha de Nacimiento':
-                    data.birth_date = value;
-                    break;
-                case 'Edad':
-                    data.age = parseInt(value) || null;
-                    break;
-                case 'Tipo de Sangre':
-                    data.blood_type = value;
-                    break;
-                case 'Previsión':
-                    data.insurance = value;
-                    break;
-            }
-        });
-
-        return data;
-    }
-
-    function extractMenstrualInfo() {
-        const items = document.querySelectorAll('#menstrualInfo .modal-item');
-        const data = {};
-
-        items.forEach(item => {
-            const label = item.querySelector('.modal-label span').textContent;
-            let value = item.querySelector('.modal-value, .boolean-value').textContent;
-            value = value.replace('No registrado', '').trim();
-
-            if (item.querySelector('.boolean-value')) {
-                value = value === 'Sí';
-            }
-
-            switch (label) {
-                case 'Edad de Menarquia':
-                    data.menarche_age = parseInt(value) || null;
-                    break;
-                case 'Duración del Ciclo':
-                    data.cycle_length = parseInt(value) || null;
-                    break;
-                case 'Duración del Período':
-                    data.period_duration = parseInt(value) || null;
-                    break;
-                case 'Última Menstruación':
-                    data.last_period = value;
-                    break;
-                case 'Dolor Menstrual':
-                    data.pain_level = parseInt(value) || null;
-                    break;
-                case 'Dolor Crónico':
-                    data.pain_chronic = value;
-                    break;
-            }
-        });
-
-        return data;
-    }
-
-    function extractMedicalHistory() {
-        const items = document.querySelectorAll('#medicalHistory .modal-item');
-        const data = {};
-
-        items.forEach(item => {
-            const label = item.querySelector('.modal-label span').textContent;
-            const value = item.querySelector('.boolean-value').textContent === 'Sí';
-
-            switch (label) {
-                case 'Cirugías Ginecológicas':
-                    data.gynecological_surgery = value;
-                    break;
-                case 'Enf. Inflamatoria Pélvica':
-                    data.pelvic_inflammatory = value;
-                    break;
-                case 'Quistes Ováricos':
-                    data.ovarian_cysts = value;
-                    break;
-                case 'Endometriosis Familiar':
-                    data.family_endometriosis = value;
-                    break;
-                case 'Enf. Autoinmunes Familiar':
-                    data.family_autoimmune = value;
-                    break;
-                case 'Cáncer Familiar':
-                    data.family_cancer = value;
-                    break;
-                case 'Enf. Autoinmune':
-                    data.comorbidity_autoimmune = value;
-                    break;
-                case 'Trastorno Tiroideo':
-                    data.comorbidity_thyroid = value;
-                    break;
-                case 'Síndrome Intestino Irritable':
-                    data.comorbidity_ibs = value;
-                    break;
-            }
-        });
-
-        return data;
-    }
-
-    function extractMedications() {
-        const container = document.getElementById('medicationsInfo');
-        return container.querySelector('.modal-value').textContent.replace('No se registraron medicamentos', '').trim();
-    }
-
-    function extractExamResults() {
-        const items = document.querySelectorAll('#examResults .modal-item');
-        const data = {};
-
-        items.forEach(item => {
-            const label = item.querySelector('.modal-label span').textContent;
-            let value = item.querySelector('.modal-value').textContent;
-            value = value.replace('No registrado', '').trim();
-
-            switch (label) {
-                case 'Estatura':
-                    data.height = parseFloat(value) || null;
-                    break;
-                case 'Peso':
-                    data.weight = parseFloat(value) || null;
-                    break;
-                case 'IMC':
-                    data.bmi = parseFloat(value) || null;
-                    break;
-                case 'Examen Pélvico':
-                    data.pelvic_exam = value;
-                    break;
-                case 'Examen Vaginal':
-                    data.vaginal_exam = value;
-                    break;
-                case 'Notas Clínicas':
-                    data.clinical_notes = value;
-                    break;
-            }
-        });
-
-        return data;
-    }
-
-    function extractBiomarkers() {
-        const items = document.querySelectorAll('#biomarkersInfo .modal-item');
-        const data = {};
-
-        items.forEach(item => {
-            const label = item.querySelector('.modal-label span').textContent;
-            let value = item.querySelector('.modal-value').textContent;
-            value = value.replace('No registrado', '').trim();
-
-            if (value) {
-                const numValue = parseFloat(value);
-                if (!isNaN(numValue)) {
-                    switch (label) {
-                        case 'CA-125':
-                            data.ca125 = numValue;
-                            break;
-                        case 'IL-6':
-                            data.il6 = numValue;
-                            break;
-                        case 'TNF-α':
-                            data.tnf_alpha = numValue;
-                            break;
-                        case 'VEGF':
-                            data.vegf = numValue;
-                            break;
-                        case 'AMH':
-                            data.amh = numValue;
-                            break;
-                        case 'PCR':
-                            data.crp = numValue;
-                            break;
-                    }
-                }
-            }
-        });
-
-        return data;
-    }
-
-    function extractImagingInfo() {
-        const container = document.getElementById('imagingInfo');
-        const result = container.querySelector('strong') ?
-            container.querySelector('strong').nextSibling.textContent.trim() : '';
-        const details = container.querySelector('.modal-value:not(:has(strong))') ?
-            container.querySelector('.modal-value:not(:has(strong))').textContent.trim() : '';
-
-        return {
-            imaging: result || 'No registrado',
-            imaging_details: details || 'No se registraron detalles'
-        };
-    }
+    // Configurar botón de imprimir
+    document.querySelector('.modal-btn.print-btn').addEventListener('click', () => {
+        window.print();
+    });
 }
 
 // Manejo del consentimiento informado
