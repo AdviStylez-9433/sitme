@@ -27,7 +27,7 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
 #Conexión a la base de datos PostgreSQL
-DB_URL = 'postgresql://postgres:[YOUR-PASSWORD]@db.vsivmttzpipxffpywdfg.supabase.co:5432/postgres'
+DATABASE_URL="postgresql://postgres.vsivmttzpipxffpywdfg:lbejTpKfjUu6Xrbl@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
 
 # Configuración de PostgreSQL (añade esto después de las otras configuraciones)
 # Configuración CORRECTA para Flask
@@ -41,7 +41,7 @@ POSTGRES_CONFIG = {
 
 # Función para obtener conexión a PostgreSQL
 def get_db_connection():
-    conn = psycopg2.connect(**POSTGRES_CONFIG)
+    conn = psycopg2.connect(DATABASE_URL)
     return conn
 
 # Función para crear la tabla si no existe (ejecutar al inicio)
