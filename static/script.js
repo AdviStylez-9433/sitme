@@ -170,7 +170,7 @@ document.getElementById('endometriosisForm').addEventListener('submit', function
     };
 
     // Hacer la petición al backend
-    fetch('https://sitme-api.onrender.com/predict', {
+    fetch('https://sitme.onrender.com/predict', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -668,7 +668,7 @@ function downloadClinicalRecord(formData) {
     const fileName = `ficha_${patientName}_${today}.pdf`;
 
     // Solicitud de generación del PDF
-    fetch('https://sitme-api.onrender.com/generate_clinical_record', {
+    fetch('https://sitme.onrender.com/generate_clinical_record', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -797,7 +797,7 @@ function saveSimulationToDB(simulationData) {
     console.log('Data enviada:', dataToSend);
 
     // Solicitud para guardar la simulación
-    fetch('https://sitme-api.onrender.com/save_simulation', {
+    fetch('https://sitme.onrender.com/save_simulation', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -839,7 +839,7 @@ function loadHistoryData(searchTerm = '') {
     historyTableBody.innerHTML = '<tr><td colspan="7" class="loading-row"><div class="spinner-container"><div class="loading-spinner"></div><span>Cargando historial...</span></div></td></tr>';
 
     // Construir URL con parámetro de búsqueda si existe
-    let url = 'https://sitme-api.onrender.com/get_history';
+    let url = 'https://sitme.onrender.com/get_history';
     if (searchTerm) {
         url += `?search=${encodeURIComponent(searchTerm)}`;
     }
@@ -927,7 +927,7 @@ function addHistoryButtonEvents() {
 // Función para ver detalles de un registro
 // Actualizar la función viewRecordDetails
 function viewRecordDetails(recordId) {
-    fetch(`https://sitme-api.onrender.com/get_record_details/${recordId}`)
+    fetch(`https://sitme.onrender.com/get_record_details/${recordId}`)
         .then(response => {
             if (!response.ok) throw new Error('Error al cargar detalles');
             return response.json();
@@ -951,7 +951,7 @@ document.addEventListener('DOMContentLoaded', setupModalEvents);
 // Función para eliminar un registro
 function deleteRecord(recordId) {
     if (confirm('¿Está seguro que desea eliminar este registro permanentemente?')) {
-        fetch(`https://sitme-api.onrender.com/delete_record/${recordId}`, {
+        fetch(`https://sitme.onrender.com/delete_record/${recordId}`, {
             method: 'DELETE'
         })
             .then(response => {
