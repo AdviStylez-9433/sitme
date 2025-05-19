@@ -31,7 +31,7 @@ POSTGRES_CONFIG = {
     'host': 'db.vsivmttzpipxffpywdfg-pooler.supabase.co',  # ¡Agrega "-pooler"!
     'database': 'postgres',
     'user': 'postgres',
-    'password': 'tu_contraseña_real',  # La misma de siempre
+    'password': '1b7imIkp2QEnX2Wv',  # La misma de siempre
     'port': '6543',  # Puerto del pooler (no 5432)
     'sslmode': 'require'
 }
