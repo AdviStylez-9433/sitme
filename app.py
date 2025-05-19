@@ -21,22 +21,29 @@ from psycopg2 import sql
 from psycopg2.extras import RealDictCursor
 import json
 import traceback
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+from datetime import datetime, timedelta
+from functools import wraps
+from flask_sqlalchemy import SQLAlchemy
 
 # Configuración inicial
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
+# Configuración de JWT
+app.config['SECRET_KEY'] = 'k!ojiTN8oMJV'  # Cambia esto en producción!
+app.config['JWT_EXPIRATION_DELTA'] = timedelta(hours=24)  # Tokens expiran en 24 horas
+
 #Conexión a la base de datos PostgreSQL
 DATABASE_URL = "postgresql://postgres.vsivmttzpipxffpywdfg:lbejTpKfjUu6Xrbl@aws-0-us-east-2.pooler.supabase.com:6543/postgres?sslmode=require"
 
-# Configuración de PostgreSQL (añade esto después de las otras configuraciones)
-POSTGRES_CONFIG = {
-    'host': 'db.vsivmttzpipxffpywdfg.supabase.co',
-    'port':'5432',
-    'database': 'postgres',
-    'user': 'postgres',
-    'password': 'lbejTpKfjUu6Xrbl'
-}
+# Configuración de la base de datos
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Inicializar SQLAlchemy
+db = SQLAlchemy(app)
 
 # Función para obtener conexión a PostgreSQL
 def get_db_connection():
@@ -49,6 +56,8 @@ def init_db():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
+        
+        # Crear tabla patient_simulations
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS patient_simulations (
                 -- Identificación
@@ -122,15 +131,126 @@ def init_db():
                 recommendations TEXT[]
             );
         """)
+        
+        # Crear tabla medicos
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS medicos (
+                id SERIAL PRIMARY KEY,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                nombre VARCHAR(100),
+                colegiado VARCHAR(50) UNIQUE,
+                creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ultimo_login TIMESTAMP,
+                activo BOOLEAN DEFAULT TRUE
+            );
+        """)
+        
+        # Opcional: Crear índice para búsquedas por email
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_medicos_email ON medicos(email);
+        """)
+        
         conn.commit()
+        app.logger.info("Tablas creadas/existentes: patient_simulations y medicos")
+        
     except Exception as e:
         app.logger.error(f"Error initializing database: {str(e)}")
+        raise e  # Re-lanzar la excepción para que no pase desapercibida
     finally:
         if conn:
             conn.close()
 
 # Ejecutar init_db al iniciar la aplicación
 init_db()
+
+# Clase Medico (actualizada)
+class Medico(db.Model):
+    __tablename__ = 'medicos'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    nombre = db.Column(db.String(100))
+    colegiado = db.Column(db.String(50), unique=True)
+    creado_en = db.Column(db.DateTime, default=datetime.utcnow)
+    ultimo_login = db.Column(db.DateTime)
+    activo = db.Column(db.Boolean, default=True)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def generate_auth_token(self):
+        payload = {
+            'user_id': self.id,
+            'exp': datetime.utcnow() + app.config['JWT_EXPIRATION_DELTA']
+        }
+        return jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+
+# Decorador para rutas protegidaspsql -h db.vsivmttzpipxffpywdfg.supabase.co -p 5432 -U postgres -d postgres
+def token_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = None
+        
+        # Obtener token del header
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(" ")[1]
+            
+        if not token:
+            return jsonify({'message': 'Token es requerido'}), 401
+            
+        try:
+            # Decodificar token
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user = Medico.query.get(data['user_id'])
+            
+            if not current_user or not current_user.activo:
+                return jsonify({'message': 'Usuario no válido o inactivo'}), 401
+                
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token expirado'}), 401
+        except (jwt.InvalidTokenError, Exception) as e:
+            return jsonify({'message': 'Token inválido', 'error': str(e)}), 401
+            
+        return f(current_user, *args, **kwargs)
+    return decorated_function
+
+# Ruta de Login
+@app.route('/api/login', methods=['POST'])
+def login():
+    auth = request.get_json()
+    
+    if not auth or not auth.get('email') or not auth.get('password'):
+        return jsonify({'error': 'Email y contraseña son requeridos'}), 400
+        
+    medico = Medico.query.filter_by(email=auth['email']).first()
+    
+    if not medico or not medico.check_password(auth['password']):
+        return jsonify({'error': 'Credenciales inválidas'}), 401
+        
+    if not medico.activo:
+        return jsonify({'error': 'Cuenta desactivada'}), 403
+        
+    # Actualizar último login
+    medico.ultimo_login = datetime.utcnow()
+    db.session.commit()
+    
+    # Generar token
+    auth_token = medico.generate_auth_token()
+    
+    return jsonify({
+        'message': 'Login exitoso',
+        'token': auth_token,
+        'user': {
+            'id': medico.id,
+            'email': medico.email,
+            'nombre': medico.nombre,
+            'colegiado': medico.colegiado
+        }
+    })
 
 # Añade esta nueva ruta al final de app.py, antes del if __name__ == '__main__':
 @app.route('/save_simulation', methods=['POST'])

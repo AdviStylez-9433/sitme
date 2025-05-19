@@ -1,3 +1,84 @@
+// Función para mostrar/ocultar formularios de login
+function toggleAuthForms() {
+    const loginForm = document.getElementById('loginFormContainer');
+    const appContent = document.getElementById('mainAppContent');
+    
+    if (localStorage.getItem('medicoToken')) {
+        loginForm.style.display = 'none';
+        appContent.style.display = 'block';
+        loadMedicoData();
+    } else {
+        loginForm.style.display = 'block';
+        appContent.style.display = 'none';
+    }
+}
+
+// Función para manejar el login
+async function handleLogin(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const loginBtn = document.getElementById('loginBtn');
+    const loginError = document.getElementById('loginError');
+    
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando sesión...';
+    loginError.textContent = '';
+    
+    try {
+        const response = await fetch('https://sitme-api.onrender.com/api/medicos/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) throw new Error(data.error || 'Error en el login');
+        
+        // Guardar token y datos del médico
+        localStorage.setItem('medicoToken', data.token);
+        localStorage.setItem('medicoData', JSON.stringify(data.medico));
+        
+        toggleAuthForms();
+        showSuccessNotification(`Bienvenido, Dr. ${data.medico.nombre}`);
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        loginError.textContent = error.message;
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
+    }
+}
+
+// Función para cargar datos del médico
+function loadMedicoData() {
+    const medicoData = JSON.parse(localStorage.getItem('medicoData'));
+    if (medicoData) {
+        document.getElementById('medicoNombre').textContent = medicoData.nombre;
+        document.getElementById('medicoEmail').textContent = medicoData.email;
+    }
+}
+
+// Función para logout
+function handleLogout() {
+    localStorage.removeItem('medicoToken');
+    localStorage.removeItem('medicoData');
+    toggleAuthForms();
+    showSuccessNotification('Sesión cerrada exitosamente');
+}
+
+// Verificar autenticación al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+    toggleAuthForms();
+    
+    // Eventos de formulario
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+});
+
 // Generar ID clínico aleatorio
 document.getElementById('clinicId').textContent = Math.floor(1000 + Math.random() * 9000);
 
