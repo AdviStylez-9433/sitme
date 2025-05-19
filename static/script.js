@@ -27,7 +27,7 @@ async function handleLogin(event) {
     loginError.textContent = '';
     
     try {
-        const response = await fetch('https://sitme-api.onrender.com/api/medicos/login', {
+        const response = await fetch('https://sitme-api.onrender.com/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
