@@ -1917,14 +1917,12 @@ footer {
 
 /* User Panel (cuando está logueado) */
 .user-panel {
-    background: var(--primary-light);
-    color: white;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
+    display: none; /* Inicialmente oculto */
     align-items: center;
+    gap: 1rem;
+    background: #f8f9fa;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
 }
 
 .user-info {
@@ -1937,8 +1935,8 @@ footer {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: white;
-    color: var(--primary);
+    background: #3a7bd5;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1946,13 +1944,10 @@ footer {
 }
 
 .logout-btn {
-    background: rgba(255, 255, 255, 0.2);
+    background: none;
     border: none;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 20px;
+    color: #dc3545;
     cursor: pointer;
-    transition: background 0.3s;
 }
 
 .logout-btn:hover {

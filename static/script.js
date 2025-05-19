@@ -2,14 +2,16 @@
 function toggleAuthForms() {
     const loginForm = document.getElementById('loginFormContainer');
     const appContent = document.getElementById('mainAppContent');
+    const userPanel = document.querySelector('.user-panel');
     
-    if (localStorage.getItem('medicoToken')) {
-        loginForm.style.display = 'none';
-        appContent.style.display = 'block';
+    const isLoggedIn = localStorage.getItem('medicoToken') !== null;
+    
+    loginForm.style.display = isLoggedIn ? 'none' : 'block';
+    appContent.style.display = isLoggedIn ? 'block' : 'none';
+    userPanel.style.display = isLoggedIn ? 'flex' : 'none';
+    
+    if (isLoggedIn) {
         loadMedicoData();
-    } else {
-        loginForm.style.display = 'block';
-        appContent.style.display = 'none';
     }
 }
 
@@ -22,6 +24,7 @@ async function handleLogin(event) {
     const loginBtn = document.getElementById('loginBtn');
     const loginError = document.getElementById('loginError');
     
+    // Mostrar estado de carga
     loginBtn.disabled = true;
     loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando sesión...';
     loginError.textContent = '';
@@ -35,49 +38,100 @@ async function handleLogin(event) {
         
         const data = await response.json();
         
-        if (!response.ok) throw new Error(data.error || 'Error en el login');
+        if (!response.ok) {
+            throw new Error(data.error || 'Credenciales incorrectas. Por favor intente nuevamente.');
+        }
         
-        // Guardar token y datos del médico
+        // Guardar datos en localStorage
         localStorage.setItem('medicoToken', data.token);
-        localStorage.setItem('medicoData', JSON.stringify(data.medico));
+        localStorage.setItem('medicoData', JSON.stringify(data.user));
         
+        // Actualizar UI
+        updateMedicoBanner(data.user);
         toggleAuthForms();
-        showSuccessNotification(`Bienvenido, Dr. ${data.medico.nombre}`);
+        showSuccessNotification(`Bienvenido, Dr. ${data.user.nombre.split(' ')[0]}`);
         
     } catch (error) {
         console.error('Login error:', error);
         loginError.textContent = error.message;
+        showErrorNotification('Error al iniciar sesión');
     } finally {
+        // Restaurar botón
         loginBtn.disabled = false;
         loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
     }
+}
+
+// Función para actualizar el panel de usuario
+function updateMedicoBanner(medicoData) {
+    if (!medicoData) return;
+    
+    // Actualizar avatar (iniciales)
+    const avatar = document.getElementById('medicoAvatar');
+    if (avatar) {
+        const initials = medicoData.nombre.split(' ')
+                            .filter(name => name.length > 0)
+                            .map(name => name[0])
+                            .join('')
+                            .toUpperCase();
+        avatar.textContent = initials.slice(0, 2);
+    }
+    
+    // Actualizar información
+    const nombreElement = document.getElementById('medicoNombre');
+    const emailElement = document.getElementById('medicoEmail');
+    
+    if (nombreElement) nombreElement.textContent = `Dr. ${medicoData.nombre}`;
+    if (emailElement) emailElement.textContent = medicoData.email;
 }
 
 // Función para cargar datos del médico
 function loadMedicoData() {
     const medicoData = JSON.parse(localStorage.getItem('medicoData'));
     if (medicoData) {
-        document.getElementById('medicoNombre').textContent = medicoData.nombre;
-        document.getElementById('medicoEmail').textContent = medicoData.email;
+        updateMedicoBanner(medicoData);
     }
 }
 
-// Función para logout
+// Función para cerrar sesión
 function handleLogout() {
     localStorage.removeItem('medicoToken');
     localStorage.removeItem('medicoData');
     toggleAuthForms();
     showSuccessNotification('Sesión cerrada exitosamente');
+    // Opcional: Redirigir a la página de inicio
+    // window.location.href = '/';
 }
 
-// Verificar autenticación al cargar la página
+// Inicialización al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
-    toggleAuthForms();
+    // Configurar event listeners
+    const loginForm = document.getElementById('loginForm');
+    const logoutBtn = document.getElementById('logoutBtn');
     
-    // Eventos de formulario
-    document.getElementById('loginForm').addEventListener('submit', handleLogin);
-    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+    
+    // Verificar estado de autenticación
+    toggleAuthForms();
 });
+
+// Funciones de notificación (ejemplo básico)
+function showSuccessNotification(message) {
+    console.log('Éxito:', message);
+    // Aquí puedes integrar Toastify, SweetAlert, etc.
+    alert(message); // Solo para ejemplo, reemplazar con tu sistema de notificaciones
+}
+
+function showErrorNotification(message) {
+    console.error('Error:', message);
+    alert(message); // Solo para ejemplo, reemplazar con tu sistema de notificaciones
+}
 
 // Generar ID clínico aleatorio
 document.getElementById('clinicId').textContent = Math.floor(1000 + Math.random() * 9000);

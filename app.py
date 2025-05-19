@@ -221,36 +221,53 @@ def token_required(f):
 # Ruta de Login
 @app.route('/api/login', methods=['POST'])
 def login():
-    auth = request.get_json()
-    
-    if not auth or not auth.get('email') or not auth.get('password'):
-        return jsonify({'error': 'Email y contraseña son requeridos'}), 400
+    try:
+        auth = request.get_json()
         
-    medico = Medico.query.filter_by(email=auth['email']).first()
-    
-    if not medico or not medico.check_password(auth['password']):
-        return jsonify({'error': 'Credenciales inválidas'}), 401
+        # Validación más robusta
+        if not auth or not isinstance(auth, dict):
+            return jsonify({'success': False, 'error': 'Datos inválidos'}), 400
+            
+        email = auth.get('email')
+        password = auth.get('password')
         
-    if not medico.activo:
-        return jsonify({'error': 'Cuenta desactivada'}), 403
+        if not email or not password:
+            return jsonify({'success': False, 'error': 'Email y contraseña son requeridos'}), 400
+            
+        medico = Medico.query.filter_by(email=email).first()
         
-    # Actualizar último login
-    medico.ultimo_login = datetime.utcnow()
-    db.session.commit()
-    
-    # Generar token
-    auth_token = medico.generate_auth_token()
-    
-    return jsonify({
-        'message': 'Login exitoso',
-        'token': auth_token,
-        'user': {
-            'id': medico.id,
-            'email': medico.email,
-            'nombre': medico.nombre,
-            'colegiado': medico.colegiado
+        if not medico:
+            return jsonify({'success': False, 'error': 'Credenciales inválidas'}), 401
+            
+        if not medico.check_password(password):
+            return jsonify({'success': False, 'error': 'Credenciales inválidas'}), 401
+            
+        if not medico.activo:
+            return jsonify({'success': False, 'error': 'Cuenta desactivada'}), 403
+            
+        # Actualizar último login
+        medico.ultimo_login = datetime.utcnow()
+        db.session.commit()
+        
+        # Generar token
+        auth_token = medico.generate_auth_token()
+        
+        response = {
+            'success': True,
+            'message': 'Login exitoso',
+            'token': auth_token,
+            'user': {
+                'id': medico.id,
+                'email': medico.email,
+                'nombre': medico.nombre,
+                'colegiado': medico.colegiado,
+                'ultimo_login': medico.ultimo_login.isoformat()
+            }
         }
-    })
+        return jsonify(response), 200
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': 'Error en el servidor'}), 500
 
 # Añade esta nueva ruta al final de app.py, antes del if __name__ == '__main__':
 @app.route('/save_simulation', methods=['POST'])
