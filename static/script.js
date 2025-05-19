@@ -1313,26 +1313,26 @@ document.addEventListener('DOMContentLoaded', function () {
 function showPatientModal(patientData) {
     const modal = document.getElementById('patientModal');
     const modalPatientName = document.getElementById('modalPatientName');
-    
+
     // Establecer nombre del paciente
     modalPatientName.textContent = patientData.full_name || 'Paciente sin nombre';
-    
+
     // Llenar información básica
     fillPersonalInfo(patientData);
     fillMenstrualInfo(patientData);
-    
+
     // Llenar historial médico
     fillMedicalHistory(patientData);
     fillMedicationsInfo(patientData);
-    
+
     // Llenar resultados
     fillExamResults(patientData);
     fillBiomarkersInfo(patientData);
     fillImagingInfo(patientData);
-    
+
     // Mostrar modal
     modal.style.display = 'block';
-    
+
     // Configurar eventos de las pestañas
     setupModalTabs();
 }
@@ -1341,7 +1341,7 @@ function showPatientModal(patientData) {
 function fillPersonalInfo(data) {
     const container = document.getElementById('personalInfo');
     container.innerHTML = '';
-    
+
     const personalData = [
         { label: 'RUT', value: data.id_number, icon: 'fa-id-card' },
         { label: 'Fecha de Nacimiento', value: data.birth_date, icon: 'fa-birthday-cake' },
@@ -1350,7 +1350,7 @@ function fillPersonalInfo(data) {
         { label: 'Previsión', value: data.insurance, icon: 'fa-hospital' },
         { label: 'ID Clínico', value: data.clinic_id, icon: 'fa-clipboard-list' }
     ];
-    
+
     personalData.forEach(item => {
         const itemElement = createModalItem(item.label, item.value, item.icon);
         container.appendChild(itemElement);
@@ -1360,7 +1360,7 @@ function fillPersonalInfo(data) {
 function fillMenstrualInfo(data) {
     const container = document.getElementById('menstrualInfo');
     container.innerHTML = '';
-    
+
     const menstrualData = [
         { label: 'Edad de Menarquia', value: data.menarche_age ? `${data.menarche_age} años` : null, icon: 'fa-calendar' },
         { label: 'Duración del Ciclo', value: data.cycle_length ? `${data.cycle_length} días` : null, icon: 'fa-calendar-week' },
@@ -1369,7 +1369,7 @@ function fillMenstrualInfo(data) {
         { label: 'Dolor Menstrual', value: data.pain_level ? `${data.pain_level}/10` : null, icon: 'fa-pain' },
         { label: 'Dolor Crónico', value: data.pain_chronic, icon: 'fa-head-side-mask', isBoolean: true }
     ];
-    
+
     menstrualData.forEach(item => {
         const itemElement = createModalItem(item.label, item.value, item.icon, item.isBoolean);
         container.appendChild(itemElement);
@@ -1379,7 +1379,7 @@ function fillMenstrualInfo(data) {
 function fillMedicalHistory(data) {
     const container = document.getElementById('medicalHistory');
     container.innerHTML = '';
-    
+
     const medicalData = [
         { label: 'Cirugías Ginecológicas', value: data.gynecological_surgery, icon: 'fa-procedures', isBoolean: true },
         { label: 'Enf. Inflamatoria Pélvica', value: data.pelvic_inflammatory, icon: 'fa-virus', isBoolean: true },
@@ -1391,7 +1391,7 @@ function fillMedicalHistory(data) {
         { label: 'Trastorno Tiroideo', value: data.comorbidity_thyroid, icon: 'fa-butterfly', isBoolean: true },
         { label: 'Síndrome Intestino Irritable', value: data.comorbidity_ibs, icon: 'fa-stomach', isBoolean: true }
     ];
-    
+
     medicalData.forEach(item => {
         const itemElement = createModalItem(item.label, item.value, item.icon, item.isBoolean);
         container.appendChild(itemElement);
@@ -1400,7 +1400,7 @@ function fillMedicalHistory(data) {
 
 function fillMedicationsInfo(data) {
     const container = document.getElementById('medicationsInfo');
-    
+
     if (data.medications) {
         container.innerHTML = `
             <div class="modal-value">
@@ -1415,7 +1415,7 @@ function fillMedicationsInfo(data) {
 function fillExamResults(data) {
     const container = document.getElementById('examResults');
     container.innerHTML = '';
-    
+
     const examData = [
         { label: 'Estatura', value: data.height ? `${data.height} cm` : null, icon: 'fa-ruler-vertical' },
         { label: 'Peso', value: data.weight ? `${data.weight} kg` : null, icon: 'fa-weight' },
@@ -1424,7 +1424,7 @@ function fillExamResults(data) {
         { label: 'Examen Vaginal', value: data.vaginal_exam, icon: 'fa-female' },
         { label: 'Notas Clínicas', value: data.clinical_notes, icon: 'fa-notes-medical' }
     ];
-    
+
     examData.forEach(item => {
         const itemElement = createModalItem(item.label, item.value, item.icon);
         container.appendChild(itemElement);
@@ -1434,7 +1434,7 @@ function fillExamResults(data) {
 function fillBiomarkersInfo(data) {
     const container = document.getElementById('biomarkersInfo');
     container.innerHTML = '';
-    
+
     const biomarkersData = [
         { label: 'CA-125', value: data.ca125 ? `${data.ca125} U/mL` : null, icon: 'fa-flask' },
         { label: 'IL-6', value: data.il6 ? `${data.il6} pg/mL` : null, icon: 'fa-flask' },
@@ -1443,7 +1443,7 @@ function fillBiomarkersInfo(data) {
         { label: 'AMH', value: data.amh ? `${data.amh} ng/mL` : null, icon: 'fa-flask' },
         { label: 'PCR', value: data.crp ? `${data.crp} mg/L` : null, icon: 'fa-flask' }
     ];
-    
+
     biomarkersData.forEach(item => {
         const itemElement = createModalItem(item.label, item.value, item.icon);
         container.appendChild(itemElement);
@@ -1452,16 +1452,16 @@ function fillBiomarkersInfo(data) {
 
 function fillImagingInfo(data) {
     const container = document.getElementById('imagingInfo');
-    
+
     let content = '';
     if (data.imaging) {
         content += `<div class="modal-value"><strong>Resultado:</strong> ${data.imaging}</div>`;
     }
-    
+
     if (data.imaging_details) {
         content += `<div class="modal-value" style="margin-top: 10px;">${data.imaging_details.replace(/\n/g, '<br>')}</div>`;
     }
-    
+
     if (content) {
         container.innerHTML = content;
     } else {
@@ -1473,7 +1473,7 @@ function fillImagingInfo(data) {
 function createModalItem(label, value, icon, isBoolean = false) {
     const item = document.createElement('div');
     item.className = 'modal-item';
-    
+
     if (isBoolean) {
         const booleanValue = value ? 'Sí' : 'No';
         const booleanClass = value ? 'boolean-true' : 'boolean-false';
@@ -1498,7 +1498,7 @@ function createModalItem(label, value, icon, isBoolean = false) {
             </div>
         `;
     }
-    
+
     return item;
 }
 
@@ -1506,15 +1506,15 @@ function createModalItem(label, value, icon, isBoolean = false) {
 function setupModalTabs() {
     const tabButtons = document.querySelectorAll('.modal-tab-btn');
     const tabContents = document.querySelectorAll('.modal-tab-content');
-    
+
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
             const tabId = button.getAttribute('data-tab');
-            
+
             // Remover clase active de todos los botones y contenidos
             tabButtons.forEach(btn => btn.classList.remove('active'));
             tabContents.forEach(content => content.classList.remove('active'));
-            
+
             // Agregar clase active al botón y contenido seleccionado
             button.classList.add('active');
             document.getElementById(tabId).classList.add('active');
@@ -1527,80 +1527,384 @@ function setupModalEvents() {
     const modal = document.getElementById('patientModal');
     const closeModal = document.querySelector('.close-modal');
     const closeBtn = document.querySelector('.modal-btn.close-btn');
-    
+
     // Cerrar modal al hacer clic en la X
     closeModal.addEventListener('click', () => {
         modal.style.display = 'none';
     });
-    
+
     // Cerrar modal al hacer clic en el botón Cerrar
     closeBtn.addEventListener('click', () => {
         modal.style.display = 'none';
     });
-    
+
     // Cerrar modal al hacer clic fuera del contenido
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.style.display = 'none';
         }
     });
+
+    // Función mejorada para generar PDF desde el modal
+document.querySelector('.modal-btn.print-btn').addEventListener('click', async () => {
+    const modal = document.getElementById('patientModal');
+    const printBtn = document.querySelector('.modal-btn.print-btn');
     
-    // Configurar botón de imprimir
-    document.querySelector('.modal-btn.print-btn').addEventListener('click', () => {
-        window.print();
-    });
+    // Guardar el contenido original del botón
+    const originalContent = printBtn.innerHTML;
+    
+    // Estado de carga
+    printBtn.disabled = true;
+    printBtn.innerHTML = `
+        <div class="spinner-container">
+            <div class="loading-spinner"></div>
+            <span>Generando PDF...</span>
+        </div>
+    `;
+    
+    try {
+        // Obtener todos los datos del modal
+        const patientData = gatherModalData();
+        
+        // Solicitud de generación del PDF
+        const response = await fetch('https://sitme-api.onrender.com/generate_patient_report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(patientData)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        
+        const blob = await response.blob();
+        
+        // Generar nombre de archivo
+        const today = new Date().toLocaleDateString('es-CL', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        }).replace(/\//g, '-');
+        
+        const patientName = patientData.personal.full_name
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '_')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9_]/g, '');
+        
+        const fileName = `informe_${patientName}_${today}.pdf`;
+        
+        // Descarga del archivo
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        
+        // Limpieza
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 100);
+        
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        showError(`Error al generar el PDF: ${error.message}`);
+    } finally {
+        // Restaurar estado normal del botón
+        printBtn.disabled = false;
+        printBtn.innerHTML = originalContent;
+    }
+});
+
+    // Función para recolectar todos los datos del modal
+    function gatherModalData() {
+        const modal = document.getElementById('patientModal');
+
+        // Obtener datos básicos
+        const patientName = document.getElementById('modalPatientName').textContent;
+        const clinicId = document.querySelector('.modal-item:nth-child(6) .modal-value').textContent.trim();
+
+        // Obtener datos de cada sección
+        const personalInfo = extractPersonalInfo();
+        const menstrualInfo = extractMenstrualInfo();
+        const medicalHistory = extractMedicalHistory();
+        const medications = extractMedications();
+        const examResults = extractExamResults();
+        const biomarkers = extractBiomarkers();
+        const imagingInfo = extractImagingInfo();
+
+        return {
+            personal: {
+                full_name: patientName,
+                clinic_id: clinicId,
+                ...personalInfo
+            },
+            menstrual: menstrualInfo,
+            history: medicalHistory,
+            medications: medications,
+            examination: examResults,
+            biomarkers: biomarkers,
+            imaging: imagingInfo
+        };
+    }
+
+    // Funciones auxiliares para extraer datos de cada sección
+    function extractPersonalInfo() {
+        const items = document.querySelectorAll('#personalInfo .modal-item');
+        const data = {};
+
+        items.forEach(item => {
+            const label = item.querySelector('.modal-label span').textContent;
+            const value = item.querySelector('.modal-value').textContent.replace('No registrado', '').trim();
+
+            switch (label) {
+                case 'RUT':
+                    data.id_number = value;
+                    break;
+                case 'Fecha de Nacimiento':
+                    data.birth_date = value;
+                    break;
+                case 'Edad':
+                    data.age = parseInt(value) || null;
+                    break;
+                case 'Tipo de Sangre':
+                    data.blood_type = value;
+                    break;
+                case 'Previsión':
+                    data.insurance = value;
+                    break;
+            }
+        });
+
+        return data;
+    }
+
+    function extractMenstrualInfo() {
+        const items = document.querySelectorAll('#menstrualInfo .modal-item');
+        const data = {};
+
+        items.forEach(item => {
+            const label = item.querySelector('.modal-label span').textContent;
+            let value = item.querySelector('.modal-value, .boolean-value').textContent;
+            value = value.replace('No registrado', '').trim();
+
+            if (item.querySelector('.boolean-value')) {
+                value = value === 'Sí';
+            }
+
+            switch (label) {
+                case 'Edad de Menarquia':
+                    data.menarche_age = parseInt(value) || null;
+                    break;
+                case 'Duración del Ciclo':
+                    data.cycle_length = parseInt(value) || null;
+                    break;
+                case 'Duración del Período':
+                    data.period_duration = parseInt(value) || null;
+                    break;
+                case 'Última Menstruación':
+                    data.last_period = value;
+                    break;
+                case 'Dolor Menstrual':
+                    data.pain_level = parseInt(value) || null;
+                    break;
+                case 'Dolor Crónico':
+                    data.pain_chronic = value;
+                    break;
+            }
+        });
+
+        return data;
+    }
+
+    function extractMedicalHistory() {
+        const items = document.querySelectorAll('#medicalHistory .modal-item');
+        const data = {};
+
+        items.forEach(item => {
+            const label = item.querySelector('.modal-label span').textContent;
+            const value = item.querySelector('.boolean-value').textContent === 'Sí';
+
+            switch (label) {
+                case 'Cirugías Ginecológicas':
+                    data.gynecological_surgery = value;
+                    break;
+                case 'Enf. Inflamatoria Pélvica':
+                    data.pelvic_inflammatory = value;
+                    break;
+                case 'Quistes Ováricos':
+                    data.ovarian_cysts = value;
+                    break;
+                case 'Endometriosis Familiar':
+                    data.family_endometriosis = value;
+                    break;
+                case 'Enf. Autoinmunes Familiar':
+                    data.family_autoimmune = value;
+                    break;
+                case 'Cáncer Familiar':
+                    data.family_cancer = value;
+                    break;
+                case 'Enf. Autoinmune':
+                    data.comorbidity_autoimmune = value;
+                    break;
+                case 'Trastorno Tiroideo':
+                    data.comorbidity_thyroid = value;
+                    break;
+                case 'Síndrome Intestino Irritable':
+                    data.comorbidity_ibs = value;
+                    break;
+            }
+        });
+
+        return data;
+    }
+
+    function extractMedications() {
+        const container = document.getElementById('medicationsInfo');
+        return container.querySelector('.modal-value').textContent.replace('No se registraron medicamentos', '').trim();
+    }
+
+    function extractExamResults() {
+        const items = document.querySelectorAll('#examResults .modal-item');
+        const data = {};
+
+        items.forEach(item => {
+            const label = item.querySelector('.modal-label span').textContent;
+            let value = item.querySelector('.modal-value').textContent;
+            value = value.replace('No registrado', '').trim();
+
+            switch (label) {
+                case 'Estatura':
+                    data.height = parseFloat(value) || null;
+                    break;
+                case 'Peso':
+                    data.weight = parseFloat(value) || null;
+                    break;
+                case 'IMC':
+                    data.bmi = parseFloat(value) || null;
+                    break;
+                case 'Examen Pélvico':
+                    data.pelvic_exam = value;
+                    break;
+                case 'Examen Vaginal':
+                    data.vaginal_exam = value;
+                    break;
+                case 'Notas Clínicas':
+                    data.clinical_notes = value;
+                    break;
+            }
+        });
+
+        return data;
+    }
+
+    function extractBiomarkers() {
+        const items = document.querySelectorAll('#biomarkersInfo .modal-item');
+        const data = {};
+
+        items.forEach(item => {
+            const label = item.querySelector('.modal-label span').textContent;
+            let value = item.querySelector('.modal-value').textContent;
+            value = value.replace('No registrado', '').trim();
+
+            if (value) {
+                const numValue = parseFloat(value);
+                if (!isNaN(numValue)) {
+                    switch (label) {
+                        case 'CA-125':
+                            data.ca125 = numValue;
+                            break;
+                        case 'IL-6':
+                            data.il6 = numValue;
+                            break;
+                        case 'TNF-α':
+                            data.tnf_alpha = numValue;
+                            break;
+                        case 'VEGF':
+                            data.vegf = numValue;
+                            break;
+                        case 'AMH':
+                            data.amh = numValue;
+                            break;
+                        case 'PCR':
+                            data.crp = numValue;
+                            break;
+                    }
+                }
+            }
+        });
+
+        return data;
+    }
+
+    function extractImagingInfo() {
+        const container = document.getElementById('imagingInfo');
+        const result = container.querySelector('strong') ?
+            container.querySelector('strong').nextSibling.textContent.trim() : '';
+        const details = container.querySelector('.modal-value:not(:has(strong))') ?
+            container.querySelector('.modal-value:not(:has(strong))').textContent.trim() : '';
+
+        return {
+            imaging: result || 'No registrado',
+            imaging_details: details || 'No se registraron detalles'
+        };
+    }
 }
 
 // Manejo del consentimiento informado
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const consentModal = document.getElementById('consentModal');
     const consentCheckbox = document.getElementById('consentCheckbox');
     const consentAcceptBtn = document.getElementById('consentAcceptBtn');
-    
+
     // Versión actual del sistema (cambiar esto cuando haya actualizaciones importantes)
     const CURRENT_SYSTEM_VERSION = '2.1';
-    
+
     // Habilitar botón cuando se marca el checkbox
-    consentCheckbox.addEventListener('change', function() {
+    consentCheckbox.addEventListener('change', function () {
         consentAcceptBtn.disabled = !this.checked;
     });
-    
+
     // Cerrar modal al aceptar
-    consentAcceptBtn.addEventListener('click', function() {
+    consentAcceptBtn.addEventListener('click', function () {
         consentModal.style.display = 'none';
         // Guardar en localStorage que el consentimiento fue aceptado
         localStorage.setItem('consentAccepted', 'true');
         localStorage.setItem('consentDate', new Date().toISOString());
         localStorage.setItem('acceptedVersion', CURRENT_SYSTEM_VERSION);
     });
-    
+
     // Verificar si debe mostrarse el modal
     function shouldShowConsentModal() {
         // 1. Si nunca ha aceptado, mostrar
         if (localStorage.getItem('consentAccepted') !== 'true') {
             return true;
         }
-        
+
         // 2. Verificar expiración (6 meses)
         const consentDate = localStorage.getItem('consentDate');
         if (consentDate) {
             const sixMonthsAgo = new Date();
             sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-            
+
             if (new Date(consentDate) < sixMonthsAgo) {
                 return true;
             }
         }
-        
+
         // 3. Verificar si la versión aceptada es diferente a la actual
         const acceptedVersion = localStorage.getItem('acceptedVersion');
         if (acceptedVersion !== CURRENT_SYSTEM_VERSION) {
             return true;
         }
-        
+
         return false;
     }
-    
+
     // Mostrar modal si es necesario
     if (shouldShowConsentModal()) {
         consentModal.style.display = 'block';
