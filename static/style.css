@@ -1475,12 +1475,12 @@ footer {
 }
 
 .view-btn {
-  background-color: #143f6a;
+  background-color: var(--success);
   color: white;
 }
 
 .delete-btn {
-  background-color: #dc3545;
+  background-color: var(--danger);
   color: white;
 }
 

@@ -971,18 +971,30 @@ function deleteRecord(recordId) {
     }
 }
 
-// Evento para el botón de búsqueda
-document.getElementById('searchHistoryBtn').addEventListener('click', function () {
-    const searchTerm = document.getElementById('historySearch').value;
-    loadHistoryData(searchTerm);
-});
+// Eventos de búsqueda mejorados
+function setupSearchEvents() {
+    const performSearch = () => {
+        const searchInput = document.getElementById('historySearch');
+        const searchTerm = searchInput ? searchInput.value.trim() : '';
+        loadHistoryData(searchTerm);
+    };
 
-// Evento para buscar al presionar Enter
-document.getElementById('historySearch').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') {
-        loadHistoryData(this.value);
+    // Botón de búsqueda
+    const searchBtn = document.getElementById('searchHistoryBtn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', performSearch);
     }
-});
+
+    // Buscar al presionar Enter
+    const searchInput = document.getElementById('historySearch');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    }
+}
 
 // Cargar datos cuando se muestra la pestaña
 document.addEventListener('DOMContentLoaded', function () {
