@@ -3,12 +3,15 @@ function toggleAuthForms() {
     const loginForm = document.getElementById('loginFormContainer');
     const appContent = document.getElementById('mainAppContent');
     const userPanel = document.querySelector('.user-panel');
+    const logo = document.querySelector('.login-logo');
+
     
     const isLoggedIn = localStorage.getItem('medicoToken') !== null;
     
     loginForm.style.display = isLoggedIn ? 'none' : 'block';
     appContent.style.display = isLoggedIn ? 'block' : 'none';
     userPanel.style.display = isLoggedIn ? 'flex' : 'none';
+    logo.style.display = isLoggedIn ? 'none' : 'block';
     
     if (isLoggedIn) {
         loadMedicoData();
@@ -49,8 +52,8 @@ async function handleLogin(event) {
         // Actualizar UI
         updateMedicoBanner(data.user);
         toggleAuthForms();
-        showSuccessNotification(`Bienvenido, Dr. ${data.user.nombre.split(' ')[0]}`);
-        
+        showSuccessNotification(`Bienvenido, ${data.user.nombre.split(' ')[0]}`);
+
     } catch (error) {
         console.error('Login error:', error);
         loginError.textContent = error.message;
@@ -81,7 +84,7 @@ function updateMedicoBanner(medicoData) {
     const nombreElement = document.getElementById('medicoNombre');
     const emailElement = document.getElementById('medicoEmail');
     
-    if (nombreElement) nombreElement.textContent = `Dr. ${medicoData.nombre}`;
+    if (nombreElement) nombreElement.textContent = `${medicoData.nombre}`;
     if (emailElement) emailElement.textContent = medicoData.email;
 }
 
@@ -132,6 +135,30 @@ function showErrorNotification(message) {
     console.error('Error:', message);
     alert(message); // Solo para ejemplo, reemplazar con tu sistema de notificaciones
 }
+
+// JavaScript para manejar el menú desplegable
+document.addEventListener('DOMContentLoaded', function() {
+    const userMenuTrigger = document.getElementById('userMenuTrigger');
+    const userMenu = document.getElementById('userMenu');
+    
+    // Alternar menú al hacer clic
+    userMenuTrigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userMenu.classList.toggle('active');
+        userMenuTrigger.classList.toggle('active');
+    });
+    
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', function() {
+        userMenu.classList.remove('active');
+        userMenuTrigger.classList.remove('active');
+    });
+    
+    // Evitar que el menú se cierre al hacer clic en él
+    userMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+});
 
 // Generar ID clínico aleatorio
 document.getElementById('clinicId').textContent = Math.floor(1000 + Math.random() * 9000);

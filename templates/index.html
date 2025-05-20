@@ -52,16 +52,20 @@
     <div id="mainAppContent" style="display: none;">
         <!-- User Panel -->
         <div class="user-panel">
-            <div class="user-info">
+            <div class="user-info" id="userMenuTrigger">
                 <div class="user-avatar" id="medicoAvatar">M</div>
                 <div class="user-details">
                     <div id="medicoNombre" class="user-name">Dr. Nombre Apellido</div>
                     <small id="medicoEmail" class="user-email">email@ejemplo.com</small>
                 </div>
+                <i class="fas fa-chevron-down dropdown-icon"></i>
             </div>
-            <button id="logoutBtn" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Salir
-            </button>
+
+            <div class="user-menu" id="userMenu">
+                <ul>
+                    <li><button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button></li>
+                </ul>
+            </div>
         </div>
         <div class="container">
             <header>

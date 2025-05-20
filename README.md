@@ -8,6 +8,7 @@ SITME es una aplicación web fullstack construida con **Python (Flask)** en el b
 
 - 🐍 **Python** + **Flask** — API REST y lógica del backend
 - 🖼️ **HTML/CSS/JavaScript** — Interfaz de usuario (frontend)
+- 🔒 **JWT Token / Bcrypt** - Login con encriptado de contraseñas y tokens
 - 🛢️ **PostgreSQL** — Base de datos relacional (hospedada en Render)
 - 🔄 **UptimeRobot** — Mantiene el servicio activo en Render Free Tier
 - 🧪 **Dataset sintético** — Generación de registros clínicos artificiales
@@ -19,6 +20,8 @@ SITME es una aplicación web fullstack construida con **Python (Flask)** en el b
 | Método | Ruta                             | Descripción                                       |
 |--------|----------------------------------|---------------------------------------------------|
 | GET    | `/`                              | Devuelve la interfaz web principal (`index.html`) |
+| POST   | `/api/login`                     | Permite el inicio de sesion                       |
+| POST   | `/api/logout`                    | Permite el cierre de sesion                       |
 | POST   | `/predict`                       | Realiza una predicción con los datos entregados   |
 | POST   | `/generate_clinical_record`      | Genera un nuevo registro clínico sintético        |
 | POST   | `/save_simulation`               | Guarda una simulación médica en la base de datos  |
@@ -32,6 +35,7 @@ SITME es una aplicación web fullstack construida con **Python (Flask)** en el b
 
 - ✅ Backend funcional
 - ✅ Frontend operativo
+- ✅ Login con tokens validados
 - ✅ Conexión a PostgreSQL en Render
 - ✅ Endpoints implementados
 - ✅ Monitoreo con UptimeRobot
