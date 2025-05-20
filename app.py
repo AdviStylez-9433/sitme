@@ -586,7 +586,6 @@ metrics_thread = threading.Thread(target=generate_performance_metrics, daemon=Tr
 metrics_thread.start()
 
 @app.route('/')
-@token_required
 def home():
     return render_template('index.html')
 
