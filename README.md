@@ -1,17 +1,33 @@
-# 🧠 SITME — Sistema Integral de Tamizaje para Endometriosis
+# 🧠 SITME — Sistema Integral de Tamizaje MuLtimodal para Endometriosis
 
 SITME es una aplicación web fullstack construida con **Python (Flask)** en el backend y **HTML/CSS/JS** en el frontend. Utiliza un **dataset sintético** y una base de datos **PostgreSQL** alojada en Render para almacenar y gestionar registros clínicos simulados. Se mantiene activa gracias a **Uptime Robot**.
 
 ---
 
-## 🚀 Tecnologías utilizadas
+## 🛠️ Tecnologías Utilizadas
 
-- 🐍 **Python** + **Flask** — API REST y lógica del backend
-- 🖼️ **HTML/CSS/JavaScript** — Interfaz de usuario (frontend)
-- 🔒 **JWT Token / Bcrypt** - Login con encriptado de contraseñas y tokens
-- 🛢️ **PostgreSQL** — Base de datos relacional (hospedada en Render)
-- 🔄 **UptimeRobot** — Mantiene el servicio activo en Render Free Tier
-- 🧪 **Dataset sintético** — Generación de registros clínicos artificiales
+- 🐍 **Python + Flask** — API REST y lógica del backend  
+  ![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python) 
+  ![Flask](https://img.shields.io/badge/Flask-2.0%2B-lightgrey?logo=flask)
+
+- 🖼️ **HTML/CSS/JavaScript** — Interfaz de usuario  
+  ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5) 
+  ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3) 
+  ![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow?logo=javascript)
+
+- 🔒 **JWT Token / Bcrypt** — Login con encriptado  
+  ![JWT](https://img.shields.io/badge/JWT-Auth-orange?logo=jsonwebtokens) 
+  ![Bcrypt](https://img.shields.io/badge/Bcrypt-Password_Hashing-blueviolet)
+
+- 🛢️ **PostgreSQL** — Base de datos relacional (hospedada en Render)  
+  ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B-blue?logo=postgresql) 
+  ![Render](https://img.shields.io/badge/Hosted_on-Render-46d3ff?logo=render)
+
+- 🔄 **UptimeRobot** — Monitoreo del servicio  
+  ![UptimeRobot](https://img.shields.io/badge/Monitored_by-UptimeRobot-green)
+
+- 🧪 **Dataset sintético** — Generación de registros clínicos  
+  ![SyntheticData](https://img.shields.io/badge/Data-Synthetic_Clinical-orange)
 
 ---
 
