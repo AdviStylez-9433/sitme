@@ -15,27 +15,37 @@
 
 <body>
     <!-- Login Form -->
-    <div id="loginFormContainer">
-        <h2 class="login-title">Acceso Médico</h2>
-        <p>Ingrese sus credenciales para acceder al sistema</p>
-
-        <form id="loginForm" class="login-form">
-            <div class="form-group">
-                <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" required>
+    <div class="auth-container">
+        <img src="/static/assets/logo.png" alt="Logo" class="login-logo">
+        <div id="loginFormContainer" class="login-container">
+            <div class="login-header">
+                <h2 class="login-title">Acceso Médico</h2>
+                <p class="login-subtitle">Ingrese sus credenciales para acceder al sistema</p>
             </div>
 
-            <div class="form-group">
-                <label for="loginPassword">Contraseña</label>
-                <input type="password" id="loginPassword" required>
-            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="loginEmail" class="input-label">
+                        <i class="fas fa-envelope icon"></i> Correo Electrónico
+                    </label>
+                    <input type="email" id="loginEmail" class="form-input" placeholder="tucorreo@ejemplo.com" required>
+                </div>
 
-            <div id="loginError"></div>
+                <div class="form-group">
+                    <label for="loginPassword" class="input-label">
+                        <i class="fas fa-lock icon"></i> Contraseña
+                    </label>
+                    <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required>
+                    <a href="#" class="forgot-password">¿Olvidó su contraseña?</a>
+                </div>
 
-            <button type="submit" id="loginBtn" class="btn-primary">
-                <i class="fas fa-sign-in-alt"></i> Iniciar sesión
-            </button>
-        </form>
+                <div id="loginError" class="error-message"></div>
+
+                <button type="submit" id="loginBtn" class="btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar sesión
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- Main App (oculto inicialmente) -->
@@ -44,9 +54,9 @@
         <div class="user-panel">
             <div class="user-info">
                 <div class="user-avatar" id="medicoAvatar">M</div>
-                <div>
-                    <div id="medicoNombre">Dr. Nombre Apellido</div>
-                    <small id="medicoEmail">email@ejemplo.com</small>
+                <div class="user-details">
+                    <div id="medicoNombre" class="user-name">Dr. Nombre Apellido</div>
+                    <small id="medicoEmail" class="user-email">email@ejemplo.com</small>
                 </div>
             </div>
             <button id="logoutBtn" class="logout-btn">
