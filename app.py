@@ -271,6 +271,7 @@ def login():
 
 # Añade esta nueva ruta al final de app.py, antes del if __name__ == '__main__':
 @app.route('/save_simulation', methods=['POST'])
+@token_required
 def save_simulation():
     try:
         data = request.get_json()
@@ -417,6 +418,7 @@ def save_simulation():
             
 # Añade esta ruta al app.py, antes del if __name__ == '__main__':
 @app.route('/get_history', methods=['GET'])
+@token_required
 def get_history():
     try:
         conn = get_db_connection()
@@ -454,6 +456,7 @@ def get_history():
             
 # Añade esta ruta al app.py
 @app.route('/delete_record/<int:record_id>', methods=['DELETE'])
+@token_required
 def delete_record(record_id):
     try:
         conn = get_db_connection()
@@ -478,6 +481,7 @@ def delete_record(record_id):
             conn.close()
             
 @app.route('/get_record_details/<int:record_id>')
+@token_required
 def get_record_details(record_id):
     try:
         conn = get_db_connection()
@@ -582,10 +586,12 @@ metrics_thread = threading.Thread(target=generate_performance_metrics, daemon=Tr
 metrics_thread.start()
 
 @app.route('/')
+@token_required
 def home():
     return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
+@token_required
 def predict():
     global REQUEST_COUNTER
     REQUEST_COUNTER += 1
@@ -723,6 +729,7 @@ def generate_explanation(input_data, probability):
     }
 
 @app.route('/generate_clinical_record', methods=['POST'])
+@token_required
 def generate_clinical_record():
     try:
         data = request.get_json()
