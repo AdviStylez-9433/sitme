@@ -22,17 +22,6 @@
   --border: #e0e0e0;
   --background: #f9f6fc;
   --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  /* payment */
-  --primary-payment: #2C3E50;
-  --secondary-payment: #3498DB;
-  --background-payment: #F5F7FA;
-  --card-bg: #FFFFFF;
-  --text: #333333;
-  --text-light: #7F8C8D;
-  --success-payment: #27AE60;
-  --error-payment: #E74C3C;
-  --border-radius: 12px;
-  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* Reset y estilos base */
@@ -50,12 +39,13 @@ body {
   font-size: 16px;
 }
 
-/* Layout principal */
 .container {
-  max-width: 1200px;
+  width: 90%;
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px;
 }
+
 
 /* Header */
 header {
