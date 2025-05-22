@@ -934,6 +934,15 @@
             </div>
         </div>
     </div>
+    <div class="container">
+        <h1>Pagar Trámite</h1>
+        <form id="payment-form">
+            <div id="card-element"><!-- Stripe injects the card input here --></div>
+            <button id="submit-button" class="btn">Pagar $10.00</button>
+            <div id="payment-message" class="hidden"></div>
+        </form>
+    </div>
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="../static/script.js"></script>

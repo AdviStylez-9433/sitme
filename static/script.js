@@ -2062,3 +2062,41 @@ document.addEventListener('DOMContentLoaded', function () {
         consentModal.style.display = 'none';
     }
 });
+
+const stripe = Stripe('pk_test_51RROVVIYicAujV2irbeGKCetZ3hdLU6bo60sRvcqNACE7doxLTpVB0gCJyHPGp6Ng0pGEo2AFSpuw7AXqqqAu3u200woHFwtE2');  // Reemplázala
+
+const form = document.getElementById('payment-form');
+const paymentMessage = document.getElementById('payment-message');
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // 1. Crear PaymentIntent en el backend
+    const response = await fetch('/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 1000 })  // $10.00 en centavos
+    });
+    const { clientSecret } = await response.json();
+    
+    // 2. Confirmar el pago con Stripe
+    const { error } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+            card: elements.getElement('card'),
+        }
+    });
+    
+    if (error) {
+        paymentMessage.textContent = error.message;
+        paymentMessage.classList.remove('hidden');
+    } else {
+        paymentMessage.textContent = "¡Pago exitoso!";
+        paymentMessage.classList.remove('hidden');
+        form.reset();
+    }
+});
+
+// 3. Mostrar formulario de tarjeta
+const elements = stripe.elements();
+const card = elements.create('card');
+card.mount('#card-element');
