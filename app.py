@@ -43,8 +43,6 @@ DATABASE_URL = "postgresql://postgres.vsivmttzpipxffpywdfg:lbejTpKfjUu6Xrbl@aws-
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-stripe.api_key = "sk_test_51RROVVIYicAujV2iMDsfJH8iTY3hOdzjlcGQk34NV1JtAYbFFtZLNkId4tyho5zUwsii57bwJ9flJPsmv0lmVN6P00z9ptn7jX"  # Reemplázala
-
 # Inicializar SQLAlchemy
 db = SQLAlchemy(app)
 
@@ -271,25 +269,6 @@ def login():
         
     except Exception as e:
         return jsonify({'success': False, 'error': 'Error en el servidor'}), 500
-
-# Ruta para pagar
-@app.route('/create-payment-intent', methods=['POST'])
-def create_payment():
-    try:
-        data = request.json
-        amount = data['amount']  # Monto en centavos (ej: $10.00 = 1000)
-        
-        payment_intent = stripe.PaymentIntent.create(
-            amount=amount,
-            currency='usd',  # o 'mxn' para pesos mexicanos
-            description="Pago por trámite en Sitme"
-        )
-        
-        return jsonify({
-            'clientSecret': payment_intent.client_secret
-        })
-    except Exception as e:
-        return jsonify(error=str(e)), 403
     
 # Añade esta nueva ruta al final de app.py, antes del if __name__ == '__main__':
 @app.route('/save_simulation', methods=['POST'])

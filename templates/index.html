@@ -63,7 +63,8 @@
 
             <div class="user-menu" id="userMenu">
                 <ul>
-                    <li><button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button></li>
+                    <li><button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar
+                            sesión</button></li>
                 </ul>
             </div>
         </div>
@@ -586,6 +587,20 @@
                                         </div>
 
                                         <div class="form-group">
+                                            <label>Subir Examenes</label>
+                                            <div class="file-upload-container">
+                                                <input type="file" id="fileUpload" accept=".jpg,.jpeg,.png,.pdf"
+                                                    multiple class="file-input">
+                                                <label for="fileUpload" class="file-upload-label">
+                                                    <i class="fas fa-cloud-upload-alt"></i> Arrastra archivos o haz clic
+                                                    aquí
+                                                </label>
+                                                <div id="filePreviews" class="file-previews"></div>
+                                            </div>
+                                            <small class="file-hint">Máximo 5 archivos (2MB cada uno)</small>
+                                        </div>
+
+                                        <div class="form-group">
                                             <label for="imaging_details">Detalles de estudios por imágenes</label>
                                             <textarea id="imaging_details" name="imaging_details" rows="3"
                                                 placeholder="Descripción de ecografía, resonancia u otros estudios"></textarea>
@@ -934,15 +949,6 @@
             </div>
         </div>
     </div>
-    <div class="container-payment">
-        <h1>Pagar Trámite</h1>
-        <form id="payment-form">
-            <div id="card-element"><!-- Stripe injects the card input here --></div>
-            <button id="submit-button" class="btn">Pagar $9.784</button>
-            <div id="payment-message" class="hidden"></div>
-        </form>
-    </div>
-    <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="../static/script.js"></script>
