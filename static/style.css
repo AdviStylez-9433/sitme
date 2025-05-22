@@ -1054,7 +1054,7 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 6px rgba(255, 160, 0, 0.2);
+  box-shadow: 0 3px 6px rgba(25, 118, 210, 0.2);
   position: relative;
   overflow: hidden;
   z-index: 1;
