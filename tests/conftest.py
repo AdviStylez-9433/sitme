@@ -23,8 +23,10 @@ def client(test_app):
 
 @pytest.fixture
 def auth_headers(client):
-    """Headers de autenticación para pruebas"""
-    # Crear usuario de prueba
+    # Limpia antes para evitar duplicados
+    db.session.query(Medico).delete()
+    db.session.commit()
+
     test_medico = Medico(
         email="test@example.com",
         password_hash=generate_password_hash("testpassword"),
@@ -35,7 +37,6 @@ def auth_headers(client):
     db.session.add(test_medico)
     db.session.commit()
     
-    # Obtener token
     response = client.post('/api/login', json={
         'email': 'test@example.com',
         'password': 'testpassword'
