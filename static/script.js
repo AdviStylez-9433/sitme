@@ -2185,11 +2185,6 @@ function setupModalEvents() {
             modal.style.display = 'none';
         }
     });
-
-    // Configurar botón de imprimir
-    document.querySelector('.modal-btn.print-btn').addEventListener('click', () => {
-        window.print();
-    });
 }
 
 // Manejo del consentimiento informado
