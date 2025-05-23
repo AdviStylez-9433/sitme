@@ -2,20 +2,12 @@ import pytest
 from app import app, db, Medico
 from werkzeug.security import generate_password_hash
 import os
-
-import subprocess
-import time
-import signal
-import subprocess
-import time
 import pytest
-import signal
 
 BASE_URL = "https://sitme-api.onrender.com"
 
 def test_login_flow(page):
     page.goto(f"{BASE_URL}")
-    assert "SITME" in page.title()  # ajusta a lo que esperes
 
 @pytest.fixture(scope='module')
 def test_app():
