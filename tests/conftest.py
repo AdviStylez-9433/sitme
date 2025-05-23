@@ -5,14 +5,14 @@ import os
 
 @pytest.fixture(scope='module')
 def test_app():
-    """Configuración de la aplicación para pruebas"""
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('TEST_DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/test_db')
     app.config['SECRET_KEY'] = 'test-secret-key'
-    
+
     with app.app_context():
         db.create_all()
         yield app
+        db.session.remove()   # Cerrar la sesión activa
         db.drop_all()
 
 @pytest.fixture
