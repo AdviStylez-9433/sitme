@@ -676,7 +676,7 @@ def predict():
         }), 500
 
 def prepare_input_data(raw_data):
-    """Prepara y valida los datos de entrada"""
+    """Prepara y valida los datos de entrada con todas las variables"""
     default_values = {
         'age': 25,
         'bmi': 23.5,
@@ -690,7 +690,24 @@ def prepare_input_data(raw_data):
         'dyspareunia': 0,
         'chronic_pelvic_pain': 0,
         'infertility': 0,
-        'family_history': 0
+        'family_history': 0,
+        'pain_during_sex': 0,
+        'bowel_symptoms': 0,
+        'urinary_symptoms': 0,
+        'fatigue': 0,
+        'gynecological_surgery': 0,
+        'pelvic_inflammatory': 0,
+        'ovarian_cysts': 0,
+        'family_endometriosis': 0,
+        'family_autoimmune': 0,
+        'family_cancer': 0,
+        'comorbidity_autoimmune': 0,
+        'comorbidity_thyroid': 0,
+        'comorbidity_ibs': 0,
+        'pain_premenstrual': 0,
+        'pain_menstrual': 0,
+        'pain_ovulation': 0,
+        'pain_chronic': 0
     }
     
     # Aplicar valores por defecto y validar tipos

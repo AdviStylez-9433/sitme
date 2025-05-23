@@ -37,8 +37,8 @@ def improved_generate_endometriosis_dataset(n_samples=20000):
     ca125 = np.round(ca125, 1)
     
     crp = np.round(np.clip(np.random.exponential(2.5, n_samples) + 
-                        np.random.normal(0, 0.5, n_samples), 
-                        0.3, 10), 2)
+                 np.random.normal(0, 0.5, n_samples), 
+                 0.3, 10), 2)
     
     # 5. Síntomas con prevalencias basadas en literatura médica
     symptoms = {
@@ -46,23 +46,48 @@ def improved_generate_endometriosis_dataset(n_samples=20000):
         'dyspareunia': (beta.rvs(2, 3, size=n_samples) > 0.35).astype(int),
         'chronic_pelvic_pain': (beta.rvs(2, 4, size=n_samples) > 0.25).astype(int),
         'infertility': (beta.rvs(1, 5, size=n_samples) > 0.15).astype(int),
-        'family_history': (beta.rvs(1, 6, size=n_samples) > 0.1).astype(int)
+        'family_history': (beta.rvs(1, 6, size=n_samples) > 0.1).astype(int),
+        'pain_during_sex': (beta.rvs(2, 3, size=n_samples) > 0.35).astype(int),
+        'bowel_symptoms': (beta.rvs(2, 3, size=n_samples) > 0.3).astype(int),
+        'urinary_symptoms': (beta.rvs(1, 4, size=n_samples) > 0.2).astype(int),
+        'fatigue': (beta.rvs(2, 2, size=n_samples) > 0.4).astype(int),
+        'gynecological_surgery': (beta.rvs(1, 5, size=n_samples) > 0.15).astype(int),
+        'pelvic_inflammatory': (beta.rvs(1, 6, size=n_samples) > 0.1).astype(int),
+        'ovarian_cysts': (beta.rvs(1, 4, size=n_samples) > 0.2).astype(int),
+        'family_endometriosis': (beta.rvs(1, 6, size=n_samples) > 0.1).astype(int),
+        'family_autoimmune': (beta.rvs(1, 7, size=n_samples) > 0.08).astype(int),
+        'family_cancer': (beta.rvs(1, 8, size=n_samples) > 0.05).astype(int),
+        'comorbidity_autoimmune': (beta.rvs(1, 7, size=n_samples) > 0.08).astype(int),
+        'comorbidity_thyroid': (beta.rvs(1, 5, size=n_samples) > 0.15).astype(int),
+        'comorbidity_ibs': (beta.rvs(1, 4, size=n_samples) > 0.2).astype(int),
+        'pain_premenstrual': (beta.rvs(2, 2, size=n_samples) > 0.4).astype(int),
+        'pain_menstrual': (beta.rvs(3, 1.5, size=n_samples) > 0.6).astype(int),
+        'pain_ovulation': (beta.rvs(1, 3, size=n_samples) > 0.25).astype(int),
+        'pain_chronic': (beta.rvs(2, 3, size=n_samples) > 0.3).astype(int)
     }
     
-    # 6. Modelo de riesgo más sofisticado
+    # 6. Modelo de riesgo más sofisticado con todas las variables
     risk_factors = (
         0.25 * (pain_level > 6) +
         0.25 * (ca125 > 35) +
         0.15 * symptoms['dysmenorrhea'] +
         0.12 * symptoms['dyspareunia'] +
-        0.1 * symptoms['family_history'] +
-        0.08 * (menarche_age < 12) +
-        0.05 * (bmi > 30)
+        0.10 * symptoms['family_endometriosis'] +
+        0.08 * symptoms['gynecological_surgery'] +
+        0.07 * symptoms['bowel_symptoms'] +
+        0.06 * symptoms['urinary_symptoms'] +
+        0.05 * symptoms['pain_chronic'] +
+        0.04 * symptoms['pelvic_inflammatory'] +
+        0.03 * symptoms['ovarian_cysts'] +
+        0.03 * symptoms['pain_menstrual'] +
+        0.02 * symptoms['pain_premenstrual'] +
+        0.02 * symptoms['pain_ovulation'] +
+        0.02 * (bmi > 30)
     )
     
     endometriosis = (risk_factors + np.random.normal(0, 0.07, n_samples)) > 0.42
     
-    # 7. Crear DataFrame
+    # 7. Crear DataFrame con todas las variables
     data = {
         'age': age,
         'bmi': bmi,
