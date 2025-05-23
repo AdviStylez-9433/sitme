@@ -6,13 +6,25 @@ import os
 import subprocess
 import time
 import signal
-import sys
-import atexit
 import subprocess
 import time
 import pytest
-import os
 import signal
+
+@pytest.fixture(scope="session")
+def live_server():
+    """Levanta el servidor Flask antes de los tests E2E"""
+    proc = subprocess.Popen(
+        ["python", "app.py"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        preexec_fn=os.setsid
+    )
+    time.sleep(3)  # Da tiempo a Flask para iniciar
+
+    yield  # Aquí se ejecutan los tests
+
+    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
 
 def test_login_flow(page, live_server):
     page.goto("http://localhost:5000")
@@ -120,27 +132,6 @@ def sample_patient_data():
             "vaginal_exam": "normal",
             "clinical_notes": "Dolor a la movilización uterina"
         }
-    }       
+    } 
 
-@pytest.fixture(scope="module")
-def live_server():
-    # Define el entorno para usar la base de datos de pruebas
-    env = os.environ.copy()
-    env["FLASK_ENV"] = "testing"
-    env["TEST_DATABASE_URL"] = "postgresql://postgres:postgres@localhost:5432/test_db"
-    
-    # Lanza tu app con el puerto y host requeridos por Playwright
-    proc = subprocess.Popen(
-        ["python", "app.py"],
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        preexec_fn=os.setsid  # Necesario para poder terminarlo limpiamente
-    )
-    
-    time.sleep(5)  # Espera a que el servidor levante
 
-    yield  # Aquí se ejecutarán los tests
-
-    # Después de los tests, termina el proceso
-    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
