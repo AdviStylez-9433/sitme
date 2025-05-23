@@ -11,7 +11,7 @@ import time
 import pytest
 import signal
 
-BASE_URL = os.getenv("https://sitme-api.onrender.com", "http://localhost:5000")
+BASE_URL = "https://sitme-api.onrender.com"
 
 def test_login_flow(page):
     page.goto(f"{BASE_URL}")
