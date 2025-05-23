@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from scipy.stats import skewnorm, beta
-from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier  # Cambiado de RandomForest
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import classification_report, roc_auc_score, balanced_accuracy_score, f1_score, precision_recall_curve, average_precision_score
@@ -107,31 +107,34 @@ def improved_train_and_save_model():
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y)
     
-    # 4. Pipeline de modelado mejorado
-    base_model = RandomForestClassifier(
-        n_estimators=150,
-        max_depth=6,
-        min_samples_split=10,
-        min_samples_leaf=2,
-        max_features='sqrt',
-        class_weight='balanced_subsample',
+    # 4. Pipeline de modelado mejorado con XGBoost
+    base_model = XGBClassifier(
+        n_estimators=200,  # Aumentado para XGBoost
+        max_depth=5,       # Profundidad reducida para XGBoost
+        learning_rate=0.05,  # Tasa de aprendizaje típica para XGBoost
+        subsample=0.8,     # Submuestreo de filas
+        colsample_bytree=0.8,  # Submuestreo de columnas
+        gamma=0.1,         # Regularización mínima de pérdida
+        reg_alpha=0.1,     # Regularización L1
+        reg_lambda=1.0,    # Regularización L2
         random_state=42,
         n_jobs=-1,
-        bootstrap=True,
-        oob_score=True
+        scale_pos_weight=np.sum(y == 0) / np.sum(y == 1),  # Balanceo de clases
+        eval_metric='auc',  # Métrica de evaluación
+        use_label_encoder=False  # Evita warning
     )
     
     # Pipeline con selección de características y escalado
     model_pipeline = Pipeline([
         ('scaler', RobustScaler()),
         ('feature_selector', SelectFromModel(
-            RandomForestClassifier(n_estimators=100, random_state=42),
+            XGBClassifier(n_estimators=100, random_state=42, use_label_encoder=False),
             threshold='1.25*median')),
         ('model', base_model)
     ])
     
     # 5. Entrenamiento con validación cruzada mejorada
-    print("\nEntrenando modelo mejorado...")
+    print("\nEntrenando modelo mejorado con XGBoost...")
     calibrated_model = CalibratedClassifierCV(
         model_pipeline,
         method='isotonic',
@@ -147,7 +150,7 @@ def improved_train_and_save_model():
     calibrated_model.fit(X_train, y_train)
     
     # 6. Evaluación exhaustiva
-    print("\n🔍 Evaluación Detallada del Modelo Mejorado:")
+    print("\n🔍 Evaluación Detallada del Modelo Mejorado (XGBoost):")
     y_pred = calibrated_model.predict(X_test)
     y_proba = calibrated_model.predict_proba(X_test)[:, 1]
     
@@ -164,7 +167,7 @@ def improved_train_and_save_model():
     
     joblib.dump(calibrated_model, model_path, compress=('zlib', 3))
     
-    print(f"\n✅ Modelo mejorado entrenado y guardado en {model_path}")
+    print(f"\n✅ Modelo XGBoost entrenado y guardado en {model_path}")
     print(f"📊 Distribución de clases - Positivos: {y.mean():.2%}, Negativos: {1-y.mean():.2%}")
     print(f"⏱ Tiempo total de ejecución: {time() - start_time:.2f} segundos")
 

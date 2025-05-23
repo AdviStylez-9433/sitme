@@ -384,7 +384,7 @@ def save_simulation():
             # Resultados de la predicción (3 campos)
             float(prediction.get('probability', 0)),
             prediction.get('risk_level', 'unknown'),
-            prediction.get('model_version', 'v4.1'),
+            prediction.get('model_version', 'v4.1-xgboost'),
             
             # Recomendaciones (1 campo)
             prediction.get('recommendations', [])
