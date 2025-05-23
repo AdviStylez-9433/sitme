@@ -992,18 +992,23 @@ function saveSimulationToDB(simulationData) {
         });
 }
 
-// Agrega esta función al script.js para cargar el historial
-function loadHistoryData(searchTerm = '') {
+let currentPage = 1;
+const recordsPerPage = 10;
+let totalRecords = 0;
+
+function loadHistoryData(searchTerm = '', page = 1) {
     const historyTableBody = document.getElementById('historyTableBody');
     const noHistoryMsg = document.getElementById('noHistoryMessage');
+    const paginationContainer = document.getElementById('paginationContainer');
 
     // Mostrar estado de carga
     historyTableBody.innerHTML = '<tr><td colspan="7" class="loading-row"><div class="spinner-container"><div class="loading-spinner"></div><span>Cargando historial...</span></div></td></tr>';
+    paginationContainer.innerHTML = '';
 
-    // Construir URL con parámetro de búsqueda si existe
-    let url = 'https://sitme-api.onrender.com/get_history';
+    // Construir URL con parámetros de búsqueda y paginación
+    let url = `https://sitme-api.onrender.com/get_history?page=${page}&limit=${recordsPerPage}`;
     if (searchTerm) {
-        url += `?search=${encodeURIComponent(searchTerm)}`;
+        url += `&search=${encodeURIComponent(searchTerm)}`;
     }
 
     fetch(url)
@@ -1015,58 +1020,129 @@ function loadHistoryData(searchTerm = '') {
             if (!data.records || data.records.length === 0) {
                 historyTableBody.innerHTML = '';
                 noHistoryMsg.style.display = 'block';
+                paginationContainer.innerHTML = '';
                 return;
             }
 
             historyTableBody.innerHTML = '';
             noHistoryMsg.style.display = 'none';
+            totalRecords = data.total || data.records.length;
 
             data.records.forEach(record => {
                 const row = document.createElement('tr');
-
-                // Determinar clase de riesgo basada en la probabilidad
-                const probability = Math.round((record.probability || 0) * 100);
-                let riskClass = '';
-                let riskText = '';
-
-                if (probability >= 70) {
-                    riskClass = 'high-risk';
-                    riskText = 'Alto';
-                } else if (probability >= 40) {
-                    riskClass = 'moderate-risk';
-                    riskText = 'Moderado';
-                } else {
-                    riskClass = 'low-risk';
-                    riskText = 'Bajo';
-                }
-
-                row.innerHTML = `
-                    <td>${record.clinic_id || 'ENDO-' + record.id.toString().padStart(4, '0')}</td>
-                    <td>${record.full_name || 'No registrado'}</td>
-                    <td>${record.rut || 'No registrado'}</td>
-                    <td>${record.age || 'N/A'}</td>
-                    <td>${record.evaluation_date || 'N/A'}</td>
-                    <td class="${riskClass}">${riskText}</td>
-                    <td class="history-actions">
-                        <button class="history-btn view-btn" data-id="${record.id}">
-                            <i class="fas fa-eye"></i> Ver
-                        </button>
-                        <button class="history-btn delete-btn" data-id="${record.id}">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </td>
-                `;
-
+                // ... (código existente para crear filas)
                 historyTableBody.appendChild(row);
             });
 
             // Agregar eventos a los botones
             addHistoryButtonEvents();
+
+            // Mostrar paginación si hay más de una página
+            if (totalRecords > recordsPerPage) {
+                renderPagination(totalRecords, page, searchTerm);
+            }
         })
         .catch(error => {
             console.error('Error:', error);
             historyTableBody.innerHTML = '<tr><td colspan="7" class="error-row">Error al cargar el historial</td></tr>';
         });
+}
+
+function renderPagination(totalRecords, currentPage, searchTerm) {
+    const paginationContainer = document.getElementById('paginationContainer');
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    
+    paginationContainer.innerHTML = '';
+    
+    if (totalPages <= 1) return;
+
+    const pagination = document.createElement('div');
+    pagination.className = 'pagination';
+
+    // Botón Anterior
+    if (currentPage > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'pagination-btn';
+        prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevBtn.addEventListener('click', () => {
+            loadHistoryData(searchTerm, currentPage - 1);
+        });
+        pagination.appendChild(prevBtn);
+    }
+
+    // Números de página
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    if (startPage > 1) {
+        const firstPageBtn = document.createElement('button');
+        firstPageBtn.className = 'pagination-btn';
+        firstPageBtn.textContent = '1';
+        firstPageBtn.addEventListener('click', () => {
+            loadHistoryData(searchTerm, 1);
+        });
+        pagination.appendChild(firstPageBtn);
+
+        if (startPage > 2) {
+            const ellipsis = document.createElement('span');
+            ellipsis.className = 'pagination-ellipsis';
+            ellipsis.textContent = '...';
+            pagination.appendChild(ellipsis);
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.addEventListener('click', () => {
+            loadHistoryData(searchTerm, i);
+        });
+        pagination.appendChild(pageBtn);
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement('span');
+            ellipsis.className = 'pagination-ellipsis';
+            ellipsis.textContent = '...';
+            pagination.appendChild(ellipsis);
+        }
+
+        const lastPageBtn = document.createElement('button');
+        lastPageBtn.className = 'pagination-btn';
+        lastPageBtn.textContent = totalPages;
+        lastPageBtn.addEventListener('click', () => {
+            loadHistoryData(searchTerm, totalPages);
+        });
+        pagination.appendChild(lastPageBtn);
+    }
+
+    // Botón Siguiente
+    if (currentPage < totalPages) {
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'pagination-btn';
+        nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextBtn.addEventListener('click', () => {
+            loadHistoryData(searchTerm, currentPage + 1);
+        });
+        pagination.appendChild(nextBtn);
+    }
+
+    // Contador de registros
+    const startRecord = (currentPage - 1) * recordsPerPage + 1;
+    const endRecord = Math.min(currentPage * recordsPerPage, totalRecords);
+    const counter = document.createElement('div');
+    counter.className = 'pagination-counter';
+    counter.textContent = `Mostrando ${startRecord}-${endRecord} de ${totalRecords} registros`;
+    
+    paginationContainer.appendChild(counter);
+    paginationContainer.appendChild(pagination);
 }
 
 // Función para agregar eventos a los botones de la tabla

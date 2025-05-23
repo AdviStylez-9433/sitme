@@ -2131,7 +2131,6 @@ footer {
 }
 
 /* Estilos carga por imagenes */
-/* Subida de archivos */
 .file-upload-container {
   border: 2px dashed var(--border);
   border-radius: 8px;
@@ -2203,4 +2202,66 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Estilos para la paginación */
+#paginationContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    gap: 15px;
+}
+
+.pagination {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pagination-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.pagination-btn:hover:not(.active) {
+    background-color: var(--primary-light);
+    color: white;
+    border-color: var(--primary-light);
+}
+
+.pagination-btn.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    font-weight: 600;
+}
+
+.pagination-btn i {
+    font-size: 12px;
+}
+
+.pagination-ellipsis {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray);
+}
+
+.pagination-counter {
+    font-size: 0.9rem;
+    color: var(--gray);
+    margin-bottom: 5px;
 }
