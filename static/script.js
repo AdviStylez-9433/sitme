@@ -992,6 +992,83 @@ function saveSimulationToDB(simulationData) {
         });
 }
 
+// Agrega esta función al script.js para cargar el historial
+function loadHistoryData(searchTerm = '') {
+    const historyTableBody = document.getElementById('historyTableBody');
+    const noHistoryMsg = document.getElementById('noHistoryMessage');
+
+    // Mostrar estado de carga
+    historyTableBody.innerHTML = '<tr><td colspan="7" class="loading-row"><div class="spinner-container"><div class="loading-spinner"></div><span>Cargando historial...</span></div></td></tr>';
+
+    // Construir URL con parámetro de búsqueda si existe
+    let url = 'https://sitme-api.onrender.com/get_history';
+    if (searchTerm) {
+        url += `?search=${encodeURIComponent(searchTerm)}`;
+    }
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) throw new Error('Error al cargar el historial');
+            return response.json();
+        })
+        .then(data => {
+            if (!data.records || data.records.length === 0) {
+                historyTableBody.innerHTML = '';
+                noHistoryMsg.style.display = 'block';
+                return;
+            }
+
+            historyTableBody.innerHTML = '';
+            noHistoryMsg.style.display = 'none';
+
+            data.records.forEach(record => {
+                const row = document.createElement('tr');
+
+                // Determinar clase de riesgo basada en la probabilidad
+                const probability = Math.round((record.probability || 0) * 100);
+                let riskClass = '';
+                let riskText = '';
+
+                if (probability >= 70) {
+                    riskClass = 'high-risk';
+                    riskText = 'Alto';
+                } else if (probability >= 40) {
+                    riskClass = 'moderate-risk';
+                    riskText = 'Moderado';
+                } else {
+                    riskClass = 'low-risk';
+                    riskText = 'Bajo';
+                }
+
+                row.innerHTML = `
+                    <td>${record.clinic_id || 'ENDO-' + record.id.toString().padStart(4, '0')}</td>
+                    <td>${record.full_name || 'No registrado'}</td>
+                    <td>${record.rut || 'No registrado'}</td>
+                    <td>${record.age || 'N/A'}</td>
+                    <td>${record.evaluation_date || 'N/A'}</td>
+                    <td class="${riskClass}">${riskText}</td>
+                    <td class="history-actions">
+                        <button class="history-btn view-btn" data-id="${record.id}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="history-btn delete-btn" data-id="${record.id}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                `;
+
+                historyTableBody.appendChild(row);
+            });
+
+            // Agregar eventos a los botones
+            addHistoryButtonEvents();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            historyTableBody.innerHTML = '<tr><td colspan="7" class="error-row">Error al cargar el historial</td></tr>';
+        });
+}
+
 let currentPage = 1;
 const recordsPerPage = 10;
 let totalRecords = 0;
@@ -1030,7 +1107,40 @@ function loadHistoryData(searchTerm = '', page = 1) {
 
             data.records.forEach(record => {
                 const row = document.createElement('tr');
-                // ... (código existente para crear filas)
+
+                // Determinar clase de riesgo basada en la probabilidad
+                const probability = Math.round((record.probability || 0) * 100);
+                let riskClass = '';
+                let riskText = '';
+
+                if (probability >= 70) {
+                    riskClass = 'high-risk';
+                    riskText = 'Alto';
+                } else if (probability >= 40) {
+                    riskClass = 'moderate-risk';
+                    riskText = 'Moderado';
+                } else {
+                    riskClass = 'low-risk';
+                    riskText = 'Bajo';
+                }
+
+                row.innerHTML = `
+                    <td>${record.clinic_id || 'ENDO-' + record.id.toString().padStart(4, '0')}</td>
+                    <td>${record.full_name || 'No registrado'}</td>
+                    <td>${record.rut || 'No registrado'}</td>
+                    <td>${record.age || 'N/A'}</td>
+                    <td>${record.evaluation_date || 'N/A'}</td>
+                    <td class="${riskClass}">${riskText}</td>
+                    <td class="history-actions">
+                        <button class="history-btn view-btn" data-id="${record.id}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="history-btn delete-btn" data-id="${record.id}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                `;
+
                 historyTableBody.appendChild(row);
             });
 
@@ -1216,6 +1326,7 @@ function setupSearchEvents() {
         currentPage = 1; // Reiniciar a la primera página
         loadHistoryData(searchTerm, currentPage);
     };
+
     // Botón de búsqueda
     const searchBtn = document.getElementById('searchHistoryBtn');
     if (searchBtn) {
