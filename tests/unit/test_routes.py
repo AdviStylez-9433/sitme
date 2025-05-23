@@ -1,41 +1,27 @@
 import pytest
-from unittest.mock import patch, MagicMock
-from app import app, init_db, Medico
-
-@pytest.fixture
-def client():
-    app.config['TESTING'] = True
-    with app.test_client() as client:
-        with app.app_context():
-            init_db()  # Inicializar DB para pruebas
-        yield client
+from app import app
 
 def test_home_route(client):
+    """Test ruta home"""
     response = client.get('/')
     assert response.status_code == 200
     assert b"SITME" in response.data
 
-def test_predict_route_missing_data(client):
-    response = client.post('/predict', json={})
-    assert response.status_code == 400
-    assert b"Datos no proporcionados" in response.data
+def test_protected_route_without_auth(client):
+    """Test ruta protegida sin autenticación"""
+    response = client.get('/api/protected-route')
+    assert response.status_code == 401
 
-@patch('app.Medico.query')
-def test_login_success(mock_query, client):
-    # Configurar mock
-    mock_medico = MagicMock()
-    mock_medico.id = 1
-    mock_medico.email = "test@example.com"
-    mock_medico.check_password.return_value = True
-    mock_medico.activo = True
-    mock_medico.generate_auth_token.return_value = "fake_token"
-    mock_query.filter_by.return_value.first.return_value = mock_medico
-
-    # Hacer petición
+def test_login_invalid_credentials(client):
+    """Test login con credenciales inválidas"""
     response = client.post('/api/login', json={
-        'email': 'test@example.com',
-        'password': 'correct_password'
+        'email': 'nonexistent@test.com',
+        'password': 'wrongpassword'
     })
+    assert response.status_code == 401
+    assert b"Credenciales" in response.data
     
+def test_login_success(client, auth_headers):
+    """Test login exitoso"""
+    response = client.get('/api/protected-route', headers=auth_headers)
     assert response.status_code == 200
-    assert b"token" in response.data

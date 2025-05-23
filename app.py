@@ -420,18 +420,19 @@ def save_simulation():
 @app.route('/get_history', methods=['GET'])
 def get_history():
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
-
-        # Parámetros de paginación y búsqueda
+        # Obtener parámetros de paginación (valores por defecto: page=1, limit=10)
         page = int(request.args.get('page', 1))
         limit = int(request.args.get('limit', 10))
-        search = request.args.get('search', '').strip()
-
+        search_term = request.args.get('search', '').strip()
+        
+        # Calcular offset
         offset = (page - 1) * limit
-
-        # Construcción dinámica de consulta
-        base_query = """
+        
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Consulta base
+        query = """
             SELECT 
                 id, clinic_id, full_name, id_number as rut, age, 
                 to_char(created_at, 'DD/MM/YYYY') as evaluation_date,
@@ -439,46 +440,53 @@ def get_history():
                 probability
             FROM patient_simulations
         """
-
-        count_query = "SELECT COUNT(*) FROM patient_simulations"
-        where_clauses = []
+        
+        # Consulta para contar el total de registros (con filtro de búsqueda si existe)
+        count_query = "SELECT COUNT(*) as total FROM patient_simulations"
+        
+        # Añadir condiciones de búsqueda si hay término
+        where_clause = ""
         params = []
-
-        if search:
-            where_clauses.append("""
-                (full_name ILIKE %s OR id_number ILIKE %s OR clinic_id ILIKE %s)
-            """)
-            search_pattern = f"%{search}%"
-            params.extend([search_pattern] * 3)
-
-        if where_clauses:
-            where_clause = " WHERE " + " AND ".join(where_clauses)
-            base_query += where_clause
-            count_query += where_clause
-
-        base_query += " ORDER BY created_at DESC LIMIT %s OFFSET %s"
-        params.extend([limit, offset])
-
-        # Ejecutar consulta principal
-        cursor.execute(base_query, params)
+        if search_term:
+            where_clause = """
+                WHERE full_name ILIKE %s 
+                OR id_number ILIKE %s 
+                OR clinic_id ILIKE %s
+            """
+            search_param = f"%{search_term}%"
+            params = [search_param, search_param, search_param]
+        
+        # Consulta para los registros paginados
+        paginated_query = f"""
+            {query}
+            {where_clause}
+            ORDER BY created_at DESC
+            LIMIT %s OFFSET %s
+        """
+        
+        # Consulta para el total de registros
+        total_query = f"{count_query} {where_clause}"
+        
+        # Ejecutar consulta paginada
+        cursor.execute(paginated_query, params + [limit, offset])
         records = cursor.fetchall()
-
-        # Obtener total de registros para la paginación
-        cursor.execute(count_query, params[:-2])  # quitar limit y offset
-        total = cursor.fetchone()['count']
-
+        
+        # Ejecutar consulta para total
+        cursor.execute(total_query, params)
+        total = cursor.fetchone()['total']
+        
         return jsonify({
             'success': True,
             'records': records,
             'total': total,
             'page': page,
-            'limit': limit
+            'limit': limit,
+            'total_pages': (total + limit - 1) // limit  # Cálculo de páginas totales
         })
-
+        
     except Exception as e:
         app.logger.error(f"Error obteniendo historial: {str(e)}")
         return jsonify({
-            'success': False,
             'error': 'Error al obtener historial',
             'details': str(e)
         }), 500

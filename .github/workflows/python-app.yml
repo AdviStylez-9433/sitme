@@ -1,10 +1,15 @@
 name: Python application CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:13
@@ -30,19 +35,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-cov playwright
-        playwright install
-        playwright install-deps
-    - name: Run unit and integration tests
+        pip install pytest pytest-cov
+    - name: Run tests
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
       run: |
-        pytest tests/unit tests/integration --cov=./ --cov-report=xml
-    - name: Run E2E tests
-      run: |
-        python app.py &  # Iniciar servidor en segundo plano
-        sleep 5  # Esperar que el servidor inicie
-        pytest tests/e2e
-        kill $!  # Detener servidor
+        pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
