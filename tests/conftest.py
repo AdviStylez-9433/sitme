@@ -3,6 +3,21 @@ from app import app, db, Medico
 from werkzeug.security import generate_password_hash
 import os
 
+import subprocess
+import time
+import signal
+import sys
+import atexit
+import subprocess
+import time
+import pytest
+import os
+import signal
+
+def test_home_page_loads(page, live_server):
+    page.goto("http://localhost:5000")  # Asegúrate de que app.py usa host=0.0.0.0 y port=10000
+    assert "SITME" in page.title()
+
 @pytest.fixture(scope='module')
 def test_app():
     app.config['TESTING'] = True
@@ -107,3 +122,26 @@ def sample_patient_data():
             "clinical_notes": "Dolor a la movilización uterina"
         }
     }       
+
+@pytest.fixture(scope="module")
+def live_server():
+    # Define el entorno para usar la base de datos de pruebas
+    env = os.environ.copy()
+    env["FLASK_ENV"] = "testing"
+    env["TEST_DATABASE_URL"] = "postgresql://postgres:postgres@localhost:5432/test_db"
+    
+    # Lanza tu app con el puerto y host requeridos por Playwright
+    proc = subprocess.Popen(
+        ["python", "app.py"],
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        preexec_fn=os.setsid  # Necesario para poder terminarlo limpiamente
+    )
+    
+    time.sleep(5)  # Espera a que el servidor levante
+
+    yield  # Aquí se ejecutarán los tests
+
+    # Después de los tests, termina el proceso
+    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
