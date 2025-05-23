@@ -170,14 +170,13 @@ def improved_train_and_save_model():
         n_jobs=-1,
         scale_pos_weight=np.sum(y == 0) / np.sum(y == 1),  # Balanceo de clases
         eval_metric='auc',  # Métrica de evaluación
-        use_label_encoder=False  # Evita warning
     )
     
     # Pipeline con selección de características y escalado
     model_pipeline = Pipeline([
         ('scaler', RobustScaler()),
         ('feature_selector', SelectFromModel(
-            XGBClassifier(n_estimators=100, random_state=42, use_label_encoder=False),
+            XGBClassifier(n_estimators=100, random_state=42),
             threshold='1.25*median')),
         ('model', base_model)
     ])
