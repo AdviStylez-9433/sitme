@@ -11,23 +11,11 @@ import time
 import pytest
 import signal
 
-@pytest.fixture(scope="session")
-def live_server():
-    """Levanta el servidor Flask antes de los tests E2E"""
-    proc = subprocess.Popen(
-        ["python", "app.py"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        preexec_fn=os.setsid
-    )
-    time.sleep(3)  # Da tiempo a Flask para iniciar
+BASE_URL = os.getenv("https://sitme-api.onrender.com", "http://localhost:5000")
 
-    yield  # Aquí se ejecutan los tests
-
-    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-
-def test_login_flow(page, live_server):
-    page.goto("http://localhost:5000")
+def test_login_flow(page):
+    page.goto(f"{BASE_URL}")
+    assert "SITME" in page.title()  # ajusta a lo que esperes
 
 @pytest.fixture(scope='module')
 def test_app():
