@@ -5,7 +5,7 @@ import time
 @pytest.fixture(scope="module")
 def browser():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)  # Cambiar a True para CI
+        browser = p.chromium.launch(headless=True)  # Cambiar a True para CI
         yield browser
         browser.close()
 
