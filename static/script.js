@@ -1213,9 +1213,9 @@ function setupSearchEvents() {
     const performSearch = () => {
         const searchInput = document.getElementById('historySearch');
         const searchTerm = searchInput ? searchInput.value.trim() : '';
-        loadHistoryData(searchTerm);
+        currentPage = 1; // Reiniciar a la primera página
+        loadHistoryData(searchTerm, currentPage);
     };
-
     // Botón de búsqueda
     const searchBtn = document.getElementById('searchHistoryBtn');
     if (searchBtn) {

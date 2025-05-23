@@ -422,30 +422,63 @@ def get_history():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        
-        # Consulta para obtener los últimos 100 registros
-        cursor.execute("""
+
+        # Parámetros de paginación y búsqueda
+        page = int(request.args.get('page', 1))
+        limit = int(request.args.get('limit', 10))
+        search = request.args.get('search', '').strip()
+
+        offset = (page - 1) * limit
+
+        # Construcción dinámica de consulta
+        base_query = """
             SELECT 
                 id, clinic_id, full_name, id_number as rut, age, 
                 to_char(created_at, 'DD/MM/YYYY') as evaluation_date,
                 risk_level as risk,
                 probability
             FROM patient_simulations
-            ORDER BY created_at DESC
-            LIMIT 100
-        """)
-        
+        """
+
+        count_query = "SELECT COUNT(*) FROM patient_simulations"
+        where_clauses = []
+        params = []
+
+        if search:
+            where_clauses.append("""
+                (full_name ILIKE %s OR id_number ILIKE %s OR clinic_id ILIKE %s)
+            """)
+            search_pattern = f"%{search}%"
+            params.extend([search_pattern] * 3)
+
+        if where_clauses:
+            where_clause = " WHERE " + " AND ".join(where_clauses)
+            base_query += where_clause
+            count_query += where_clause
+
+        base_query += " ORDER BY created_at DESC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+
+        # Ejecutar consulta principal
+        cursor.execute(base_query, params)
         records = cursor.fetchall()
-        
+
+        # Obtener total de registros para la paginación
+        cursor.execute(count_query, params[:-2])  # quitar limit y offset
+        total = cursor.fetchone()['count']
+
         return jsonify({
             'success': True,
             'records': records,
-            'count': len(records)
+            'total': total,
+            'page': page,
+            'limit': limit
         })
-        
+
     except Exception as e:
         app.logger.error(f"Error obteniendo historial: {str(e)}")
         return jsonify({
+            'success': False,
             'error': 'Error al obtener historial',
             'details': str(e)
         }), 500
