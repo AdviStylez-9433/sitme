@@ -1,5 +1,5 @@
 import pytest
-from app import Medico, db
+from app import app, Medico, db
 
 def test_db_connection(test_app):
     """Test conexión a la base de datos"""

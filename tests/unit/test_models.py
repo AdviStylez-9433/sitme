@@ -1,5 +1,5 @@
 import pytest
-from app import Medico, db
+from app import app, Medico, db
 from werkzeug.security import check_password_hash
 
 def test_medico_creation(test_app):
