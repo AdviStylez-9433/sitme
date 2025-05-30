@@ -22,11 +22,12 @@ from psycopg2.extras import RealDictCursor
 import json
 import traceback
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+import requests
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
-import stripe
 
 # Configuración inicial
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -1058,6 +1059,43 @@ def generate_clinical_record():
     except Exception as e:
         app.logger.error(f"Error generando bono: {str(e)}")
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/upload_file', methods=['POST'])
+def upload_file():
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        if file and allowed_file(file.filename):
+            # Convertir a base64 para enviar a Google Apps Script
+            file_content = file.read()
+            file_b64 = base64.b64encode(file_content).decode('utf-8')
+            
+            # Configurar datos para enviar al script
+            payload = {
+                'fileName': secure_filename(file.filename),
+                'mimeType': file.mimetype,
+                'base64Data': file_b64
+            }
+            
+            # URL de tu API de Google Apps Script
+            script_url = "https://script.google.com/macros/s/AKfycbxq-m6imJ73e34Q_Dd3neyzhcZq_dRNaPR5Vae3m65HztMT__XHewrG-FkJo1siCFCmqw/exec"
+            response = requests.post(script_url, json=payload)
+            
+            if response.ok:
+                return jsonify(response.json()), 200
+            else:
+                return jsonify({'error': 'Failed to upload to Drive'}), 500
+                
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pdf', 'jpg', 'jpeg', 'png'}
 
 if __name__ == '__main__':
     # Verificar que exista el modelo

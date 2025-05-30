@@ -2357,21 +2357,21 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Subida de archivos
-document.getElementById('fileUpload').addEventListener('change', function(e) {
+document.getElementById('fileUpload').addEventListener('change', async function(e) {
     const files = e.target.files;
     const previewContainer = document.getElementById('filePreviews');
     previewContainer.innerHTML = '';
     
     if (files.length > 5) {
         showErrorNotification('Límite de archivos', 'Máximo 5 archivos permitidos');
-        this.value = ''; // Limpiar selección
+        this.value = '';
         return;
     }
 
-    Array.from(files).forEach(file => {
+    for (const file of files) {
         if (file.size > 2 * 1024 * 1024) {
             showErrorNotification('Archivo demasiado grande', `El archivo ${file.name} excede 2MB`);
-            return;
+            continue;
         }
 
         const preview = document.createElement('div');
@@ -2397,7 +2397,28 @@ document.getElementById('fileUpload').addEventListener('change', function(e) {
             `;
             previewContainer.appendChild(preview);
         }
-    });
+
+        // Subir el archivo al servidor
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/upload_file', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al subir el archivo');
+            }
+
+            const data = await response.json();
+            console.log('Archivo subido:', data);
+        } catch (error) {
+            console.error('Error:', error);
+            showErrorNotification('Error', `No se pudo subir ${file.name}`);
+        }
+    }
 
     if (files.length > 0) {
         showSuccessNotification('Archivos cargados', `Se han seleccionado ${files.length} archivo(s)`);
