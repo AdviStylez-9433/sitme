@@ -5,14 +5,14 @@ function toggleAuthForms() {
     const userPanel = document.querySelector('.user-panel');
     const logo = document.querySelector('.login-logo');
 
-    
+
     const isLoggedIn = localStorage.getItem('medicoToken') !== null;
-    
+
     loginForm.style.display = isLoggedIn ? 'none' : 'block';
     appContent.style.display = isLoggedIn ? 'block' : 'none';
     userPanel.style.display = isLoggedIn ? 'flex' : 'none';
     logo.style.display = isLoggedIn ? 'none' : 'block';
-    
+
     if (isLoggedIn) {
         loadMedicoData();
     }
@@ -21,43 +21,42 @@ function toggleAuthForms() {
 // Función para manejar el login
 async function handleLogin(event) {
     event.preventDefault();
-    
+
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
     const loginBtn = document.getElementById('loginBtn');
     const loginError = document.getElementById('loginError');
-    
+
     // Mostrar estado de carga
     loginBtn.disabled = true;
     loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando sesión...';
     loginError.textContent = '';
-    
+
     try {
         const response = await fetch('https://sitme-api.onrender.com/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
-        
+
         const data = await response.json();
-        
+
         if (!response.ok) {
             throw new Error(data.error || 'Credenciales incorrectas. Por favor intente nuevamente.');
         }
-        
+
         // Guardar datos en localStorage
         localStorage.setItem('medicoToken', data.token);
         localStorage.setItem('medicoData', JSON.stringify(data.user));
-        
+
         // Actualizar UI
         updateMedicoBanner(data.user);
         toggleAuthForms();
-        showSuccessNotification(`Bienvenido, ${data.user.nombre.split(' ')[0]}`);
+        showSuccessNotification('Inicio de sesión exitoso', `Bienvenido, ${data.user.nombre.split(' ')[0]}`);
 
     } catch (error) {
         console.error('Login error:', error);
-        loginError.textContent = error.message;
-        showErrorNotification('Error al iniciar sesión');
+        showErrorNotification('Error al iniciar sesión', error.message);
     } finally {
         // Restaurar botón
         loginBtn.disabled = false;
@@ -68,22 +67,22 @@ async function handleLogin(event) {
 // Función para actualizar el panel de usuario
 function updateMedicoBanner(medicoData) {
     if (!medicoData) return;
-    
+
     // Actualizar avatar (iniciales)
     const avatar = document.getElementById('medicoAvatar');
     if (avatar) {
         const initials = medicoData.nombre.split(' ')
-                            .filter(name => name.length > 0)
-                            .map(name => name[0])
-                            .join('')
-                            .toUpperCase();
+            .filter(name => name.length > 0)
+            .map(name => name[0])
+            .join('')
+            .toUpperCase();
         avatar.textContent = initials.slice(0, 2);
     }
-    
+
     // Actualizar información
     const nombreElement = document.getElementById('medicoNombre');
     const emailElement = document.getElementById('medicoEmail');
-    
+
     if (nombreElement) nombreElement.textContent = `${medicoData.nombre}`;
     if (emailElement) emailElement.textContent = medicoData.email;
 }
@@ -98,12 +97,19 @@ function loadMedicoData() {
 
 // Función para cerrar sesión
 function handleLogout() {
-    localStorage.removeItem('medicoToken');
-    localStorage.removeItem('medicoData');
-    toggleAuthForms();
-    showSuccessNotification('Sesión cerrada exitosamente');
-    // Opcional: Redirigir a la página de inicio
-    // window.location.href = '/';
+    showConfirmModal({
+        title: 'Cerrar sesión',
+        message: '¿Está seguro que desea cerrar su sesión?',
+        icon: 'fa-sign-out-alt',
+        acceptText: 'Cerrar sesión'
+    }).then((confirmed) => {
+        if (confirmed) {
+            localStorage.removeItem('medicoToken');
+            localStorage.removeItem('medicoData');
+            toggleAuthForms();
+            showSuccessNotification('Sesión cerrada', 'Ha cerrado sesión exitosamente');
+        }
+    });
 }
 
 // Inicialización al cargar la página
@@ -111,51 +117,148 @@ document.addEventListener('DOMContentLoaded', () => {
     // Configurar event listeners
     const loginForm = document.getElementById('loginForm');
     const logoutBtn = document.getElementById('logoutBtn');
-    
+
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
     }
-    
+
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
     }
-    
+
     // Verificar estado de autenticación
     toggleAuthForms();
 });
 
-// Funciones de notificación (ejemplo básico)
-function showSuccessNotification(message) {
-    console.log('Éxito:', message);
-    // Aquí puedes integrar Toastify, SweetAlert, etc.
-    alert(message); // Solo para ejemplo, reemplazar con tu sistema de notificaciones
+// Funciones de notificación mejoradas
+function showNotification(type, title, message, duration = 5000) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+
+    let icon;
+    switch (type) {
+        case 'success': icon = 'fa-check-circle'; break;
+        case 'error': icon = 'fa-exclamation-circle'; break;
+        case 'warning': icon = 'fa-exclamation-triangle'; break;
+        case 'info': icon = 'fa-info-circle'; break;
+        default: icon = 'fa-info-circle';
+    }
+
+    notification.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <div class="notification-content">
+            <div class="notification-title">${title}</div>
+            <div class="notification-message">${message}</div>
+        </div>
+        <div class="notification-close"><i class="fas fa-times"></i></div>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Mostrar notificación
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+
+    // Cerrar al hacer clic en la X
+    notification.querySelector('.notification-close').addEventListener('click', () => {
+        closeNotification(notification);
+    });
+
+    // Cerrar automáticamente después de la duración
+    if (duration > 0) {
+        setTimeout(() => {
+            closeNotification(notification);
+        }, duration);
+    }
+
+    return notification;
 }
 
-function showErrorNotification(message) {
-    console.error('Error:', message);
-    alert(message); // Solo para ejemplo, reemplazar con tu sistema de notificaciones
+function closeNotification(notification) {
+    notification.classList.remove('show');
+    notification.classList.add('hide');
+
+    // Eliminar del DOM después de la animación
+    setTimeout(() => {
+        notification.remove();
+    }, 300);
+}
+
+// Funciones de conveniencia para tipos específicos
+function showSuccessNotification(title, message, duration = 5000) {
+    return showNotification('success', title, message, duration);
+}
+
+function showErrorNotification(title, message, duration = 5000) {
+    return showNotification('error', title, message, duration);
+}
+
+function showWarningNotification(title, message, duration = 5000) {
+    return showNotification('warning', title, message, duration);
+}
+
+function showInfoNotification(title, message, duration = 5000) {
+    return showNotification('info', title, message, duration);
+}
+
+// Función de confirmación personalizada
+function showConfirmModal(options) {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'confirm-modal';
+
+        modal.innerHTML = `
+            <div class="confirm-content">
+                <div class="confirm-header">
+                    <i class="fas ${options.icon || 'fa-question-circle'}"></i>
+                    <h4>${options.title || 'Confirmación'}</h4>
+                </div>
+                <div class="confirm-body">
+                    <p>${options.message || '¿Está seguro que desea realizar esta acción?'}</p>
+                </div>
+                <div class="confirm-footer">
+                    <button class="confirm-btn cancel">${options.cancelText || 'Cancelar'}</button>
+                    <button class="confirm-btn accept">${options.acceptText || 'Aceptar'}</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Manejar botones
+        modal.querySelector('.confirm-btn.cancel').addEventListener('click', () => {
+            modal.remove();
+            resolve(false);
+        });
+
+        modal.querySelector('.confirm-btn.accept').addEventListener('click', () => {
+            modal.remove();
+            resolve(true);
+        });
+    });
 }
 
 // JavaScript para manejar el menú desplegable
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const userMenuTrigger = document.getElementById('userMenuTrigger');
     const userMenu = document.getElementById('userMenu');
-    
+
     // Alternar menú al hacer clic
-    userMenuTrigger.addEventListener('click', function(e) {
+    userMenuTrigger.addEventListener('click', function (e) {
         e.stopPropagation();
         userMenu.classList.toggle('active');
         userMenuTrigger.classList.toggle('active');
     });
-    
+
     // Cerrar menú al hacer clic fuera
-    document.addEventListener('click', function() {
+    document.addEventListener('click', function () {
         userMenu.classList.remove('active');
         userMenuTrigger.classList.remove('active');
     });
-    
+
     // Evitar que el menú se cierre al hacer clic en él
-    userMenu.addEventListener('click', function(e) {
+    userMenu.addEventListener('click', function (e) {
         e.stopPropagation();
     });
 });
@@ -956,8 +1059,6 @@ function saveSimulationToDB(simulationData) {
         clinic_id: document.getElementById('clinicId').textContent
     };
 
-    console.log('Data enviada:', dataToSend);
-
     // Solicitud para guardar la simulación
     fetch('https://sitme-api.onrender.com/save_simulation', {
         method: 'POST',
@@ -979,11 +1080,11 @@ function saveSimulationToDB(simulationData) {
             if (data.error) throw new Error(data.error);
 
             // Mostrar notificación de éxito
-            showSuccessNotification('Simulación guardada exitosamente en la base de datos');
+            showSuccessNotification('Simulación guardada', 'Los datos se han guardado correctamente en la base de datos');
         })
         .catch(error => {
             console.error('Error:', error);
-            showError(`Error al guardar: ${error.message}`);
+            showErrorNotification('Error al guardar', error.message || 'No se pudo guardar la simulación');
         })
         .finally(() => {
             // Restaurar estado normal
@@ -1161,9 +1262,9 @@ function loadHistoryData(searchTerm = '', page = 1) {
 function renderPagination(totalRecords, currentPage, searchTerm) {
     const paginationContainer = document.getElementById('paginationContainer');
     const totalPages = Math.ceil(totalRecords / recordsPerPage);
-    
+
     paginationContainer.innerHTML = '';
-    
+
     if (totalPages <= 1) return;
 
     const pagination = document.createElement('div');
@@ -1250,7 +1351,7 @@ function renderPagination(totalRecords, currentPage, searchTerm) {
     const counter = document.createElement('div');
     counter.className = 'pagination-counter';
     counter.textContent = `Mostrando ${startRecord}-${endRecord} de ${totalRecords} registros`;
-    
+
     paginationContainer.appendChild(counter);
     paginationContainer.appendChild(pagination);
 }
@@ -1297,25 +1398,35 @@ document.addEventListener('DOMContentLoaded', setupModalEvents);
 
 // Función para eliminar un registro
 function deleteRecord(recordId) {
-    if (confirm('¿Está seguro que desea eliminar este registro permanentemente?')) {
-        fetch(`https://sitme-api.onrender.com/delete_record/${recordId}`, {
-            method: 'DELETE'
-        })
-            .then(response => {
+    showConfirmModal({
+        title: 'Eliminar registro',
+        message: '¿Está seguro que desea eliminar este registro permanentemente? Esta acción no se puede deshacer.',
+        icon: 'fa-trash-alt',
+        acceptText: 'Eliminar',
+        cancelText: 'Cancelar'
+    }).then(async (confirmed) => {
+        if (confirmed) {
+            try {
+                const response = await fetch(`https://sitme-api.onrender.com/delete_record/${recordId}`, {
+                    method: 'DELETE'
+                });
+
                 if (!response.ok) throw new Error('Error al eliminar registro');
-                return response.json();
-            })
-            .then(data => {
+
+                const data = await response.json();
+
                 if (data.success) {
-                    showSuccessNotification('Registro eliminado correctamente');
-                    loadHistoryData(); // Recargar la tabla
+                    showSuccessNotification('Registro eliminado', 'El registro ha sido eliminado correctamente');
+                    loadHistoryData();
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error:', error);
-                showError('No se pudo eliminar el registro');
-            });
-    }
+                showErrorNotification('Error al eliminar', error.message || 'No se pudo eliminar el registro');
+            }
+        }
+    });
 }
 
 // Eventos de búsqueda mejorados
@@ -1691,7 +1802,7 @@ function showPatientModal(patientData) {
         newDownloadBtn.className = 'modal-btn download-btn';
         newDownloadBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Descargar PDF';
         newDownloadBtn.onclick = () => generatePatientPDF(patientData);
-        
+
         const modalFooter = document.querySelector('.modal-footer');
         modalFooter.insertBefore(newDownloadBtn, modalFooter.querySelector('.close-btn'));
     }
@@ -1853,7 +1964,7 @@ function generatePatientPDF(patientData) {
 
         // Acceder a los biomarcadores correctamente
         const biomarkers = patientData.biomarkers || {};
-        
+
         // Función para formatear valores de biomarcadores
         const formatBiomarker = (value, unit) => {
             if (value === null || value === undefined || value === '') return 'No medido';
@@ -1862,9 +1973,9 @@ function generatePatientPDF(patientData) {
 
         // Versión resiliente que busca en múltiples ubicaciones
         const getBiomarkerValue = (field) => {
-            return patientData.biomarkers?.[field] || 
-                patientData.formData?.biomarkers?.[field] || 
-                patientData[field] || 
+            return patientData.biomarkers?.[field] ||
+                patientData.formData?.biomarkers?.[field] ||
+                patientData[field] ||
                 null;
         };
 
@@ -1881,9 +1992,9 @@ function generatePatientPDF(patientData) {
             startY: yPosition,
             head: false,
             body: biomarkersData,
-            columnStyles: { 
+            columnStyles: {
                 0: { fontStyle: 'bold', cellWidth: 40 },
-                1: { cellWidth: 'auto' } 
+                1: { cellWidth: 'auto' }
             },
             margin: { left: 20 },
             tableWidth: 170
@@ -2247,50 +2358,57 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Subida de archivos
 document.getElementById('fileUpload').addEventListener('change', function(e) {
-  const files = e.target.files;
-  const previewContainer = document.getElementById('filePreviews');
-  previewContainer.innerHTML = '';
-  
-  if (files.length > 5) {
-    showError('Máximo 5 archivos permitidos');
-    return;
-  }
-
-  Array.from(files).forEach(file => {
-    if (file.size > 2 * 1024 * 1024) {
-      showError(`El archivo ${file.name} excede 2MB`);
-      return;
-    }
-
-    const preview = document.createElement('div');
-    preview.className = 'file-preview';
+    const files = e.target.files;
+    const previewContainer = document.getElementById('filePreviews');
+    previewContainer.innerHTML = '';
     
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        preview.innerHTML = `
-          <img src="${event.target.result}" alt="${file.name}">
-          <button class="remove-file"><i class="fas fa-times"></i></button>
-        `;
-        previewContainer.appendChild(preview);
-      };
-      reader.readAsDataURL(file);
-    } else if (file.type === 'application/pdf') {
-      preview.innerHTML = `
-        <div class="pdf-preview">
-          <i class="fas fa-file-pdf"></i>
-          <span>${file.name}</span>
-          <button class="remove-file"><i class="fas fa-times"></i></button>
-        </div>
-      `;
-      previewContainer.appendChild(preview);
+    if (files.length > 5) {
+        showErrorNotification('Límite de archivos', 'Máximo 5 archivos permitidos');
+        this.value = ''; // Limpiar selección
+        return;
     }
-  });
+
+    Array.from(files).forEach(file => {
+        if (file.size > 2 * 1024 * 1024) {
+            showErrorNotification('Archivo demasiado grande', `El archivo ${file.name} excede 2MB`);
+            return;
+        }
+
+        const preview = document.createElement('div');
+        preview.className = 'file-preview';
+        
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                preview.innerHTML = `
+                    <img src="${event.target.result}" alt="${file.name}">
+                    <button class="remove-file"><i class="fas fa-times"></i></button>
+                `;
+                previewContainer.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        } else if (file.type === 'application/pdf') {
+            preview.innerHTML = `
+                <div class="pdf-preview">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>${file.name}</span>
+                    <button class="remove-file"><i class="fas fa-times"></i></button>
+                </div>
+            `;
+            previewContainer.appendChild(preview);
+        }
+    });
+
+    if (files.length > 0) {
+        showSuccessNotification('Archivos cargados', `Se han seleccionado ${files.length} archivo(s)`);
+    }
 });
 
 // Eliminar archivos
 document.addEventListener('click', function(e) {
-  if (e.target.closest('.remove-file')) {
-    e.target.closest('.file-preview').remove();
-  }
+    if (e.target.closest('.remove-file')) {
+        const preview = e.target.closest('.file-preview');
+        preview.remove();
+        showInfoNotification('Archivo eliminado', 'El archivo ha sido removido de la selección');
+    }
 });
