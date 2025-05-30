@@ -1082,9 +1082,12 @@ def upload_file():
                 'base64Data': file_b64
             }
             
+            print("Payload a enviar:", payload)
+
             # URL de tu API de Google Apps Script
             script_url = "https://script.google.com/macros/s/AKfycbxq-m6imJ73e34Q_Dd3neyzhcZq_dRNaPR5Vae3m65HztMT__XHewrG-FkJo1siCFCmqw/exec"
             response = requests.post(script_url, json=payload)
+            print("Respuesta de Apps Script:", response.text)            
             
             if response.ok:
                 return jsonify(response.json()), 200
