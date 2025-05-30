@@ -463,6 +463,7 @@ input[type="range"]:hover::-moz-range-thumb {
   flex-wrap: wrap;
 }
 
+/* Reemplazar el estilo existente de .probability-circle */
 .probability-circle {
   width: 120px;
   height: 120px;
@@ -474,9 +475,47 @@ input[type="range"]:hover::-moz-range-thumb {
   font-weight: 700;
   margin-right: 30px;
   position: relative;
-  border: 5px solid var(--primary) !important;
-  background-color: rgba(94, 53, 177, 0.05) !important;
-  color: var(--primary) !important;
+  border: 5px solid;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  transition: all 0.5s ease;
+}
+
+/* Colores según el porcentaje de riesgo */
+.probability-circle.low-risk {
+  border-color: #4CAF50; /* Verde */
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #2E7D32; /* Verde oscuro */
+}
+
+.probability-circle.low-moderate-risk {
+  border-color: #8BC34A; /* Verde claro */
+  background-color: rgba(139, 195, 74, 0.1);
+  color: #558B2F; /* Verde oscuro claro */
+}
+
+.probability-circle.moderate-risk {
+  border-color: #FFC107; /* Amarillo */
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #FF8F00; /* Ámbar */
+}
+
+.probability-circle.high-moderate-risk {
+  border-color: #FF9800; /* Naranja */
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #E65100; /* Naranja oscuro */
+}
+
+.probability-circle.high-risk {
+  border-color: #F44336; /* Rojo */
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #C62828; /* Rojo oscuro */
+}
+
+.probability-circle.very-high-risk {
+  border-color: #9C27B0; /* Morado */
+  background-color: rgba(156, 39, 176, 0.1);
+  color: #6A1B9A; /* Morado oscuro */
 }
 
 .probability-circle::before {

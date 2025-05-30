@@ -518,6 +518,26 @@ function displayResults(data) {
     const probabilityCircle = document.getElementById('probabilityCircle');
     probabilityCircle.textContent = `${probabilityPercent}%`;
 
+    // Determinar la clase de riesgo según el porcentaje
+    let riskClass;
+    if (probabilityPercent < 20) {
+        riskClass = 'low-risk';
+    } else if (probabilityPercent < 40) {
+        riskClass = 'low-moderate-risk';
+    } else if (probabilityPercent < 60) {
+        riskClass = 'moderate-risk';
+    } else if (probabilityPercent < 80) {
+        riskClass = 'high-moderate-risk';
+    } else if (probabilityPercent < 90) {
+        riskClass = 'high-risk';
+    } else {
+        riskClass = 'very-high-risk';
+    }
+
+    // Aplicar la clase al círculo
+    probabilityCircle.className = 'probability-circle ' + riskClass;
+    probabilityCircle.textContent = `${probabilityPercent}%`;
+
     // Configurar el texto de probabilidad
     document.getElementById('probabilityText').textContent =
         `El sistema ha calculado un ${probabilityPercent}% de probabilidad de endometriosis basado en los síntomas y marcadores proporcionados.`;
